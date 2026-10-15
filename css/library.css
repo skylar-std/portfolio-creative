@@ -474,3 +474,17 @@ a { color: inherit; }
   .wk-cat, .wk-yr, .wk-role { grid-column: 1 / -1; font-size: 12px; color: var(--ink-3); }
   .wk-go { grid-column: 2; grid-row: 1; }
 }
+
+/* 아직 책이 없을 때 (틀만 보이기) */
+.wk-dim { color: var(--ink-4); }
+.wk-ghost-img { margin: 12px 0 14px; height: 150px; border: 1px dashed #BDBBB5; background: repeating-linear-gradient(45deg, transparent 0 8px, rgba(20, 20, 22, .035) 8px 9px); }
+.wk-ghost-img--sm { margin: 0; height: 92px; }
+.feat__book--ghost { cursor: default; opacity: 1; background: transparent; border: 1px dashed #BDBBB5; box-shadow: none; }
+.feat__book--ghost:nth-child(2n) { height: 220px; }
+.wk-chip--ghost { cursor: default; color: var(--ink-4); border-style: dashed; }
+.wk-chip--ghost:hover { border-color: #BDBBB5; color: var(--ink-4); }
+.shelf-row__track--empty { position: relative; }
+.wk-spine--ghost { cursor: default; background: transparent; border: 1px dashed #BDBBB5; box-shadow: none; }
+.wk-spine--ghost:hover { transform: none; box-shadow: none; }
+.shelf-row__empty { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 10px 16px; background: rgba(251, 250, 247, .92); border: 1px solid var(--edge); font-size: 13px; color: var(--ink-3); white-space: nowrap; }
+@media (max-width: 760px) { .shelf-row__empty { white-space: normal; width: 80%; text-align: center; } }

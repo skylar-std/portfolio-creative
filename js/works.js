@@ -91,7 +91,7 @@
   function buildFeat(feat) {
     F.list = feat;
     const sec = $("#feat");
-    if (!feat.length) { sec.hidden = true; return; }
+    if (!feat.length) { emptyFeat(); return; }
     $("#featTitle").textContent = `추천 도서 · 대표작 ${feat.length}권`;
     $("#featBooks").innerHTML = feat.map((p, i) => `
       <button type="button" class="feat__book" data-open="${esc(p.id)}" data-i="${i}" aria-label="${esc(p.title)} 펼쳐보기">
@@ -107,6 +107,28 @@
     $("#featBooks").addEventListener("focusout", leave);
     setFeatMode();
     mqSticky.addEventListener ? mqSticky.addEventListener("change", setFeatMode) : mqSticky.addListener(setFeatMode);
+  }
+
+  /* 아직 책이 없을 때도 서가 틀은 그대로 */
+  const GHOSTS = 5;
+  function emptyFeat() {
+    const v = (new URLSearchParams(location.search).get("v") || "").trim();
+    const home = `index.html${v ? `?v=${encodeURIComponent(v)}` : ""}`;
+    $("#featTitle").textContent = "추천 도서 · 대표작 0권";
+    $("#featHint").textContent = "아직 꽂힌 책이 없어요";
+    $("#featCard").innerHTML = `<div class="feat__card-top">
+        <span><span class="wk-k">CALL NO.</span><span class="en feat__call">— · 000</span></span>
+        <span class="en">00 / 00</span>
+      </div>
+      <div class="wk-ghost-img" aria-hidden="true"></div>
+      <p class="eb">NO VOLUME</p>
+      <h3 class="feat__title">준비 중인 책</h3>
+      <p class="feat__line">새 프로젝트가 정리되는 대로 이 자리에 꽂아둘게요.</p>
+      <div class="feat__rows">${["YEAR", "ROLE", "TYPE"].map((k) => `<div class="wk-row"><span class="wk-k">${k}</span><span class="wk-dim">—</span></div>`).join("")}</div>
+      <a class="lib-btn feat__open" href="${home}">메인으로 돌아가기
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 12H4M10 6l-6 6 6 6" /></svg></a>`;
+    $("#featBooks").innerHTML = Array.from({ length: GHOSTS }, () => `<span class="feat__book feat__book--ghost" aria-hidden="true"></span>`).join("");
+    $("#featProg").style.width = "0";
   }
 
   function setFeatMode() {
@@ -132,6 +154,29 @@
 
   /* ---------- 3. 분류별 서가 ---------- */
   function buildShelves(shelves) {
+    if (!shelves.length) {
+      $("#shelfChips").innerHTML = `<span class="wk-chip wk-chip--ghost">분류 없음<span>0</span></span>`;
+      $("#shelfList").innerHTML = `
+        <div class="shelf-row">
+          <div class="shelf-row__side">
+            <div class="shelf-row__label">
+              <p class="en">SHELF 01 · —</p>
+              <p class="shelf-row__name">빈 서가</p>
+              <p class="shelf-row__count">0권</p>
+            </div>
+            <div class="shelf-row__peek"><div class="wk-ghost-img wk-ghost-img--sm" aria-hidden="true"></div><span class="shelf-row__title wk-dim">아직 꽂힌 책이 없어요</span></div>
+          </div>
+          <div class="shelf-row__main">
+            <div class="shelf-row__track shelf-row__track--empty">
+              ${[54, 40, 62, 46, 58, 42, 50].map((w, i) => `<span class="wk-spine wk-spine--ghost" style="width:${w}px;height:${190 + (i * 17) % 40}px" aria-hidden="true"></span>`).join("")}
+              <p class="shelf-row__empty">새 프로젝트가 정리되는 대로 이 서가에 꽂아둘게요.</p>
+            </div>
+            <div class="shelf-row__plank" aria-hidden="true"></div>
+            <div class="shelf-row__foot"><span>0권</span></div>
+          </div>
+        </div>`;
+      return;
+    }
     $("#shelfChips").innerHTML = shelves.map((s) => `<a class="wk-chip" href="#${s.id}">${esc(s.name)}<span>${s.books.length}</span></a>`).join("");
     $("#shelfList").innerHTML = shelves.map((s) => `
       <div class="shelf-row" id="${s.id}">
@@ -367,7 +412,7 @@
     buildFeat(feat);
     buildShelves(shelves);
     buildList(books, shelves);
-    if (!books.length) $(".shelves").hidden = true;
+    if (!books.length) $("#wkEmpty").textContent = "아직 등록된 책이 없어요.";
 
     // 서가 ↔ 목록
     const toggle = $("#viewToggle");
