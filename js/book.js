@@ -14,7 +14,7 @@
   const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
   const pad2 = (n) => String(n).padStart(2, "0");
 
-  const BLUE = "#0F2A9E";
+  const MAIN = "#1B7E8E";
   const HEADER = 64;
   const PW = 480, PH = 660;          // 한 쪽 크기 (책은 화면에 맞춰 통째로 확대·축소)
   const SPREAD_STEP = 1.7;           // 한 장 넘기는 데 쓰는 스크롤 양 (클수록 천천히)
@@ -114,7 +114,7 @@
     return chapters;
   }
 
-  const chHead = (ch) => `<p class="eb eb--blue">CHAPTER ${ch.no}${ch.eyebrow ? ` — ${esc(ch.eyebrow)}` : ""}</p>
+  const chHead = (ch) => `<p class="eb eb--main">CHAPTER ${ch.no}${ch.eyebrow ? ` — ${esc(ch.eyebrow)}` : ""}</p>
     <h2 class="ch">${esc(ch.en)}</h2><p class="ck">${esc(ch.ko)}</p><div class="rule rule--ink"></div>`;
   const contHead = (ch) => `<p class="eb">CHAPTER ${ch.no} — ${esc(ch.en)} <span class="pg-cont">(이어서)</span></p><div class="rule rule--ink rule--top"></div>`;
 
@@ -124,14 +124,14 @@
         <button type="button" class="ct-copy" data-copy="${esc(src.email)}">복사</button>
       </div>` : "";
     const links = src.links.map((l) => `<a class="ct-link" href="${esc(l.href)}" target="_blank" rel="noopener"><span class="eb">${esc(l.label.toUpperCase())}</span><span aria-hidden="true">↗</span></a>`).join("");
-    return `<p class="eb eb--blue">CHAPTER ${no}</p>
+    return `<p class="eb eb--main">CHAPTER ${no}</p>
       <h2 class="ch">CONTACT</h2><p class="ck">연락처</p><div class="rule rule--ink"></div>
       ${src.lead ? `<p class="pg-p">${src.lead}</p>` : ""}
       ${mail}
       ${links ? `<div class="ct-links">${links}</div>` : ""}
       <div class="ct-btns">
         ${src.resume ? `<a class="lib-btn lib-btn--ink lib-btn--sm" href="${esc(src.resume.href)}" target="_blank" rel="noopener">${esc(src.resume.label)}<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 4v12M6 11l6 6 6-6M5 20h14" /></svg></a>` : ""}
-        <a class="lib-btn lib-btn--blue lib-btn--sm" href="${keep("works.html")}">프로젝트 서가로<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6" /></svg></a>
+        <a class="lib-btn lib-btn--main lib-btn--sm" href="${keep("works.html")}">프로젝트 서가로<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6" /></svg></a>
       </div>`;
   }
   const colophon = (src, role) => `<div class="colophon">
@@ -203,7 +203,7 @@
     // 목차 (표지 뒷면)
     const toc = chapters.map((ch) => ({ ch, page: pages.find((p) => p.ch === ch).no })).concat([{ ch: contact.ch, ko: "연락처", page: contact.no }]);
     const tocHTML = `<div class="page__rh"><span>CONTENTS</span><span></span></div><div class="page__body">
-        <p class="eb eb--blue">CONTENTS</p><h2 class="ch">목차</h2><div class="rule rule--ink"></div>
+        <p class="eb eb--main">CONTENTS</p><h2 class="ch">목차</h2><div class="rule rule--ink"></div>
         ${toc.map((t) => `<button type="button" class="toc" data-go="${t.ch.id}"><span class="en toc__no">${t.ch.no}</span><span class="toc__ko">${esc(t.ko || t.ch.ko)}</span><span class="en toc__en">${esc(t.ch.en)}</span><span class="toc__dots" aria-hidden="true"></span><span class="en">${t.page}</span></button>`).join("")}
         <p class="pg-note">스크롤하면 한 장씩 넘어가요.<br />목차나 오른쪽 색인 탭을 누르면 해당 장으로 바로 이동해요.</p>
       </div>`;
@@ -267,15 +267,15 @@
     const rowH = flatMode ? 170 : Math.round((vh - HEADER - 60) / 3);
     let x = 7;
     const rnd = () => { x = (x * 9301 + 49297) % 233280; return x / 233280; };
-    const palette = ["#141416", "#FFFFFF", "#E9E8E4", "#D6D4CF", "#2B2B2F", "#F7F6F3", "#BDBBB5", "#141416", "#FFFFFF"];
+    const palette = ["#203D50", "#FFFFFF", "#DBE5E9", "#BCE9E3", "#222D35", "#FDFDFB", "#B9C8CE", "#203D50", "#FFFFFF", "#637680"];
     let html = "";
     for (let r = 0; r < nRows; r++) {
       let spines = "", sx = 0;
       while (sx < vw + 60) {
         const w = 16 + Math.round(rnd() * 26);
         const h = Math.round(rowH * (0.58 + rnd() * 0.3));
-        const col = rnd() < 0.07 ? BLUE : palette[Math.floor(rnd() * palette.length)];
-        const dark = col === "#141416" || col === "#2B2B2F" || col === BLUE;
+        const col = rnd() < 0.07 ? MAIN : palette[Math.floor(rnd() * palette.length)];
+        const dark = ["#203D50", "#222D35", "#637680", MAIN].includes(col);
         const lean = rnd() < 0.04 ? "rotate(-6deg)" : "none";
         const bandTop = Math.round(h * (0.12 + rnd() * 0.1)), bandH = 2 + Math.round(rnd() * 8);
         spines += `<span class="spine${dark ? " is-dark" : ""}" style="width:${w}px;height:${h}px;background:${col};transform:${lean}"><i style="top:${bandTop}px;height:${bandH}px"></i></span>`;

@@ -45,6 +45,7 @@
       link: (p.links && (p.links.detail || p.links.behance || p.links.demo)) || "",
       period: p.period_label || "",
       detail: p.detail || {},
+      problem: p.problem || "", action: p.action || "", resultText: p.result || "", team: p.team || "",
     };
   }
   function toResume(rows) {

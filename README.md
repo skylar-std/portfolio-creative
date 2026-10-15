@@ -22,19 +22,17 @@
 ```
 portfolio/
 ├── index.html          # 메인: 서가 → 회원카드 → 꺼내서 펼치는 책 (목차 → Profile → Background → Activities → Credentials → Skills → Contact)
-├── works.html          # 프로젝트 서가: 추천 도서 → 분류별 서가 / 목록으로 보기(검색·분류·연도), 책을 누르면 상세 창
+├── works.html          # 프로젝트 서가: 추천 도서 → 분류별 서가 / 목록으로 보기(검색·분류·연도), 책을 누르면 그 자리에서 펼쳐짐
 ├── manage.html         # 관리 페이지 (비밀번호, 링크 어디에도 없음)
 ├── projects.html       # 예전 주소 → works.html 로 이동
 ├── css/
 │   ├── reset.css       # 브라우저 기본 스타일 초기화
-│   ├── library.css     # 서가·회원카드·책 디자인 (맨 위 :root 에서 색상/폰트 변경)
-│   ├── style.css       # 프로젝트 상세 창(케이스 스터디) 모양
-│   └── responsive.css  # 상세 창 태블릿·모바일 대응
+│   └── library.css     # 서가·회원카드·책·책 펼치기 팝업 디자인 (맨 위 :root 에서 색상/폰트 변경)
 ├── js/
 │   ├── db.js           # Supabase 주소와 방문자용 공개 키
 │   ├── data.js         # DB에서 그 직무 내용을 받아 화면에 채우기, 관리자 막대
 │   ├── book.js         # 메인 전용: 책 페이지 자동 나누기, 스크롤로 넘기기, 휴대폰은 세로로
-│   └── works.js        # 서가 전용: 추천 도서, 분류별 서가, 목록 보기, 상세 창
+│   └── works.js        # 서가 전용: 추천 도서, 분류별 서가, 목록 보기, 책 펼치기 팝업
 ├── img/
 │   ├── favicon.svg     # 브라우저 탭 아이콘
 │   ├── og-image.svg    # 링크 공유 미리보기 이미지
@@ -62,9 +60,10 @@ portfolio/
    - `id`는 영문 소문자·숫자·`-`만 (주소에 써요)
    - `date` → 최신순 정렬과 '목록으로 보기'의 연도 필터에 쓰여요
    - `kind`: 구분 → `personal`(개인 프로젝트) · `team`(팀 프로젝트) · `contest`(공모전) · `school`(학교 과제) · `client`(외주)
-   - `client`: 주최·발주처. 목록 카드에는 안 보이고 '자세히 보기' 창에만 보여요. 비워두면 어디에도 안 보여요
-   - `summary`(한 줄 요약), `did`(한 일), `tools`(사용한 도구), `result_value`·`result_label`(결과 숫자) → 프로젝트 카드에 보여요
-   - `detail`: '자세히 보기'를 케이스 스터디(넓은 창)로 보여줄 때 채워요. 비워두면(`{}`) 기존 작은 창이 열려요
+   - `client`: 주최·발주처. 서가에는 안 보이고 펼친 책의 대출카드에만 보여요. 비워두면 어디에도 안 보여요
+   - `summary`(한 줄 요약), `did`(한 일), `tools`(사용한 도구), `result_value`·`result_label`(결과 숫자) → 추천 도서 카드와 펼친 책에 보여요
+   - `detail`: 책을 펼쳤을 때의 장(章)들이에요. 장마다 페이지가 자동으로 나뉘고 색인 탭이 생겨요. 비워두면(`{}`) `description`·`problem`·`action`·`did`로 장을 만들어요
+   - 펼친 책 1쪽의 대출카드에는 `period_label`·`my_role`·`team`·`kind`·`client`가, 마지막 쪽에는 `result`·`tags`가 들어가요
      - 모양: `{"sections": [ {"type": "...", "label": "Overview", "title": "...", "body": ["문단", ...]}, ... ]}`
      - `type` 종류: `text`(글) · `target`(persona, decisions) · `cards`(items) · `cast`(items: name, sound, color, note) · `scenario`(arc, scenes) · `mockup`(태블릿 목업, image 없으면 대표 이미지) · `gallery`(items: title, desc, image) · `palette`(colors: name, hex / fonts: style, sample, note) · `process`(steps, note) · `notes`(items: title, desc)
      - 섹션 번호는 순서대로 자동으로 붙어요. 예시는 `recycling-band` 프로젝트를 참고하세요
@@ -72,7 +71,7 @@ portfolio/
    - `category`가 같은 작업끼리 '분류별 서가' 한 칸에 꽂혀요. 영문 분류면 앞 두 글자(BR, PK…)가 청구기호가 돼요
 3. **프로필 사진** → `img/profile.jpg`로 넣고 `index.html` `#bookSource`의 `img/profile.svg`를 `img/profile.jpg`로 변경
 4. **이력서** → `files/resume.pdf`를 내 파일로 교체
-5. **색상** → `css/library.css` 맨 위 `--blue` 값 변경
+5. **색상** → `css/library.css` 맨 위 `--main`(청록) · `--navy` 값 변경
 
 > 💡 이미지는 가로 1200px 정도, 장당 500KB 이하로 줄여서 올리면 사이트가 빨리 열립니다.
 
