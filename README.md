@@ -21,19 +21,20 @@
 
 ```
 portfolio/
-├── index.html          # 메인: 표지 → Profile → Activities(대외·교내) → Credentials(수상·어학·자격증) → Skills → 작업물 보러가기 → 연락처
-├── works.html          # 작업물 페이지: 한눈에 보기 → 프로젝트 카드 / 아카이브(연도 → 월별)
+├── index.html          # 메인: 서가 → 회원카드 → 꺼내서 펼치는 책 (목차 → Profile → Background → Activities → Credentials → Skills → Contact)
+├── works.html          # 프로젝트 서가: 추천 도서 → 분류별 서가 / 목록으로 보기(검색·분류·연도), 책을 누르면 상세 창
 ├── manage.html         # 관리 페이지 (비밀번호, 링크 어디에도 없음)
 ├── projects.html       # 예전 주소 → works.html 로 이동
 ├── css/
 │   ├── reset.css       # 브라우저 기본 스타일 초기화
-│   ├── style.css       # 메인 스타일 (맨 위 :root 에서 색상/폰트 변경)
-│   └── responsive.css  # 태블릿·모바일 대응
+│   ├── library.css     # 서가·회원카드·책 디자인 (맨 위 :root 에서 색상/폰트 변경)
+│   ├── style.css       # 프로젝트 상세 창(케이스 스터디) 모양
+│   └── responsive.css  # 상세 창 태블릿·모바일 대응
 ├── js/
 │   ├── db.js           # Supabase 주소와 방문자용 공개 키
 │   ├── data.js         # DB에서 그 직무 내용을 받아 화면에 채우기, 관리자 막대
-│   ├── works.js        # 작업물 페이지 전용: 한눈에 보기, 분야 필터, 카드, 아카이브, 상세 모달
-│   └── main.js         # 공통: 메뉴, 스크롤 효과, 메인 미리보기
+│   ├── book.js         # 메인 전용: 책 페이지 자동 나누기, 스크롤로 넘기기, 휴대폰은 세로로
+│   └── works.js        # 서가 전용: 추천 도서, 분류별 서가, 목록 보기, 상세 창
 ├── img/
 │   ├── favicon.svg     # 브라우저 탭 아이콘
 │   ├── og-image.svg    # 링크 공유 미리보기 이미지
@@ -53,13 +54,13 @@ portfolio/
      - 어학(language)은 `score`(점수)와 `expires_date`(유효기간, 비우면 '평생 유효')
      - 날짜는 `start_date`(취득일·시작일), 재직 중·수강 중이면 `end_date`를 비워요
    - 순서 상관없이 **최신순 자동 정렬**, 자격증은 **연도별 자동 묶음**, 개수도 자동
-   - 경력·교육 4개, 자격증 3개 연도를 넘으면 자동으로 **더보기**로 접힘 (`js/main.js` 맨 위 `LIMITS`에서 변경)
-   - 비어 있는 칸(예: 어학이 하나도 없음)은 제목까지 통째로 안 보이고, 섹션 번호·오른쪽 점 메뉴도 남은 것만으로 다시 매겨져요
+   - 책 페이지는 내용 양에 맞춰 자동으로 나뉘어요. 넘치면 다음 쪽에 '(이어서)'로 이어져요
+   - 비어 있는 장(예: 활동이 하나도 없음)은 통째로 빠지고, 장 번호·목차·색인 탭도 남은 것만으로 다시 매겨져요
 1. **올린 뒤 화면이 안 바뀌면** → HTML의 `?v=20261008c` 숫자를 바꿔서 다시 업로드
-1. **이름·소개·이메일** → `index.html`에서 직접 수정
+1. **이름·소개·기본 정보·이메일·링크** → `index.html` 아래쪽 `#bookSource` 안에서 직접 수정 (회원카드와 책 페이지에 들어가요)
 2. **작업물** → `img/projects/`에 이미지 넣고, `projects` 표에 한 줄 추가 + `project_roles`에 보일 직무 연결
    - `id`는 영문 소문자·숫자·`-`만 (주소에 써요)
-   - `date` → '아카이브' 보기의 **연도 → 월별** 묶음이 이 값으로 자동 생성됩니다
+   - `date` → 최신순 정렬과 '목록으로 보기'의 연도 필터에 쓰여요
    - `kind`: 구분 → `personal`(개인 프로젝트) · `team`(팀 프로젝트) · `contest`(공모전) · `school`(학교 과제) · `client`(외주)
    - `client`: 주최·발주처. 목록 카드에는 안 보이고 '자세히 보기' 창에만 보여요. 비워두면 어디에도 안 보여요
    - `summary`(한 줄 요약), `did`(한 일), `tools`(사용한 도구), `result_value`·`result_label`(결과 숫자) → 프로젝트 카드에 보여요
@@ -67,11 +68,11 @@ portfolio/
      - 모양: `{"sections": [ {"type": "...", "label": "Overview", "title": "...", "body": ["문단", ...]}, ... ]}`
      - `type` 종류: `text`(글) · `target`(persona, decisions) · `cards`(items) · `cast`(items: name, sound, color, note) · `scenario`(arc, scenes) · `mockup`(태블릿 목업, image 없으면 대표 이미지) · `gallery`(items: title, desc, image) · `palette`(colors: name, hex / fonts: style, sample, note) · `process`(steps, note) · `notes`(items: title, desc)
      - 섹션 번호는 순서대로 자동으로 붙어요. 예시는 `recycling-band` 프로젝트를 참고하세요
-   - 페이지 맨 위 '작업 분야'와 '많이 쓴 도구'는 `category`와 `tools`로 자동 계산됩니다
-   - `featured` 켜기 → 메인 '작업물 보러가기' 배너 썸네일에 사용 (최신 3개), `published` 끄기 → 숨기기
-3. **프로필 사진** → `img/profile.jpg`로 넣고 `index.html`의 `img/profile.svg`를 `img/profile.jpg`로 변경
+   - `featured` 켜기 → 서가 맨 위 '추천 도서'에 꽂혀요 (최대 8권, 하나도 없으면 최신 6권), `published` 끄기 → 숨기기
+   - `category`가 같은 작업끼리 '분류별 서가' 한 칸에 꽂혀요. 영문 분류면 앞 두 글자(BR, PK…)가 청구기호가 돼요
+3. **프로필 사진** → `img/profile.jpg`로 넣고 `index.html` `#bookSource`의 `img/profile.svg`를 `img/profile.jpg`로 변경
 4. **이력서** → `files/resume.pdf`를 내 파일로 교체
-5. **색상** → `css/style.css` 맨 위 `--accent` 값 변경
+5. **색상** → `css/library.css` 맨 위 `--blue` 값 변경
 
 > 💡 이미지는 가로 1200px 정도, 장당 500KB 이하로 줄여서 올리면 사이트가 빨리 열립니다.
 

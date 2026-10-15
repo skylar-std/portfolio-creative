@@ -1,7 +1,8 @@
 /* =========================================
-   works.html 전용 스크립트
-   - 한눈에 보기(분야 · 많이 쓴 도구) / 분야 필터 / 프로젝트 목록 / 상세 모달
-   - 내용은 전부 js/projects.js 에서 가져와요
+   works.html 전용: 프로젝트 서가
+   - 추천 도서(featured, 없으면 최신 6권) → 분류별 서가(category) → 목록 보기(검색·분류·연도)
+   - 책을 누르면 상세 창이 열려요 (DB projects.detail 이 있으면 케이스 스터디)
+   - 내용은 전부 DB(js/data.js 가 받은 window.PROJECTS)에서 와요
    ========================================= */
 (function () {
   "use strict";
@@ -10,139 +11,220 @@
   const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const fmtDate = (d) => d.replace("-", ".");
-  let filter = "all";
+  const pad = (n, w) => String(n).padStart(w, "0");
+  const c01 = (v) => Math.max(0, Math.min(1, v));
 
-  /* ---------- 1. 한눈에 보기 ---------- */
-  function renderOverview(list) {
-    $("#ovCount").textContent = list.length;
-
-    const fields = {};
-    list.forEach((p) => { fields[p.categoryLabel] = (fields[p.categoryLabel] || 0) + 1; });
-    $("#ovFields").innerHTML = Object.entries(fields).sort((a, b) => b[1] - a[1])
-      .map(([name, n]) => `<li><span>${esc(name)}</span><em>${n}</em></li>`).join("");
-
-    const tools = {};
-    list.forEach((p) => (p.tools || []).forEach((t) => { tools[t] = (tools[t] || 0) + 1; }));
-    const top = Object.entries(tools).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    const max = top.length ? top[0][1] : 1;
-    $("#ovTools").innerHTML = top.map(([name, n]) => `<li>
-        <span class="overview__tool">${esc(name)}</span>
-        <span class="overview__bar"><i style="width:${Math.round((n / max) * 100)}%"></i></span>
-        <span class="overview__n">${n}개 작업</span>
-      </li>`).join("");
-  }
-
-  /* ---------- 2. 분야 필터 ---------- */
-  function renderFilter(list) {
-    const cats = [...new Set(list.map((p) => p.categoryLabel))];
-    const box = $("#filter");
-    if (cats.length < 2) { box.hidden = true; return; }
-    box.innerHTML = [["all", "전체", list.length], ...cats.map((c) => [c, c, list.filter((p) => p.categoryLabel === c).length])]
-      .map(([key, label, n]) => `<button type="button" data-f="${esc(key)}" aria-pressed="${key === filter}">${esc(label)} <sup>${n}</sup></button>`).join("");
-    box.addEventListener("click", (e) => {
-      const b = e.target.closest("button[data-f]");
-      if (!b) return;
-      filter = b.dataset.f;
-      $$("button", box).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-      $$(".work").forEach((el) => { el.hidden = filter !== "all" && el.dataset.cat !== filter; });
-      layout();
-    });
-  }
-
-  // 보이는 작업만 01부터 다시 번호를 매기고, 이미지 위치(왼쪽·오른쪽)도 보이는 순서대로 번갈아 둬요.
-  function layout() {
-    $$(".work").filter((el) => !el.hidden).forEach((el, i) => {
-      $(".work__no", el).textContent = String(i + 1).padStart(2, "0");
-      el.classList.toggle("is-flip", i % 2 === 1);
-    });
-  }
+  const FEAT_MAX = 8;   // 추천 도서 최대 권수
 
   /* 프로젝트 구분 표시 이름 */
   const KINDS = { personal: "개인 프로젝트", team: "팀 프로젝트", contest: "공모전", school: "학교 과제", client: "외주" };
   const kindLabel = (p) => KINDS[p.type] || (p.client ? "외주" : "개인 프로젝트");
 
-  /* ---------- 3. 프로젝트 목록 ---------- */
-  function renderList(list) {
-    $("#worksList").innerHTML = list.map((p, i) => `
-      <article class="work reveal" data-cat="${esc(p.categoryLabel)}" id="${esc(p.id)}">
-        <button type="button" class="work__media" data-open="${esc(p.id)}" aria-label="${esc(p.title)} 자세히 보기">
-          <img src="${esc(p.thumb)}" alt="" loading="lazy" />
-          ${p.result ? `<span class="work__result"><strong>${esc(p.result.value)}</strong>${esc(p.result.label)}</span>` : ""}
-        </button>
-        <div class="work__body">
-          <p class="work__meta"><span class="work__no">${String(i + 1).padStart(2, "0")}</span>${esc(p.categoryLabel)} · ${fmtDate(p.date)}</p>
-          <h2 class="work__title">${esc(p.title)}</h2>
-          <p class="work__summary">${esc(p.summary || p.desc)}</p>
-          <dl class="work__facts">
-            <div><dt>역할</dt><dd>${esc(p.role)}</dd></div>
-            <div><dt>구분</dt><dd>${esc(kindLabel(p))}</dd></div>
-          </dl>
-          ${p.did && p.did.length ? `<div class="work__did"><p class="work__label">한 일</p><ul>${p.did.map((d) => `<li>${esc(d)}</li>`).join("")}</ul></div>` : ""}
-          ${p.tools && p.tools.length ? `<ul class="work__tools" aria-label="사용한 도구">${p.tools.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}
-          <button type="button" class="work__more" data-open="${esc(p.id)}">자세히 보기 <span aria-hidden="true">→</span></button>
-        </div>
-      </article>`).join("");
+  /* 책등 모양: 프로젝트 id 로 항상 같은 색 · 두께 · 높이 */
+  const SPINE_COLORS = [["#0F2A9E", "#FFFFFF"], ["#FBFAF7", "#141416"], ["#2B2B2F", "#FFFFFF"], ["#D6D4CF", "#141416"], ["#141416", "#FFFFFF"],
+    ["#FFFFFF", "#141416"], ["#3A3A40", "#FFFFFF"], ["#E9E8E4", "#141416"], ["#0B2283", "#FFFFFF"], ["#BDBBB5", "#141416"]];
+  const hash = (s) => { let h = 2166136261; for (const ch of String(s)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+
+  /* 분류 기호: 영문이면 앞 두 글자(BR, PK…), 아니면 서가 번호(S1, S2…) */
+  function shelfCode(label, no) {
+    const m = String(label).match(/[A-Za-z]{2}/);
+    return m ? m[0].toUpperCase() : `S${no}`;
   }
 
-  /* ---------- 4. 날짜별 Archive : 연도 탭 → 월별 묶음 ----------
-     연도가 많아져도 한 번에 한 해만 펼쳐서 길어지지 않아요. */
-  function renderTimeline(list) {
-    const box = $("#timelineList");
-    if (!box) return;
-    const byYear = {};
-    [...list].sort((a, b) => b.date.localeCompare(a.date)).forEach((p) => {
-      (byYear[p.date.slice(0, 4)] = byYear[p.date.slice(0, 4)] || []).push(p);
+  /* ---------- 1. 데이터 정리 ---------- */
+  function prepare(list) {
+    const books = [...list].sort((a, b) => b.date.localeCompare(a.date));
+    const cats = [];
+    books.forEach((p) => { const c = p.categoryLabel || "기타"; if (!cats.includes(c)) cats.push(c); });
+    // 권수 많은 분류부터, 같으면 최신 작업이 있는 분류부터
+    const count = (c) => books.filter((p) => (p.categoryLabel || "기타") === c).length;
+    cats.sort((a, b) => count(b) - count(a));
+    const shelves = cats.map((c, i) => ({ name: c, no: i + 1, code: shelfCode(c, i + 1), id: `shelf-${i + 1}`, books: [] }));
+    // 오래된 작업일수록 앞 번호 (001부터)
+    const chrono = [...books].reverse();
+    books.forEach((p) => {
+      const sh = shelves.find((s) => s.name === (p.categoryLabel || "기타"));
+      const h = hash(p.id);
+      const [col, ink] = SPINE_COLORS[h % SPINE_COLORS.length];
+      Object.assign(p, {
+        _num: pad(chrono.indexOf(p) + 1, 3), _year: p.date.slice(0, 4), _shelf: sh,
+        _col: col, _ink: ink, _w: 38 + (h >> 4) % 24, _h: 180 + (h >> 9) % 52,
+      });
+      p._call = `${sh.code} · ${p._num}`;
+      sh.books.push(p);
     });
-    const years = Object.keys(byYear).sort((a, b) => b - a);
-    if (!years.length) { box.innerHTML = ""; return; }
-    let current = years[0];
+    let feat = books.filter((p) => p.featured);
+    if (!feat.length) feat = books.slice(0, 6);
+    return { books, shelves, feat: feat.slice(0, FEAT_MAX) };
+  }
 
-    box.innerHTML = `
-      <div class="yarch__tabs" role="tablist" aria-label="연도 선택">${years.map((y) =>
-        `<button type="button" role="tab" data-y="${y}" aria-selected="${y === current}">${y}<sup>${byYear[y].length}</sup></button>`).join("")}
+  /* ---------- 2. 추천 도서 (PC: 스크롤하면 한 권씩 꺼내져요) ---------- */
+  const F = { list: [], sel: 0, hover: -1, sticky: false, range: 0 };
+  const mqSticky = window.matchMedia("(min-width: 960px) and (min-height: 620px) and (prefers-reduced-motion: no-preference)");
+
+  function featCard(p, i, n) {
+    const rows = [["YEAR", `<span class="en">${esc(p._year)}</span>`], ["ROLE", esc(p.role)], ["TYPE", esc(kindLabel(p))]].filter(([, v]) => v);
+    return `<div class="feat__card-top">
+        <span><span class="wk-k">CALL NO.</span><span class="en feat__call">${esc(p._call)}</span></span>
+        <span class="en">${pad(i + 1, 2)} / ${pad(n, 2)}</span>
       </div>
-      <div class="yarch__panel" id="yarchPanel" role="tabpanel"></div>`;
+      <img src="${esc(p.thumb)}" alt="" />
+      <p class="eb eb--blue">${esc(p.categoryLabel)}</p>
+      <h3 class="feat__title">${esc(p.title)}</h3>
+      ${p.summary ? `<p class="feat__line">${esc(p.summary)}</p>` : ""}
+      <div class="feat__rows">${rows.map(([k, v]) => `<div class="wk-row"><span class="wk-k">${k}</span><span>${v}</span></div>`).join("")}</div>
+      <button type="button" class="lib-btn lib-btn--blue feat__open" data-open="${esc(p.id)}">책 펼쳐보기
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6" /></svg></button>`;
+  }
 
-    const panel = $("#yarchPanel");
-    function show(y) {
-      current = y;
-      $$(".yarch__tabs button", box).forEach((b) => b.setAttribute("aria-selected", String(b.dataset.y === y)));
-      const byMonth = {};
-      byYear[y].forEach((p) => { (byMonth[p.date.slice(5, 7)] = byMonth[p.date.slice(5, 7)] || []).push(p); });
-      panel.innerHTML = Object.keys(byMonth).sort((a, b) => b - a).map((m) => `
-        <div class="yarch__month">
-          <p class="yarch__mh"><em>${m}</em><span>월</span><small>${byMonth[m].length}개</small></p>
-          <ol class="yarch__rows">${byMonth[m].map((p) => `
-            <li><a href="#${esc(p.id)}" class="yarch__row">
-              <img src="${esc(p.thumb)}" alt="" loading="lazy" />
-              <span class="yarch__t">${esc(p.title)}</span>
-              <span class="yarch__c">${esc(p.categoryLabel)}</span>
-              <span class="yarch__go" aria-hidden="true">↗</span>
-            </a></li>`).join("")}
-          </ol>
-        </div>`).join("");
-      panel.classList.remove("is-in"); void panel.offsetWidth; panel.classList.add("is-in");
-    }
-    box.addEventListener("click", (e) => {
-      const tab = e.target.closest(".yarch__tabs button");
-      if (tab) { show(tab.dataset.y); return; }
-      const a = e.target.closest("a.yarch__row");
-      if (!a) return;
-      const t = document.getElementById(a.getAttribute("href").slice(1));
-      if (t && t.hidden) { // 필터로 숨겨져 있으면 전체 보기로
-        filter = "all";
-        $$("#filter button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.f === "all")));
-        $$(".work").forEach((el) => { el.hidden = false; });
-        layout();
-      }
+  function drawFeat() {
+    const n = F.list.length;
+    const sel = F.hover >= 0 ? F.hover : F.sel;
+    const p = F.list[sel];
+    if (!p) return;
+    const card = $("#featCard");
+    if (card.dataset.id !== p.id) { card.dataset.id = p.id; card.innerHTML = featCard(p, sel, n); }
+    $$(".feat__book", $("#featBooks")).forEach((b, i) => b.classList.toggle("is-on", i === sel));
+    $("#featProg").style.width = `${Math.round(((F.sel + 1) / n) * 100)}%`;
+  }
+
+  function buildFeat(feat) {
+    F.list = feat;
+    const sec = $("#feat");
+    if (!feat.length) { sec.hidden = true; return; }
+    $("#featTitle").textContent = `추천 도서 · 대표작 ${feat.length}권`;
+    $("#featBooks").innerHTML = feat.map((p, i) => `
+      <button type="button" class="feat__book" data-open="${esc(p.id)}" data-i="${i}" aria-label="${esc(p.title)} 펼쳐보기">
+        <img src="${esc(p.thumb)}" alt="" loading="lazy" />
+        <span class="feat__edge" aria-hidden="true"></span>
+        <span class="en feat__tag">${esc(p._call)}</span>
+      </button>`).join("");
+    const enter = (e) => { const b = e.target.closest(".feat__book"); if (b) { F.hover = +b.dataset.i; drawFeat(); } };
+    const leave = (e) => { const b = e.target.closest(".feat__book"); if (b && !b.contains(e.relatedTarget)) { F.hover = -1; drawFeat(); } };
+    $("#featBooks").addEventListener("mouseover", enter);
+    $("#featBooks").addEventListener("focusin", enter);
+    $("#featBooks").addEventListener("mouseout", leave);
+    $("#featBooks").addEventListener("focusout", leave);
+    setFeatMode();
+    mqSticky.addEventListener ? mqSticky.addEventListener("change", setFeatMode) : mqSticky.addListener(setFeatMode);
+  }
+
+  function setFeatMode() {
+    const n = F.list.length;
+    F.sticky = mqSticky.matches && n > 1;
+    $("#feat").classList.toggle("is-sticky", F.sticky);
+    $("#featHint").textContent = F.sticky ? "스크롤하면 한 권씩 꺼내져요 · 누르면 바로 펼쳐져요" : "책에 마우스를 올리거나 누르면 펼쳐져요";
+    sizeFeat();
+  }
+  function sizeFeat() {
+    const vh = Math.min(window.innerHeight, 1100);
+    F.range = F.sticky ? (F.list.length - 1) * vh * 0.36 : 0;
+    $("#feat").style.height = F.sticky ? `${Math.round(F.range + vh)}px` : "";
+    scrollFeat();
+  }
+  function scrollFeat() {
+    if (F.sticky) {
+      const p = c01(-$("#feat").getBoundingClientRect().top / (F.range || 1));
+      F.sel = Math.min(F.list.length - 1, Math.floor(p * F.list.length));
+    } else F.sel = Math.max(0, Math.min(F.sel, F.list.length - 1));
+    drawFeat();
+  }
+
+  /* ---------- 3. 분류별 서가 ---------- */
+  function buildShelves(shelves) {
+    $("#shelfChips").innerHTML = shelves.map((s) => `<a class="wk-chip" href="#${s.id}">${esc(s.name)}<span>${s.books.length}</span></a>`).join("");
+    $("#shelfList").innerHTML = shelves.map((s) => `
+      <div class="shelf-row" id="${s.id}">
+        <div class="shelf-row__side">
+          <div class="shelf-row__label">
+            <p class="en">SHELF ${pad(s.no, 2)} · ${esc(s.code)}</p>
+            <p class="shelf-row__name">${esc(s.name)}</p>
+            <p class="shelf-row__count">${s.books.length}권 · 최신순</p>
+          </div>
+          <div class="shelf-row__peek" data-peek></div>
+        </div>
+        <div class="shelf-row__main">
+          <div class="shelf-row__track" data-track>
+            ${s.books.map((p, i) => `
+              <button type="button" class="wk-spine${i === 0 ? " is-on" : ""}" data-open="${esc(p.id)}" aria-label="${esc(p.title)} — ${esc(p._year)}, 펼쳐보기"
+                style="width:${p._w}px;height:${p._h}px;background:${p._col};color:${p._ink};${p._ink === "#141416" ? "border-color:#CFCDC8;" : ""}">
+                <span class="en wk-spine__year">${esc(p._year)}</span>
+                <span class="wk-spine__title" style="max-height:${p._h - 74}px;font-size:${p._w > 48 ? 14 : 12}px">${esc(p.title)}</span>
+                <span class="en wk-spine__num">${esc(p._num)}</span>
+              </button>`).join("")}
+            <span class="shelf-row__end" aria-hidden="true"></span>
+          </div>
+          <div class="shelf-row__plank" aria-hidden="true"></div>
+          <div class="shelf-row__foot">
+            <span>${s.books.length > 8 ? "옆으로 넘기면 더 있어요 · 최신순" : "최신순 정렬"}</span>
+            <span class="shelf-row__arrows">
+              <button type="button" class="wk-arrow" data-scroll="-1" aria-label="${esc(s.name)} 서가 왼쪽으로"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" /></svg></button>
+              <button type="button" class="wk-arrow" data-scroll="1" aria-label="${esc(s.name)} 서가 오른쪽으로"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg></button>
+            </span>
+          </div>
+        </div>
+      </div>`).join("");
+
+    const peek = (row, p) => {
+      $("[data-peek]", row).innerHTML = `<img src="${esc(p.thumb)}" alt="" loading="lazy" />
+        <span class="en shelf-row__call">${esc(p._call)} · ${esc(p._year)}</span>
+        <span class="shelf-row__title">${esc(p.title)}</span>`;
+      $$(".wk-spine", row).forEach((b) => b.classList.toggle("is-on", b.dataset.open === p.id));
+    };
+    shelves.forEach((s) => {
+      const row = document.getElementById(s.id);
+      peek(row, s.books[0]);
+      const on = (e) => { const b = e.target.closest(".wk-spine"); if (b) peek(row, s.books.find((p) => p.id === b.dataset.open)); };
+      row.addEventListener("mouseover", on);
+      row.addEventListener("focusin", on);
+      row.addEventListener("click", (e) => {
+        const a = e.target.closest("[data-scroll]");
+        if (a) $("[data-track]", row).scrollBy({ left: 480 * a.dataset.scroll, behavior: "smooth" });
+      });
+      // 넘칠 때만 화살표
+      const track = $("[data-track]", row);
+      const arrows = () => { $(".shelf-row__arrows", row).hidden = track.scrollWidth <= track.clientWidth + 4; };
+      arrows(); window.addEventListener("resize", arrows);
     });
-    box.addEventListener("keydown", (e) => {
-      const tab = e.target.closest(".yarch__tabs button");
-      if (!tab || (e.key !== "ArrowRight" && e.key !== "ArrowLeft")) return;
-      const i = years.indexOf(tab.dataset.y) + (e.key === "ArrowRight" ? 1 : -1);
-      if (years[i]) { show(years[i]); $(`.yarch__tabs button[data-y="${years[i]}"]`, box).focus(); }
+  }
+
+  /* ---------- 4. 목록으로 보기 ---------- */
+  const Q = { q: "", cat: "all", year: "all" };
+  function buildList(books, shelves) {
+    const chips = (box, items, key) => {
+      box.innerHTML = items.map(([v, label]) => `<button type="button" class="wk-chip" data-v="${esc(v)}" aria-pressed="${Q[key] === v}">${esc(label)}</button>`).join("");
+      box.addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-v]"); if (!b) return;
+        Q[key] = b.dataset.v;
+        $$("button", box).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+        drawRows(books);
+      });
+    };
+    chips($("#catFilter"), [["all", "All"], ...shelves.map((s) => [s.name, s.name])], "cat");
+    const years = [...new Set(books.map((p) => p._year))].sort((a, b) => b - a);
+    chips($("#yearFilter"), [["all", "All"], ...years.map((y) => [y, y])], "year");
+    $("#wkQuery").addEventListener("input", (e) => { Q.q = e.target.value; drawRows(books); });
+    drawRows(books);
+  }
+  function drawRows(books) {
+    const q = Q.q.trim().toLowerCase();
+    const rows = books.filter((p) => {
+      if (Q.cat !== "all" && p.categoryLabel !== Q.cat) return false;
+      if (Q.year !== "all" && p._year !== Q.year) return false;
+      if (q && [p.title, p.categoryLabel, p.role, p.summary, ...(p.tools || []), ...(p.tags || [])].join(" ").toLowerCase().indexOf(q) < 0) return false;
+      return true;
     });
-    show(current);
+    $("#wkCount").textContent = rows.length;
+    $("#wkEmpty").hidden = rows.length > 0;
+    $("#wkRows").innerHTML = rows.map((p) => `
+      <div class="wk-tr">
+        <span class="en wk-call">${esc(p._call)}</span>
+        <span><span class="wk-tt">${esc(p.title)}</span>${p.summary ? `<span class="wk-sum">${esc(p.summary)}</span>` : ""}</span>
+        <span class="wk-cat">${esc(p.categoryLabel)}</span>
+        <span class="en wk-yr">${esc(p._year)}</span>
+        <span class="wk-role">${esc(p.role)}</span>
+        <button type="button" class="wk-go" data-open="${esc(p.id)}">펼쳐보기<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6" /></svg></button>
+      </div>`).join("");
   }
 
   /* ---------- 5. 케이스 스터디 (DB projects.detail 이 채워진 프로젝트) ----------
@@ -181,7 +263,7 @@
         ${arc.length ? `<div class="cs-arc" style="grid-template-columns:${arc.map((a) => `${Number(a.span) || 1}fr`).join(" ")}">${arc.map((a) => `<span${a.key ? ' class="is-key"' : ""}>${esc(a.label)}</span>`).join("")}</div>` : ""}
         <ol class="cs-scenes">${(s.scenes || []).map((sc, i) => `
           <li${sc.key ? ' class="is-key"' : ""}><div class="cs-scenes__box">${sc.image ? img(sc.image) : String(i + 1).padStart(2, "0")}</div><b>${esc(sc.title)}</b><span>${esc(sc.desc || "")}</span></li>`).join("")}</ol>
-        ${(s.scenes || []).some((x) => x.key) ? `<p class="cs-hint">주황 테두리 = 연출 포인트 장면</p>` : ""}`;
+        ${(s.scenes || []).some((x) => x.key) ? `<p class="cs-hint">파란 테두리 = 연출 포인트 장면</p>` : ""}`;
     },
     mockup: (s, p) => `<div class="cs-tablet">${img(s.image || p.image, s.caption || p.title)}</div>`,
     gallery: (s) => `<div class="cs-gallery">${(s.items || []).map((it) => `
@@ -229,7 +311,7 @@
       ${p.link ? `<p class="cs-end"><a class="btn btn--primary" href="${esc(p.link)}" target="_blank" rel="noopener">작품 보러 가기 ↗</a></p>` : ""}`;
   }
 
-  /* ---------- 6. 상세 모달 ---------- */
+  /* ---------- 6. 상세 창 ---------- */
   const modal = $("#modal");
   let lastFocused = null;
   function openModal(id) {
@@ -275,34 +357,35 @@
     if (lastFocused) lastFocused.focus();
   }
 
+
+  /* ---------- 7. 시작 ---------- */
   function init() {
-    const list = window.PROJECTS || [];
-    renderOverview(list);
-    renderFilter(list);
-    renderList(list);
-    layout();
-    renderTimeline(list);
-    // 보기 전환 (works2.html 처럼 #viewToggle 이 있을 때만)
+    const { books, shelves, feat } = prepare(window.PROJECTS || []);
+    $("#wkTotal").textContent = books.length;
+    const y = $("#year"); if (y) y.textContent = new Date().getFullYear();
+
+    buildFeat(feat);
+    buildShelves(shelves);
+    buildList(books, shelves);
+    if (!books.length) $(".shelves").hidden = true;
+
+    // 서가 ↔ 목록
     const toggle = $("#viewToggle");
-    if (toggle) {
-      const show = (v) => {
-        $$("button", toggle).forEach((b) => b.setAttribute("aria-selected", String(b.dataset.view === v)));
-        $("#worksList").hidden = v !== "cards";
-        $("#filter").hidden = v !== "cards" || $$("#filter button").length === 0;
-        $("#timeline").hidden = v !== "timeline";
-        $("#timeline").classList.add("is-visible");
-      };
-      toggle.addEventListener("click", (e) => { const b = e.target.closest("button[data-view]"); if (b) show(b.dataset.view); });
-      $("#timelineList").addEventListener("click", (e) => { if (e.target.closest("a.yarch__row")) show("cards"); }, true);
-    }
-    // 목록은 나중에 그려지므로 등장 효과를 여기서 직접 연결해요
-    const items = $$(".work.reveal");
-    if ("IntersectionObserver" in window) {
-      const io = new IntersectionObserver((entries) => entries.forEach((en) => {
-        if (en.isIntersecting) { en.target.classList.add("is-visible"); io.unobserve(en.target); }
-      }), { threshold: 0.12 });
-      items.forEach((el) => io.observe(el));
-    } else items.forEach((el) => el.classList.add("is-visible"));
+    toggle.addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-view]"); if (!b) return;
+      $$("button", toggle).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      $("#shelfView").hidden = b.dataset.view !== "shelf";
+      $("#listView").hidden = b.dataset.view !== "list";
+      if (b.dataset.view === "shelf") sizeFeat();
+    });
+
+    // 스크롤 · 크기 변화
+    let raf = 0;
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; if (F.sticky) scrollFeat(); }); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", () => { if (F.sticky) sizeFeat(); });
+
+    // 상세 창
     document.addEventListener("click", (e) => {
       const b = e.target.closest("[data-open]");
       if (b) openModal(b.dataset.open);
@@ -311,8 +394,11 @@
       $$("[data-close]", modal).forEach((el) => el.addEventListener("click", closeModal));
       document.addEventListener("keydown", (e) => { if (e.key === "Escape" && modal.classList.contains("is-open")) closeModal(); });
     }
-    // 메인에서 #프로젝트id 로 들어오면 그 작업으로 이동
-    if (location.hash) { const t = document.getElementById(location.hash.slice(1)); if (t) setTimeout(() => t.scrollIntoView({ block: "start" }), 50); }
+    // works.html#프로젝트id 로 들어오면 그 작업을 바로 열어요
+    if (location.hash) {
+      const id = decodeURIComponent(location.hash.slice(1));
+      if (books.some((p) => p.id === id)) openModal(id);
+    }
   }
 
   (window.PROJECTS_READY || Promise.resolve()).then(() => {

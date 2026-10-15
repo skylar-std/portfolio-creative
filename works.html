@@ -13,82 +13,113 @@
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
 
   <!-- 폰트 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Noto+Serif+KR:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
-  <!-- 스타일 -->
-  <link rel="stylesheet" href="css/reset.css?v=20261001e" />
-  <link rel="stylesheet" href="css/style.css?v=20261008f" />
-  <link rel="stylesheet" href="css/responsive.css?v=20261001e" />
-
+  <!-- 스타일: style.css · responsive.css 는 상세 창, library.css 가 서가 디자인 -->
+  <link rel="stylesheet" href="css/reset.css?v=20261016a" />
+  <link rel="stylesheet" href="css/style.css?v=20261016a" />
+  <link rel="stylesheet" href="css/responsive.css?v=20261016a" />
+  <link rel="stylesheet" href="css/library.css?v=20261016a" />
 </head>
-<body>
+<body class="lib-works">
 
   <!-- ===== Header ===== -->
-  <header class="header" id="header">
-    <div class="container header__inner">
-      <a href="index.html" class="logo" data-keep="index.html">PARK<span>.</span></a>
-
-      <nav class="nav" id="nav">
-        <a href="index.html#profile" class="nav__link" data-keep="index.html#profile">About</a>
-        <a href="works.html" class="nav__link is-current" aria-current="page">Projects</a>
+  <header class="lib-head" id="header">
+    <div class="lib-head__inner">
+      <a href="index.html" data-keep="index.html" class="lib-logo">PARK.</a>
+      <nav class="lib-nav" aria-label="주요 메뉴">
+        <a href="index.html" data-keep="index.html">HOME</a>
+        <span aria-hidden="true"></span>
+        <a href="works.html" class="is-current" aria-current="page">PROJECTS</a>
       </nav>
-
-      <button class="menu-btn" id="menuBtn" aria-label="메뉴 열기" aria-expanded="false">
-        <span></span><span></span>
-      </button>
     </div>
   </header>
 
   <main id="top">
-
-    <!-- ===== Projects : 무엇을 했고 어떤 능력이 있는지 ===== -->
-    <section class="section works archive--page" id="works">
-      <div class="container">
-        <div class="works__head reveal">
-          <h1 class="page-title">Projects</h1>
-          <p class="works__lead">어떤 작업을 했고, 그 안에서 제가 무엇을 맡았는지 정리했어요. 이미지를 누르면 자세히 볼 수 있어요.</p>
+    <!-- ===== 머리말 ===== -->
+    <section class="wk-wrap wk-top">
+      <div>
+        <p class="eb">THE LIBRARY OF DESIGNER PARK.</p>
+        <h1 class="wk-title">Projects</h1>
+        <p class="wk-lead">추천 도서부터 보고, 분류별 서가나 도서 목록에서 더 찾아보세요. 책을 누르면 자세히 볼 수 있어요.</p>
+      </div>
+      <div class="wk-top__side">
+        <div class="wk-total">
+          <p class="eb">TOTAL VOLUMES</p>
+          <p class="en" id="wkTotal">0</p>
         </div>
+        <div class="wk-seg" id="viewToggle" role="group" aria-label="보기 방식">
+          <button type="button" data-view="shelf" aria-pressed="true">서가로 보기</button>
+          <button type="button" data-view="list" aria-pressed="false">목록으로 보기</button>
+        </div>
+      </div>
+    </section>
 
-        <!-- 한눈에 보는 능력: js/projects.js 의 category · tools 로 자동 계산 -->
-        <div class="overview reveal" aria-label="한눈에 보기">
-          <div class="overview__count"><strong id="ovCount">0</strong><span>Projects</span></div>
-          <div class="overview__block">
-            <p class="overview__label">작업 분야</p>
-            <ul class="overview__fields" id="ovFields"></ul>
-          </div>
-          <div class="overview__block">
-            <p class="overview__label">많이 쓴 도구</p>
-            <ul class="overview__tools" id="ovTools"></ul>
+    <!-- ===== 서가로 보기 (js/works.js 가 DB 내용으로 채워요) ===== -->
+    <div id="shelfView">
+      <section class="feat" id="feat" aria-labelledby="featTitle">
+        <div class="feat__stage" id="featStage">
+          <div class="wk-wrap feat__box">
+            <div class="feat__head">
+              <div>
+                <p class="eb eb--blue">SHELF 00 — RECOMMENDED</p>
+                <h2 class="wk-h2" id="featTitle"></h2>
+              </div>
+              <p class="feat__hint" id="featHint"></p>
+            </div>
+            <div class="feat__grid">
+              <article class="feat__card" id="featCard" aria-live="polite"></article>
+              <div class="feat__shelf">
+                <nav class="feat__books" id="featBooks" aria-label="추천 도서 목록"></nav>
+                <div class="feat__plank" aria-hidden="true"></div>
+                <div class="feat__prog" aria-hidden="true"><span id="featProg"></span></div>
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div class="view-toggle reveal" id="viewToggle" role="tablist" aria-label="보기 방식: 프로젝트 또는 아카이브">
-          <button type="button" role="tab" data-view="cards" aria-selected="true">프로젝트</button>
-          <button type="button" role="tab" data-view="timeline" aria-selected="false">아카이브</button>
-        </div>
-        <div class="filter reveal" id="filter" role="group" aria-label="분야로 보기"></div>
-        <div class="works__list" id="worksList"></div>
-
-        <!-- 날짜별로 한 번에 보기: date 값으로 연도별 자동 정리 -->
-        <section class="yarch yarch--tab reveal" id="timeline" hidden aria-labelledby="timelineTitle">
-          <div class="yarch__head">
-            <h2 class="yarch__title" id="timelineTitle">아카이브</h2>
-            <p class="yarch__lead">언제, 어떤 순서로 작업했는지 한 번에 볼 수 있어요. 누르면 위의 작업으로 이동해요.</p>
+      <section class="wk-wrap shelves" aria-labelledby="shelvesTitle">
+        <div class="shelves__head">
+          <div>
+            <p class="eb">SHELVES BY SUBJECT</p>
+            <h2 class="wk-h2" id="shelvesTitle">분류별 서가</h2>
           </div>
-          <div class="yarch__years" id="timelineList"></div>
-        </section>
+          <nav class="shelves__chips" id="shelfChips" aria-label="분류 바로가기"></nav>
+        </div>
+        <div id="shelfList"></div>
+      </section>
+    </div>
+
+    <!-- ===== 목록으로 보기 ===== -->
+    <section class="wk-wrap wk-list" id="listView" aria-label="도서 목록" hidden>
+      <div class="wk-list__bar">
+        <label class="wk-search">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13M15.5 15.5L20 20" /></svg>
+          <span class="sr-only">프로젝트 검색</span>
+          <input type="search" id="wkQuery" placeholder="제목, 분류, 역할, 도구로 검색" autocomplete="off" />
+        </label>
+        <p class="wk-count">검색 결과 <span class="en" id="wkCount">0</span>권</p>
+      </div>
+      <div class="wk-filters">
+        <span class="wk-k">SUBJECT</span>
+        <div class="wk-chips" id="catFilter" role="group" aria-label="분류 필터"></div>
+        <span class="wk-k">YEAR</span>
+        <div class="wk-chips" id="yearFilter" role="group" aria-label="연도 필터"></div>
+      </div>
+      <div class="wk-table">
+        <div class="wk-tr wk-tr--head"><span class="wk-k">CALL NO.</span><span class="wk-k">TITLE</span><span class="wk-k">SUBJECT</span><span class="wk-k">YEAR</span><span class="wk-k">ROLE</span><span></span></div>
+        <div id="wkRows"></div>
+        <p class="wk-empty" id="wkEmpty" hidden>찾는 책이 없어요. 검색어나 필터를 바꿔보세요.</p>
       </div>
     </section>
   </main>
 
-  <footer class="footer footer--light">
-    <div class="container footer__inner">
-      <p>© <span id="year"></span> PARK Younghee. All rights reserved.</p>
-      <a href="#top" class="footer__top">Back to top ↑</a>
-    </div>
+  <footer class="lib-foot">
+    <p>© <span id="year"></span> PARK Younghee. All rights reserved.</p>
+    <a href="#top">Back to top ↑</a>
   </footer>
 
   <!-- ===== Project Modal ===== -->
@@ -109,10 +140,9 @@
     </article>
   </div>
 
-  <!-- 스크립트 (순서 중요: 데이터 → 작업물 페이지 → 공통) -->
-  <script src="js/db.js?v=20261008f"></script>
-  <script src="js/data.js?v=20261008f"></script>
-  <script src="js/works.js?v=20261008f"></script>
-  <script src="js/main.js?v=20261008f"></script>
+  <!-- 스크립트 (순서 중요: DB 연결 → 데이터 → 서가) -->
+  <script src="js/db.js?v=20261016a"></script>
+  <script src="js/data.js?v=20261016a"></script>
+  <script src="js/works.js?v=20261016a"></script>
 </body>
 </html>

@@ -115,6 +115,7 @@
       if (!d || !d.role) throw new Error("empty");
       const R = toRole(d);
       window.ROLE = R.id;
+      window.ROLE_DATA = R;
       window.PROJECTS = (d.projects || []).map(toProject).sort((a, b) => b.date.localeCompare(a.date));
       window.RESUME = toResume(d.resume || []);
       apply(R);
