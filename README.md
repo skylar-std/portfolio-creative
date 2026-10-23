@@ -21,8 +21,8 @@
 
 ```
 portfolio/
-├── index.html          # 메인: 첫 화면(한 줄 소개 · 기본 정보) → 소개·학력 → 경력·교육 → 대외·교내활동 → 수상·어학·자격증 → 스킬 → 프로젝트 미리보기 → 연락처
-├── works.html          # 프로젝트 목록: 분야 필터 + 카드
+├── index.html          # 메인: 첫 화면(한 줄 소개 · 기본 정보) → 대표 프로젝트 3개 → 소개·학력 → 경력·교육 → 대외·교내활동 → 수상·어학·자격증 → 스킬 → 연락처
+├── works.html          # 전체 프로젝트 아카이브: 연도별 목록 + 검색 · 분야 · 구분 필터
 ├── project.html        # 프로젝트 상세: project.html?id=프로젝트id
 ├── manage.html         # 관리 페이지 (비밀번호, 링크 어디에도 없음)
 ├── projects.html       # 예전 주소 → works.html 로 이동
@@ -32,8 +32,8 @@ portfolio/
 ├── js/
 │   ├── db.js           # Supabase 주소와 방문자용 공개 키
 │   ├── data.js         # DB에서 그 직무 내용을 받기, 프로젝트 카드 모양, 관리자 막대
-│   ├── main.js         # 메인 전용: 이력 · 스킬 · 프로젝트 미리보기 채우기
-│   ├── works.js        # 프로젝트 목록 전용
+│   ├── main.js         # 메인 전용: 이력 · 스킬 · 대표 프로젝트 채우기
+│   ├── works.js        # 아카이브 전용
 │   └── project.js      # 프로젝트 상세 전용
 ├── img/
 │   ├── favicon.svg     # 브라우저 탭 아이콘
@@ -60,7 +60,7 @@ portfolio/
 1. **이름·기본 정보·자기소개·이메일·링크** → `index.html`에서 직접 수정 (✏️ 표시가 있는 곳)
 2. **작업물** → `img/projects/`에 이미지 넣고, `projects` 표에 한 줄 추가 + `project_roles`에 보일 직무 연결
    - `id`는 영문 소문자·숫자·`-`만 (주소에 써요)
-   - `date` → 최신순 정렬과 카드의 날짜에 쓰여요
+   - `date` → 아카이브의 연도 묶음과 최신순 정렬에 쓰여요
    - `kind`: 구분 → `personal`(개인 프로젝트) · `team`(팀 프로젝트) · `contest`(공모전) · `school`(학교 과제) · `client`(외주)
    - `client`: 주최·발주처. 목록 카드에는 안 보이고 상세 페이지에만 보여요. 비워두면 어디에도 안 보여요
    - `summary`(한 줄 요약), `did`(한 일), `tools`(사용한 도구), `result_value`·`result_label`(결과 숫자) → 카드와 상세 페이지에 보여요
@@ -69,8 +69,8 @@ portfolio/
      - 모양: `{"sections": [ {"type": "...", "label": "Overview", "title": "...", "body": ["문단", ...]}, ... ]}`
      - `type` 종류: `text`(글) · `target`(persona, decisions) · `cards`(items) · `cast`(items: name, sound, color, note) · `scenario`(arc, scenes) · `mockup`(태블릿 목업, image 없으면 대표 이미지) · `gallery`(items: title, desc, image) · `palette`(colors: name, hex / fonts: style, sample, note) · `process`(steps, note) · `notes`(items: title, desc)
      - 섹션 번호는 순서대로 자동으로 붙어요. 예시는 `recycling-band` 프로젝트를 참고하세요
-   - `featured` 켜기 → 메인 '프로젝트' 미리보기에 먼저 보여요 (최신 2개, 하나도 없으면 최신순), `published` 끄기 → 숨기기
-   - `category` → 프로젝트 목록의 분야 필터가 이 값으로 자동 생성돼요
+   - `featured` 켜기 → 메인 '대표 프로젝트'에 보여요 (최신 3개까지, 하나도 없으면 최신순 3개). 아카이브에는 '대표' 표시가 붙어요. `published` 끄기 → 숨기기
+   - `category` · `kind` → 아카이브의 분야 · 구분 필터가 이 값으로 자동 생성돼요 (한 가지뿐이면 그 필터는 숨겨요)
 3. **프로필 사진** → `img/profile.jpg`로 넣고 `index.html`의 `img/profile.svg`를 `img/profile.jpg`로 변경
 4. **이력서** → `files/resume.pdf`를 내 파일로 교체
 5. **색상** → `css/site.css` 맨 위 `--accent` 값 변경

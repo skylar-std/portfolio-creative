@@ -11,7 +11,7 @@
   const esc = window.esc;
   const pad2 = (n) => String(n).padStart(2, "0");
 
-  const LIMITS = { experience: 4, training: 4, activities: 4, certificates: 6, preview: 2 };
+  const LIMITS = { experience: 4, training: 4, activities: 4, certificates: 6, preview: 3 };
 
   const NOW = (() => { const d = new Date(); return `${d.getFullYear()}.${pad2(d.getMonth() + 1)}`; })();
   const latestFirst = (k) => (a, b) => (b[k] || NOW).localeCompare(a[k] || NOW);
@@ -125,7 +125,7 @@
   function hideEmpty() {
     $$("[data-block]").forEach((b) => { const l = $("ul, ol, dl", b); b.hidden = !l || !l.children.length; });
     $$(".sec").forEach((sec) => {
-      if (sec.id === "profile" || sec.id === "projects") return;          // 소개 · 프로젝트는 항상 보여요
+      if (sec.id === "profile") return;          // 소개는 항상 보여요
       const blocks = $$("[data-block]", sec);
       const empty = blocks.length ? blocks.every((b) => b.hidden) : !$(".skills", sec).children.length;
       sec.hidden = empty;

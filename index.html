@@ -15,8 +15,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 
   <!-- 스타일 (?v= 숫자는 수정 후 올릴 때마다 바꾸면 캐시 문제 없음) -->
-  <link rel="stylesheet" href="css/reset.css?v=20261023a" />
-  <link rel="stylesheet" href="css/site.css?v=20261023a" />
+  <link rel="stylesheet" href="css/reset.css?v=20261023b" />
+  <link rel="stylesheet" href="css/site.css?v=20261023b" />
 </head>
 <body>
 
@@ -27,12 +27,13 @@
     <div class="wrap head__in">
       <a href="#top" class="logo">PARK Younghee</a>
       <nav class="nav" aria-label="주요 메뉴">
+        <a href="#projects" class="nav__sec">대표작</a>
         <a href="#profile" class="nav__sec">소개</a>
         <a href="#experience" class="nav__sec">경력</a>
         <a href="#activities" class="nav__sec">활동</a>
         <a href="#credentials" class="nav__sec">자격</a>
         <a href="#skills" class="nav__sec">스킬</a>
-        <a href="works.html" data-keep="works.html">프로젝트</a>
+        <a href="works.html" data-keep="works.html">아카이브</a>
         <a href="#contact" class="nav__sec">연락처</a>
       </nav>
       <a class="btn btn--sm btn--line" href="files/resume.pdf" target="_blank" rel="noopener">이력서 PDF</a>
@@ -63,6 +64,20 @@
             <div><dt>이메일</dt><dd><a href="mailto:hello@example.com">hello@example.com</a></dd></div>
           </dl>
         </aside>
+      </div>
+    </section>
+
+    <!-- ===== 대표 프로젝트 (DB projects.featured, 최대 3개) ===== -->
+    <section class="featured" id="projects" aria-labelledby="t-proj">
+      <div class="wrap">
+        <header class="featured__head">
+          <div>
+            <p class="sec__en">Selected Work</p>
+            <h2 class="featured__title" id="t-proj">대표 프로젝트</h2>
+          </div>
+          <a class="more-link" href="works.html" data-keep="works.html">전체 프로젝트 아카이브 <span id="projectCount"></span> <span aria-hidden="true">→</span></a>
+        </header>
+        <div class="cards cards--3" id="projectPreview"></div>
       </div>
     </section>
 
@@ -169,21 +184,6 @@
       </div>
     </section>
 
-    <!-- ===== 06 프로젝트 미리보기 ===== -->
-    <section class="sec" id="projects" aria-labelledby="t-proj">
-      <div class="wrap sec__in">
-        <header class="sec__head">
-          <p class="sec__num">06</p>
-          <h2 class="sec__title" id="t-proj">프로젝트</h2>
-          <p class="sec__en">Projects</p>
-        </header>
-        <div class="sec__body">
-          <div class="cards cards--2" id="projectPreview"></div>
-          <a class="more-link" href="works.html" data-keep="works.html">전체 프로젝트 보기 <span id="projectCount"></span> <span aria-hidden="true">→</span></a>
-        </div>
-      </div>
-    </section>
-
     <!-- ===== 연락처 ===== -->
     <section class="contact" id="contact" aria-labelledby="t-contact">
       <div class="wrap contact__in">
@@ -212,8 +212,8 @@
     </div>
   </footer>
 
-  <script src="js/db.js?v=20261023a"></script>
-  <script src="js/data.js?v=20261023a"></script>
-  <script src="js/main.js?v=20261023a"></script>
+  <script src="js/db.js?v=20261023b"></script>
+  <script src="js/data.js?v=20261023b"></script>
+  <script src="js/main.js?v=20261023b"></script>
 </body>
 </html>
