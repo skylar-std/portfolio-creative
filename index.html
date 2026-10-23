@@ -12,130 +12,208 @@
   <meta property="og:image" content="img/og-image.svg" />
 
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
-
-  <!-- 폰트 -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Noto+Serif+KR:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 
   <!-- 스타일 (?v= 숫자는 수정 후 올릴 때마다 바꾸면 캐시 문제 없음) -->
-  <link rel="stylesheet" href="css/reset.css?v=20261016d" />
-  <link rel="stylesheet" href="css/library.css?v=20261016d" />
+  <link rel="stylesheet" href="css/reset.css?v=20261023a" />
+  <link rel="stylesheet" href="css/site.css?v=20261023a" />
 </head>
-<body class="lib-home">
+<body>
 
-  <!-- ===== Header (회원카드가 내려가면 나타나요) ===== -->
-  <header class="lib-head is-hidden" id="header">
-    <div class="lib-head__inner">
-      <a href="#top" class="lib-logo">PARK.</a>
-      <nav class="lib-nav" aria-label="주요 메뉴">
-        <a href="#top" class="is-current" aria-current="page">HOME</a>
-        <span aria-hidden="true"></span>
-        <a href="works.html" data-keep="works.html">PROJECTS</a>
+  <a class="skip" href="#main">본문으로 건너뛰기</a>
+
+  <!-- ===== Header ===== -->
+  <header class="head" id="header">
+    <div class="wrap head__in">
+      <a href="#top" class="logo">PARK Younghee</a>
+      <nav class="nav" aria-label="주요 메뉴">
+        <a href="#profile" class="nav__sec">소개</a>
+        <a href="#experience" class="nav__sec">경력</a>
+        <a href="#activities" class="nav__sec">활동</a>
+        <a href="#credentials" class="nav__sec">자격</a>
+        <a href="#skills" class="nav__sec">스킬</a>
+        <a href="works.html" data-keep="works.html">프로젝트</a>
+        <a href="#contact" class="nav__sec">연락처</a>
       </nav>
+      <a class="btn btn--sm btn--line" href="files/resume.pdf" target="_blank" rel="noopener">이력서 PDF</a>
     </div>
   </header>
 
-  <main id="top">
-    <!-- ===== 서가 → 회원카드 → 꺼내서 펼치는 책 (내용은 js/book.js 가 DB에서 채워요) ===== -->
-    <section class="lib" id="lib" aria-label="박영희 포트폴리오">
-      <div class="lib__stage" id="stage">
-        <div class="shelf" id="shelf" aria-hidden="true"></div>
-
-        <div class="lib__intro" id="intro">
-          <p class="eb">THE LIBRARY OF DESIGNER PARK.</p>
-          <p class="lib__intro-ko">서가에서 한 권을 꺼내 펼쳐보세요</p>
-          <p class="eb eb--main">SCROLL ↓</p>
-        </div>
-
-        <div class="veil" id="veil" aria-hidden="true"></div>
-
-        <!-- 회원카드 -->
-        <div class="card-pos" id="cardPos">
-          <article class="mcard" aria-label="회원카드">
-            <div class="mcard__bar">
-              <span class="en mcard__brand">PARK. LIBRARY</span>
-              <span class="mcard__kind"><span class="en">MEMBER CARD</span><span>회원증</span></span>
-            </div>
-            <div class="mcard__body">
-              <div class="mcard__photo"><img id="cardPhoto" src="img/profile.svg" alt="" /></div>
-              <dl class="mcard__dl">
-                <dt>NAME</dt><dd class="mcard__name" id="cardName"></dd>
-                <dt>ROLE</dt><dd id="cardRole"></dd>
-                <dt>EMAIL</dt><dd class="en mcard__mail" id="cardMail"></dd>
-              </dl>
-            </div>
-            <div class="mcard__foot">
-              <div>
-                <span class="mcard__barcode" aria-hidden="true"></span>
-                <span class="en mcard__code" id="cardCode" aria-hidden="true"></span>
-              </div>
-              <div class="mcard__sign">
-                <span class="en" id="cardSign">Park</span>
-                <span id="cardIssued"></span>
-              </div>
-            </div>
-            <span class="mcard__stamp en" aria-hidden="true">VALID<br />MEMBER</span>
-          </article>
-          <div class="mcard__btns">
-            <button type="button" class="lib-btn" id="goInfo"><span class="en">INFO</span>바로가기
-              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6" /></svg></button>
-            <a href="works.html" data-keep="works.html" class="lib-btn lib-btn--main"><span class="en">PROJECTS</span>바로가기
-              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6" /></svg></a>
+  <main id="main">
+    <!-- ===== 첫 화면: 이름 · 한 줄 소개 · 기본 정보 ===== -->
+    <section class="hero" id="top">
+      <div class="wrap hero__in">
+        <div class="hero__text">
+          <!-- 아래 세 줄은 DB(roles)의 직무별 문장으로 바뀌어요 -->
+          <p class="hero__eyebrow" id="heroEyebrow">Brand · UI/UX · Graphic Designer</p>
+          <h1 class="hero__title" id="heroTitle">생각을 <em>형태</em>로,<br />형태를 <em>경험</em>으로.</h1>
+          <p class="hero__desc" id="heroDesc">안녕하세요, 사용자의 맥락을 읽고 브랜드의 목소리를 시각 언어로 옮기는 디자이너 <strong>박영희</strong>입니다.</p>
+          <div class="hero__btns">
+            <a class="btn" href="works.html" data-keep="works.html">프로젝트 보기 <span aria-hidden="true">→</span></a>
+            <a class="btn btn--line" href="#contact">연락하기</a>
           </div>
         </div>
-
-        <!-- 펼치는 책 (PC) -->
-        <div class="book-pos" id="bookPos">
-          <div class="book" id="book"></div>
-        </div>
-
-        <div class="lib__progress" id="progress" aria-hidden="true"><span></span></div>
+        <aside class="idcard" aria-label="기본 정보">
+          <img class="idcard__photo" src="img/profile.svg" alt="박영희 프로필 사진" />
+          <!-- ✏️ 이름 · 기본 정보는 여기서 직접 고쳐요 -->
+          <dl class="idcard__dl">
+            <div><dt>이름</dt><dd>박영희 · PARK Younghee</dd></div>
+            <div><dt>생년월일</dt><dd>1999. 1. 1.</dd></div>
+            <div><dt>거주지</dt><dd>Seoul, Korea</dd></div>
+            <div><dt>이메일</dt><dd><a href="mailto:hello@example.com">hello@example.com</a></dd></div>
+          </dl>
+        </aside>
       </div>
     </section>
 
-    <!-- ===== 휴대폰 · 움직임 줄이기 설정: 같은 페이지를 세로로 ===== -->
-    <section class="flat" id="flat" aria-label="포트폴리오 내용" hidden></section>
+    <!-- ===== 01 소개 + 학력 ===== -->
+    <section class="sec" id="profile" aria-labelledby="t-profile">
+      <div class="wrap sec__in">
+        <header class="sec__head">
+          <p class="sec__num">01</p>
+          <h2 class="sec__title" id="t-profile">소개</h2>
+          <p class="sec__en">Profile</p>
+        </header>
+        <div class="sec__body">
+          <!-- ✏️ 자기소개 문단은 여기서 직접 고쳐요 -->
+          <div class="prose">
+            <p>시각디자인을 전공하고 3년간 에이전시와 스타트업에서 브랜드 아이덴티티와 디지털 프로덕트 디자인을 해왔습니다. 예쁜 것보다 <strong>맞는 것</strong>을 만드는 일에 관심이 많습니다.</p>
+            <p>리서치에서 출발해 콘셉트를 세우고, 시스템으로 확장하는 과정을 좋아합니다.</p>
+          </div>
+          <div class="block" data-block="education">
+            <h3 class="block__title">학력</h3>
+            <ul class="rows" id="eduList"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 02 경력 · 교육 ===== -->
+    <section class="sec" id="experience" aria-labelledby="t-exp">
+      <div class="wrap sec__in">
+        <header class="sec__head">
+          <p class="sec__num">02</p>
+          <h2 class="sec__title" id="t-exp">경력 · 교육</h2>
+          <p class="sec__en">Experience</p>
+        </header>
+        <div class="sec__body">
+          <div class="block" data-block="experience">
+            <h3 class="block__title">경력 <span class="count" id="expCount"></span></h3>
+            <ul class="rows" id="expList"></ul>
+          </div>
+          <div class="block" data-block="training">
+            <h3 class="block__title">교육 · 수료 <span class="count" id="trainCount"></span></h3>
+            <ul class="rows" id="trainList"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 03 대외 · 교내활동 ===== -->
+    <section class="sec" id="activities" aria-labelledby="t-act">
+      <div class="wrap sec__in">
+        <header class="sec__head">
+          <p class="sec__num">03</p>
+          <h2 class="sec__title" id="t-act">대외 · 교내활동</h2>
+          <p class="sec__en">Activities</p>
+        </header>
+        <div class="sec__body">
+          <div class="block" data-block="external">
+            <h3 class="block__title">대외활동 <span class="count" id="extCount"></span></h3>
+            <ul class="rows" id="extList"></ul>
+          </div>
+          <div class="block" data-block="campus">
+            <h3 class="block__title">교내활동 <span class="count" id="campCount"></span></h3>
+            <ul class="rows" id="campList"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 04 수상 · 어학 · 자격증 ===== -->
+    <section class="sec" id="credentials" aria-labelledby="t-cred">
+      <div class="wrap sec__in">
+        <header class="sec__head">
+          <p class="sec__num">04</p>
+          <h2 class="sec__title" id="t-cred">수상 · 어학 · 자격증</h2>
+          <p class="sec__en">Credentials</p>
+        </header>
+        <div class="sec__body">
+          <div class="block" data-block="awards">
+            <h3 class="block__title">수상 <span class="count" id="awardCount"></span></h3>
+            <ul class="rows" id="awardList"></ul>
+          </div>
+          <div class="block" data-block="languages">
+            <h3 class="block__title">어학 <span class="count" id="langCount"></span></h3>
+            <ul class="langs" id="langList"></ul>
+          </div>
+          <div class="block" data-block="certificates">
+            <h3 class="block__title">자격증 <span class="count" id="certCount"></span></h3>
+            <ul class="rows rows--table" id="certList"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 05 스킬 (DB skills) ===== -->
+    <section class="sec" id="skills" aria-labelledby="t-skills">
+      <div class="wrap sec__in">
+        <header class="sec__head">
+          <p class="sec__num">05</p>
+          <h2 class="sec__title" id="t-skills">스킬 · 도구</h2>
+          <p class="sec__en">Skills</p>
+        </header>
+        <div class="sec__body">
+          <dl class="skills" id="skillsList"></dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 06 프로젝트 미리보기 ===== -->
+    <section class="sec" id="projects" aria-labelledby="t-proj">
+      <div class="wrap sec__in">
+        <header class="sec__head">
+          <p class="sec__num">06</p>
+          <h2 class="sec__title" id="t-proj">프로젝트</h2>
+          <p class="sec__en">Projects</p>
+        </header>
+        <div class="sec__body">
+          <div class="cards cards--2" id="projectPreview"></div>
+          <a class="more-link" href="works.html" data-keep="works.html">전체 프로젝트 보기 <span id="projectCount"></span> <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 연락처 ===== -->
+    <section class="contact" id="contact" aria-labelledby="t-contact">
+      <div class="wrap contact__in">
+        <div>
+          <p class="sec__en">Contact</p>
+          <h2 class="contact__title" id="t-contact">함께 일하고 싶다면 편하게 연락주세요.</h2>
+        </div>
+        <!-- ✏️ 이메일 · 링크는 여기서 직접 고쳐요 -->
+        <div class="contact__side">
+          <a class="contact__mail" href="mailto:hello@example.com">hello@example.com</a>
+          <ul class="contact__links">
+            <li><a href="https://www.behance.net/" target="_blank" rel="noopener">Behance ↗</a></li>
+            <li><a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram ↗</a></li>
+            <li><a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn ↗</a></li>
+            <li><a href="files/resume.pdf" target="_blank" rel="noopener">이력서 PDF ↗</a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <footer class="lib-foot">
-    <p>© <span id="year"></span> PARK Younghee. All rights reserved.</p>
-    <a href="#top">Back to top ↑</a>
+  <footer class="foot">
+    <div class="wrap foot__in">
+      <p>© <span id="year"></span> PARK Younghee</p>
+      <a href="#top">맨 위로 ↑</a>
+    </div>
   </footer>
 
-  <!-- =========================================================
-       ✏️ 직접 고치는 내용 (화면에는 책 페이지 안에 들어가요)
-       - 이름 · 영문 이름 · 소개 문단 · 기본 정보 · 이메일 · 링크 · 프로필 사진
-       - 학력/경력/활동/자격증/스킬은 Supabase DB에서 와요
-       ========================================================= -->
-  <div id="bookSource" hidden>
-    <p data-src="name">박영희</p>
-    <p data-src="name-en">PARK Younghee</p>
-    <p data-src="sign">Park</p>
-    <img data-src="photo" src="img/profile.svg" alt="박영희 프로필 사진" />
-    <div data-src="about">
-      <p>시각디자인을 전공하고 3년간 에이전시와 스타트업에서 브랜드 아이덴티티와 디지털 프로덕트 디자인을 해왔습니다. 예쁜 것보다 <strong>맞는 것</strong>을 만드는 일에 관심이 많습니다.</p>
-      <p>리서치에서 출발해 콘셉트를 세우고, 시스템으로 확장하는 과정을 좋아합니다.</p>
-    </div>
-    <dl data-src="facts">
-      <dt>이름</dt><dd>박영희 · PARK Younghee</dd>
-      <dt>생년월일</dt><dd>1999. 1. 1.</dd>
-      <dt>거주지역</dt><dd>Seoul, Korea</dd>
-      <dt>이메일</dt><dd>hello@example.com</dd>
-    </dl>
-    <a data-src="email" href="mailto:hello@example.com">hello@example.com</a>
-    <p data-src="contact-lead">새로운 가능성을 함께 만들어가길 바랍니다.<br />언제든 편하게 연락주세요.</p>
-    <ul data-src="links">
-      <li><a href="https://www.behance.net/" target="_blank" rel="noopener">Behance</a></li>
-      <li><a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram</a></li>
-      <li><a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn</a></li>
-    </ul>
-    <a data-src="resume" href="files/resume.pdf" target="_blank" rel="noopener">이력서 PDF</a>
-  </div>
-
-  <!-- 스크립트 -->
-  <script src="js/db.js?v=20261016d"></script>
-  <script src="js/data.js?v=20261016d"></script>
-  <script src="js/book.js?v=20261016d"></script>
+  <script src="js/db.js?v=20261023a"></script>
+  <script src="js/data.js?v=20261023a"></script>
+  <script src="js/main.js?v=20261023a"></script>
 </body>
 </html>

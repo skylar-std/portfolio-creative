@@ -11,140 +11,49 @@
   <meta property="og:image" content="img/og-image.svg" />
 
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
-
-  <!-- 폰트 -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Noto+Serif+KR:wght@300;400;500;600&display=swap" rel="stylesheet" />
-
-  <!-- 스타일 -->
-  <link rel="stylesheet" href="css/reset.css?v=20261016d" />
-  <link rel="stylesheet" href="css/library.css?v=20261016d" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="css/reset.css?v=20261023a" />
+  <link rel="stylesheet" href="css/site.css?v=20261023a" />
 </head>
-<body class="lib-works">
+<body data-keep-title="1">
 
-  <!-- ===== Header ===== -->
-  <header class="lib-head" id="header">
-    <div class="lib-head__inner">
-      <a href="index.html" data-keep="index.html" class="lib-logo">PARK.</a>
-      <nav class="lib-nav" aria-label="주요 메뉴">
-        <a href="index.html" data-keep="index.html">HOME</a>
-        <span aria-hidden="true"></span>
-        <a href="works.html" class="is-current" aria-current="page">PROJECTS</a>
+  <a class="skip" href="#main">본문으로 건너뛰기</a>
+
+  <header class="head" id="header">
+    <div class="wrap head__in">
+      <a href="index.html" data-keep="index.html" class="logo">PARK Younghee</a>
+      <nav class="nav" aria-label="주요 메뉴">
+        <a href="index.html" data-keep="index.html">소개</a>
+        <a href="works.html" class="is-on" aria-current="page">프로젝트</a>
+        <a href="index.html#contact" data-keep="index.html#contact">연락처</a>
       </nav>
+      <a class="btn btn--sm btn--line" href="files/resume.pdf" target="_blank" rel="noopener">이력서 PDF</a>
     </div>
   </header>
 
-  <main id="top">
-    <!-- ===== 머리말 ===== -->
-    <section class="wk-wrap wk-top">
-      <div>
-        <p class="eb">THE LIBRARY OF DESIGNER PARK.</p>
-        <h1 class="wk-title">Projects</h1>
-        <p class="wk-lead">추천 도서부터 보고, 분류별 서가나 도서 목록에서 더 찾아보세요. 책을 누르면 그 자리에서 펼쳐져요.</p>
-      </div>
-      <div class="wk-top__side">
-        <div class="wk-total">
-          <p class="eb">TOTAL VOLUMES</p>
-          <p class="en" id="wkTotal">0</p>
-        </div>
-        <div class="wk-seg" id="viewToggle" role="group" aria-label="보기 방식">
-          <button type="button" data-view="shelf" aria-pressed="true">서가로 보기</button>
-          <button type="button" data-view="list" aria-pressed="false">목록으로 보기</button>
-        </div>
-      </div>
-    </section>
+  <main id="main" class="page">
+    <div class="wrap">
+      <header class="page__head">
+        <p class="sec__en">Projects</p>
+        <h1 class="page__title">프로젝트 <span class="count" id="wkCount"></span></h1>
+        <p class="page__lead">어떤 작업을 했고, 그 안에서 무엇을 맡았는지 정리했어요. 카드를 누르면 자세히 볼 수 있어요.</p>
+      </header>
 
-    <!-- ===== 서가로 보기 (js/works.js 가 DB 내용으로 채워요) ===== -->
-    <div id="shelfView">
-      <section class="feat" id="feat" aria-labelledby="featTitle">
-        <div class="feat__stage" id="featStage">
-          <div class="wk-wrap feat__box">
-            <div class="feat__head">
-              <div>
-                <p class="eb eb--main">SHELF 00 — RECOMMENDED</p>
-                <h2 class="wk-h2" id="featTitle"></h2>
-              </div>
-              <p class="feat__hint" id="featHint"></p>
-            </div>
-            <div class="feat__grid">
-              <article class="feat__card" id="featCard" aria-live="polite"></article>
-              <div class="feat__shelf">
-                <nav class="feat__books" id="featBooks" aria-label="추천 도서 목록"></nav>
-                <div class="feat__plank" aria-hidden="true"></div>
-                <div class="feat__prog" aria-hidden="true"><span id="featProg"></span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="wk-wrap shelves" aria-labelledby="shelvesTitle">
-        <div class="shelves__head">
-          <div>
-            <p class="eb">SHELVES BY SUBJECT</p>
-            <h2 class="wk-h2" id="shelvesTitle">분류별 서가</h2>
-          </div>
-          <nav class="shelves__chips" id="shelfChips" aria-label="분류 바로가기"></nav>
-        </div>
-        <div id="shelfList"></div>
-      </section>
+      <!-- 분야로 거르기: DB projects.category 로 자동 생성 -->
+      <div class="filters" id="filter" role="group" aria-label="분야로 보기"></div>
+      <div class="cards cards--3" id="worksList"></div>
     </div>
-
-    <!-- ===== 목록으로 보기 ===== -->
-    <section class="wk-wrap wk-list" id="listView" aria-label="도서 목록" hidden>
-      <div class="wk-list__bar">
-        <label class="wk-search">
-          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13M15.5 15.5L20 20" /></svg>
-          <span class="sr-only">프로젝트 검색</span>
-          <input type="search" id="wkQuery" placeholder="제목, 분류, 역할, 도구로 검색" autocomplete="off" />
-        </label>
-        <p class="wk-count">검색 결과 <span class="en" id="wkCount">0</span>권</p>
-      </div>
-      <div class="wk-filters">
-        <span class="wk-k">SUBJECT</span>
-        <div class="wk-chips" id="catFilter" role="group" aria-label="분류 필터"></div>
-        <span class="wk-k">YEAR</span>
-        <div class="wk-chips" id="yearFilter" role="group" aria-label="연도 필터"></div>
-      </div>
-      <div class="wk-table">
-        <div class="wk-tr wk-tr--head"><span class="wk-k">CALL NO.</span><span class="wk-k">TITLE</span><span class="wk-k">SUBJECT</span><span class="wk-k">YEAR</span><span class="wk-k">ROLE</span><span></span></div>
-        <div id="wkRows"></div>
-        <p class="wk-empty" id="wkEmpty" hidden>찾는 책이 없어요. 검색어나 필터를 바꿔보세요.</p>
-      </div>
-    </section>
   </main>
 
-  <footer class="lib-foot">
-    <p>© <span id="year"></span> PARK Younghee. All rights reserved.</p>
-    <a href="#top">Back to top ↑</a>
+  <footer class="foot">
+    <div class="wrap foot__in">
+      <p>© <span id="year"></span> PARK Younghee</p>
+      <a href="#top">맨 위로 ↑</a>
+    </div>
   </footer>
 
-  <!-- ===== 책 펼치기 팝업 (js/works.js 가 프로젝트 내용으로 페이지를 채워요) ===== -->
-  <div class="pop" id="pop" role="dialog" aria-modal="true" aria-labelledby="popTitle" hidden>
-    <div class="pop__bar">
-      <p><span class="en pop__call" id="popCall"></span><span class="en pop__title" id="popTitle"></span></p>
-      <span class="pop__right">
-        <span class="pop__esc">ESC 또는 바깥을 누르면 닫혀요</span>
-        <button type="button" class="pop__x" id="popClose" aria-label="책 닫기"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
-      </span>
-    </div>
-    <div class="pop__wrap" id="popWrap">
-      <div class="pop__stage">
-        <div class="pop__book-pos" id="popBookPos"><div class="book" id="popBook"></div></div>
-        <div class="pop__foot" aria-hidden="true">
-          <span class="en" id="popPage"></span>
-          <span class="pop__prog"><span id="popProg"></span></span>
-          <span id="popHint"></span>
-        </div>
-      </div>
-    </div>
-    <div class="pop__flat" id="popFlat" hidden></div>
-  </div>
-
-  <!-- 스크립트 (순서 중요: DB 연결 → 데이터 → 서가) -->
-  <script src="js/db.js?v=20261016d"></script>
-  <script src="js/data.js?v=20261016d"></script>
-  <script src="js/works.js?v=20261016d"></script>
+  <script src="js/db.js?v=20261023a"></script>
+  <script src="js/data.js?v=20261023a"></script>
+  <script src="js/works.js?v=20261023a"></script>
 </body>
 </html>
