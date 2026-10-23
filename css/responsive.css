@@ -1,0 +1,193 @@
+/* ===== Tablet (≤ 1024px) ===== */
+@media (max-width: 1024px) {
+  :root { --gutter: 28px; }
+
+  .section { padding: 110px 0; }
+  .about__inner { gap: 48px; }
+  .skills__grid { grid-template-columns: repeat(2, 1fr); }
+  .records { grid-template-columns: repeat(2, 1fr); gap: 48px 32px; }
+  .cta { padding: 48px; }
+  .cta__stack { right: 48px; top: 48px; }
+  .cta__stack img { width: 140px; }
+}
+
+/* ===== Mobile (≤ 768px) ===== */
+@media (max-width: 768px) {
+  :root { --gutter: 20px; --header-h: 64px; }
+
+  body { font-size: 16px; }
+  .pc-only { display: none; }
+
+  /* 모바일 메뉴 */
+  .menu-btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7px;
+    width: 40px; height: 40px;
+    z-index: 60;
+  }
+  .menu-btn span {
+    display: block;
+    width: 24px; height: 2px;
+    margin-left: auto;
+    background: var(--ink);
+    transition: transform .35s var(--ease);
+  }
+  .menu-btn[aria-expanded="true"] span:first-child { transform: translateY(4.5px) rotate(45deg); }
+  .menu-btn[aria-expanded="true"] span:last-child { transform: translateY(-4.5px) rotate(-45deg); }
+
+  .nav {
+    position: fixed;
+    inset: 0;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 var(--gutter);
+    gap: 8px;
+    background: var(--bg);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .35s, visibility .35s;
+  }
+  .nav.is-open { opacity: 1; visibility: visible; }
+  .nav__link {
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+  }
+  .nav__link::after { display: none; }
+
+  /* Hero */
+  .hero__bottom { flex-direction: column; align-items: flex-start; margin-top: 40px; }
+  .hero__desc { font-size: 16px; }
+  .marquee { margin-top: 56px; padding: 16px 0; }
+  .marquee__track { font-size: 24px; gap: 28px; }
+
+  /* Section */
+  .section { padding: 88px 0; }
+  .section__head { flex-direction: column; align-items: flex-start; margin-bottom: 40px; }
+
+  /* Work */
+  .work__grid { grid-template-columns: 1fr; gap: 44px; }
+  .work__item:nth-child(even) { margin-top: 0; }
+  .card__title { font-size: 19px; }
+  .card__view { display: none; }
+
+  /* Archive */
+  .archive__months { grid-template-columns: repeat(6, 1fr); }
+  .archive__mbtn:nth-child(7) { border-left: 0; }
+  .archive__mbtn:nth-child(n+7) { border-top: 1px solid var(--line); }
+  .archive__mbtn { padding: 14px 0 12px; font-size: 11px; }
+  .archive__mbtn strong { font-size: 24px; }
+  .archive__summary { font-size: 14px; min-height: 60px; }
+  .archive__group { grid-template-columns: 1fr; gap: 12px; padding: 24px 0; }
+  .archive__month em { display: inline; font-size: 40px; margin: 0 10px 0 0; }
+  .archive__row { grid-template-columns: 80px 1fr; gap: 14px; padding: 8px 0; }
+  .archive__row:hover { background: none; }
+  .archive__title { font-size: 17px; }
+  .archive__sub { font-size: 13px; }
+  .archive__arrow { display: none; }
+
+  /* About */
+  .about__inner { grid-template-columns: 1fr; }
+  .about__photo { max-width: 360px; }
+  .about__text p { font-size: 16px; }
+  .timeline li { grid-template-columns: 96px 1fr; font-size: 15px; }
+  .about__facts { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .about__facts dd { font-size: 15px; word-break: break-all; }
+  .records { grid-template-columns: 1fr; gap: 40px; margin-top: 64px; }
+
+  /* 작업물 보러가기 */
+  .cta {
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: 0;
+    padding: 36px 24px 28px;
+    border-radius: 20px;
+  }
+  .cta__stack { position: static; order: -1; margin: 0 0 8px 40px; }
+  .cta__stack img { width: 104px; margin-left: -40px; border-width: 3px; }
+  .cta__arrow { width: 64px; height: 64px; font-size: 26px; align-self: flex-end; margin-top: -40px; }
+
+  /* works.html */
+  .page-head { padding-top: calc(var(--header-h) + 56px); }
+  .page-head__desc { font-size: 16px; }
+  .page-head + .work { padding-top: 64px; }
+
+  /* Skills */
+  .skills__grid { grid-template-columns: 1fr; }
+  .skill-card { padding: 28px; }
+
+  /* Contact / Footer */
+  .contact__links { margin-top: 40px; }
+  .footer__inner { flex-direction: column; gap: 8px; }
+
+  /* Modal */
+  .modal { padding: 0; align-items: end; }
+  .modal__panel { max-height: 92vh; border-radius: 20px 20px 0 0; }
+  .modal__body { padding: 28px 20px 36px; }
+  .modal__title { font-size: 26px; }
+}
+
+/* ===== v3 — 개편 섹션 반응형 ===== */
+@media (max-width: 1280px) {
+  .dots { right: 16px; }
+}
+@media (max-width: 1024px) {
+  .dots { display: none; }
+  .history__row { grid-template-columns: 150px 64px minmax(0, 1fr); }
+  .history__note { display: none; }
+  .certs__grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+  .projects-cta { padding-top: 88px; }
+  .about .section__num { margin-bottom: 28px; }
+
+  .history { margin-top: 72px; }
+  .history__head { flex-direction: column; align-items: flex-start; }
+  .history__row {
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "badge date" "what what";
+    gap: 8px 10px;
+    padding: 18px 0;
+  }
+  .history__row:hover { padding-left: 0; padding-right: 0; background: none; }
+  .history__row .badge { grid-area: badge; }
+  .history__date { grid-area: date; font-size: 16px; }
+  .history__what { grid-area: what; }
+  .history__what strong { font-size: 17px; width: 100%; }
+
+  .awards { margin-top: 40px; }
+  .award { flex-direction: column; align-items: flex-start; padding: 32px 24px; border-radius: 20px; }
+  .award__side { flex-direction: row; align-items: baseline; gap: 12px; }
+  .award__year { font-size: 56px; }
+
+  .certs { margin-top: 56px; }
+  .certs__grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cert { min-height: 140px; padding: 18px; }
+  .cert__name { font-size: 15px; }
+}
+
+/* ===== v4 — 이력 반응형 ===== */
+@media (max-width: 1024px) {
+  .career { gap: 40px; }
+  .cert-year { grid-template-columns: 120px 1fr; }
+  .cert-row { grid-template-columns: minmax(0, 1fr) auto 44px; }
+}
+@media (max-width: 768px) {
+  .career { grid-template-columns: 1fr; gap: 56px; margin-top: 72px; }
+  .career__item { padding: 20px 0 20px 22px; }
+  .career__item::before { top: 27px; }
+  .career__name { font-size: 17px; }
+  .awards.is-multi { grid-template-columns: 1fr; }
+  .cert-year { grid-template-columns: 1fr; gap: 12px; padding: 22px 0; }
+  .cert-year__label em { font-size: 36px; }
+  .cert-row { grid-template-columns: minmax(0, 1fr) 40px; gap: 2px 12px; }
+  .cert-row__name { font-size: 15px; }
+  .cert-row__org { grid-row: 2; font-size: 13px; }
+  .cert-row__month { grid-row: 1 / span 2; align-self: center; font-size: 15px; }
+}
+@media (max-width: 768px) {
+  .archive--page { padding-top: calc(var(--header-h) + 48px); }
+}

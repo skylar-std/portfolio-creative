@@ -12,208 +12,252 @@
   <meta property="og:image" content="img/og-image.svg" />
 
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
+
+  <!-- 폰트 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
 
   <!-- 스타일 (?v= 숫자는 수정 후 올릴 때마다 바꾸면 캐시 문제 없음) -->
-  <link rel="stylesheet" href="css/reset.css?v=20261023b" />
-  <link rel="stylesheet" href="css/site.css?v=20261023b" />
+  <link rel="stylesheet" href="css/reset.css?v=20261001e" />
+  <link rel="stylesheet" href="css/style.css?v=20261008f" />
+  <link rel="stylesheet" href="css/responsive.css?v=20261001e" />
 </head>
 <body>
 
-  <a class="skip" href="#main">본문으로 건너뛰기</a>
-
   <!-- ===== Header ===== -->
-  <header class="head" id="header">
-    <div class="wrap head__in">
-      <a href="#top" class="logo">PARK Younghee</a>
-      <nav class="nav" aria-label="주요 메뉴">
-        <a href="#projects" class="nav__sec">대표작</a>
-        <a href="#profile" class="nav__sec">소개</a>
-        <a href="#experience" class="nav__sec">경력</a>
-        <a href="#activities" class="nav__sec">활동</a>
-        <a href="#credentials" class="nav__sec">자격</a>
-        <a href="#skills" class="nav__sec">스킬</a>
-        <a href="works.html" data-keep="works.html">아카이브</a>
-        <a href="#contact" class="nav__sec">연락처</a>
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="#top" class="logo">PARK<span>.</span></a>
+
+      <nav class="nav" id="nav">
+        <a href="#profile" class="nav__link">About</a>
+        <a href="works.html" data-keep="works.html" class="nav__link">Projects</a>
       </nav>
-      <a class="btn btn--sm btn--line" href="files/resume.pdf" target="_blank" rel="noopener">이력서 PDF</a>
+
+      <button class="menu-btn" id="menuBtn" aria-label="메뉴 열기" aria-expanded="false">
+        <span></span><span></span>
+      </button>
     </div>
   </header>
 
-  <main id="main">
-    <!-- ===== 첫 화면: 이름 · 한 줄 소개 · 기본 정보 ===== -->
-    <section class="hero" id="top">
-      <div class="wrap hero__in">
-        <div class="hero__text">
-          <!-- 아래 세 줄은 DB(roles)의 직무별 문장으로 바뀌어요 -->
-          <p class="hero__eyebrow" id="heroEyebrow">Brand · UI/UX · Graphic Designer</p>
-          <h1 class="hero__title" id="heroTitle">생각을 <em>형태</em>로,<br />형태를 <em>경험</em>으로.</h1>
-          <p class="hero__desc" id="heroDesc">안녕하세요, 사용자의 맥락을 읽고 브랜드의 목소리를 시각 언어로 옮기는 디자이너 <strong>박영희</strong>입니다.</p>
-          <div class="hero__btns">
-            <a class="btn" href="works.html" data-keep="works.html">프로젝트 보기 <span aria-hidden="true">→</span></a>
-            <a class="btn btn--line" href="#contact">연락하기</a>
-          </div>
+  <!-- ===== 오른쪽 섹션 이동 바 (PC에서만 보임) ===== -->
+  <nav class="dots" id="dots" aria-label="섹션 이동">
+    <span class="dots__fill" id="dotsFill" aria-hidden="true"></span>
+    <a href="#profile" class="dots__item"><span class="dots__label">Profile</span><i></i></a>
+    <a href="#activities" class="dots__item"><span class="dots__label">Activities</span><i></i></a>
+    <a href="#credentials" class="dots__item"><span class="dots__label">Credentials</span><i></i></a>
+    <a href="#skills" class="dots__item"><span class="dots__label">Skills</span><i></i></a>
+    <a href="#projects" class="dots__item"><span class="dots__label">Projects</span><i></i></a>
+  </nav>
+
+  <main id="top">
+
+    <!-- ===== Hero (표지) ===== -->
+    <section class="hero">
+      <div class="container">
+        <p class="hero__eyebrow reveal" id="heroEyebrow">Brand · UI/UX · Graphic Designer</p>
+        <h1 class="hero__title reveal" id="heroTitle">
+          생각을 <em>형태</em>로,<br />
+          형태를 <em>경험</em>으로.
+        </h1>
+        <div class="hero__bottom reveal">
+          <p class="hero__desc" id="heroDesc">
+            안녕하세요, 사용자의 맥락을 읽고 브랜드의 목소리를 시각 언어로 옮기는<br class="pc-only" />
+            디자이너 <strong>박영희</strong>입니다.
+          </p>
+          <a href="#profile" class="btn btn--primary">
+            더 알아보기
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2v12M8 14l5-5M8 14l-5-5" stroke="currentColor" stroke-width="1.6"/></svg>
+          </a>
         </div>
-        <aside class="idcard" aria-label="기본 정보">
-          <img class="idcard__photo" src="img/profile.svg" alt="박영희 프로필 사진" />
-          <!-- ✏️ 이름 · 기본 정보는 여기서 직접 고쳐요 -->
-          <dl class="idcard__dl">
-            <div><dt>이름</dt><dd>박영희 · PARK Younghee</dd></div>
-            <div><dt>생년월일</dt><dd>1999. 1. 1.</dd></div>
-            <div><dt>거주지</dt><dd>Seoul, Korea</dd></div>
-            <div><dt>이메일</dt><dd><a href="mailto:hello@example.com">hello@example.com</a></dd></div>
-          </dl>
-        </aside>
       </div>
-    </section>
-
-    <!-- ===== 대표 프로젝트 (DB projects.featured, 최대 3개) ===== -->
-    <section class="featured" id="projects" aria-labelledby="t-proj">
-      <div class="wrap">
-        <header class="featured__head">
-          <div>
-            <p class="sec__en">Selected Work</p>
-            <h2 class="featured__title" id="t-proj">대표 프로젝트</h2>
-          </div>
-          <a class="more-link" href="works.html" data-keep="works.html">전체 프로젝트 아카이브 <span id="projectCount"></span> <span aria-hidden="true">→</span></a>
-        </header>
-        <div class="cards cards--3" id="projectPreview"></div>
-      </div>
-    </section>
-
-    <!-- ===== 01 소개 + 학력 ===== -->
-    <section class="sec" id="profile" aria-labelledby="t-profile">
-      <div class="wrap sec__in">
-        <header class="sec__head">
-          <p class="sec__num">01</p>
-          <h2 class="sec__title" id="t-profile">소개</h2>
-          <p class="sec__en">Profile</p>
-        </header>
-        <div class="sec__body">
-          <!-- ✏️ 자기소개 문단은 여기서 직접 고쳐요 -->
-          <div class="prose">
-            <p>시각디자인을 전공하고 3년간 에이전시와 스타트업에서 브랜드 아이덴티티와 디지털 프로덕트 디자인을 해왔습니다. 예쁜 것보다 <strong>맞는 것</strong>을 만드는 일에 관심이 많습니다.</p>
-            <p>리서치에서 출발해 콘셉트를 세우고, 시스템으로 확장하는 과정을 좋아합니다.</p>
-          </div>
-          <div class="block" data-block="education">
-            <h3 class="block__title">학력</h3>
-            <ul class="rows" id="eduList"></ul>
-          </div>
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee__track" id="marqueeTrack">
+          <span>Branding</span><span>✦</span><span>UI/UX</span><span>✦</span><span>Editorial</span><span>✦</span><span>Packaging</span><span>✦</span><span>Motion</span><span>✦</span>
+          <span>Branding</span><span>✦</span><span>UI/UX</span><span>✦</span><span>Editorial</span><span>✦</span><span>Packaging</span><span>✦</span><span>Motion</span><span>✦</span>
         </div>
       </div>
     </section>
 
-    <!-- ===== 02 경력 · 교육 ===== -->
-    <section class="sec" id="experience" aria-labelledby="t-exp">
-      <div class="wrap sec__in">
-        <header class="sec__head">
-          <p class="sec__num">02</p>
-          <h2 class="sec__title" id="t-exp">경력 · 교육</h2>
-          <p class="sec__en">Experience</p>
-        </header>
-        <div class="sec__body">
-          <div class="block" data-block="experience">
-            <h3 class="block__title">경력 <span class="count" id="expCount"></span></h3>
-            <ul class="rows" id="expList"></ul>
+    <!-- ===== About 1 · Profile (기본 정보 + 경력·학력·교육) ===== -->
+    <section class="section about" id="profile">
+      <div class="container">
+        <p class="section__num reveal">01 — Profile</p>
+        <div class="about__inner">
+          <div class="about__photo reveal">
+            <img src="img/profile.svg" alt="박영희 프로필 사진" />
           </div>
-          <div class="block" data-block="training">
-            <h3 class="block__title">교육 · 수료 <span class="count" id="trainCount"></span></h3>
-            <ul class="rows" id="trainList"></ul>
+          <div class="about__text reveal">
+            <h2 class="section__title">About <em>Me</em></h2>
+            <p>
+              시각디자인을 전공하고 3년간 에이전시와 스타트업에서 브랜드 아이덴티티와
+              디지털 프로덕트 디자인을 해왔습니다. 예쁜 것보다 <strong>맞는 것</strong>을 만드는 일에 관심이 많습니다.
+            </p>
+            <p>
+              리서치에서 출발해 콘셉트를 세우고, 시스템으로 확장하는 과정을 좋아합니다.
+            </p>
+
+            <dl class="about__facts">
+              <div><dt>Name</dt><dd>박영희 · PARK Younghee</dd></div>
+              <div><dt>Birth</dt><dd>1999. 1. 1.</dd></div>
+              <div><dt>Based in</dt><dd>Seoul, Korea</dd></div>
+              <div><dt>Email</dt><dd><a href="mailto:hello@example.com">hello@example.com</a></dd></div>
+            </dl>
+
+            <!-- 학력: js/resume.js 의 education 에서 자동 생성 -->
+            <div class="edu">
+              <p class="edu__label">Education</p>
+              <ul class="edu__list" id="eduList"></ul>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- ===== 03 대외 · 교내활동 ===== -->
-    <section class="sec" id="activities" aria-labelledby="t-act">
-      <div class="wrap sec__in">
-        <header class="sec__head">
-          <p class="sec__num">03</p>
-          <h2 class="sec__title" id="t-act">대외 · 교내활동</h2>
-          <p class="sec__en">Activities</p>
-        </header>
-        <div class="sec__body">
-          <div class="block" data-block="external">
-            <h3 class="block__title">대외활동 <span class="count" id="extCount"></span></h3>
-            <ul class="rows" id="extList"></ul>
+        <!-- 경력 · 교육: js/resume.js 에서 자동 생성 (최신순, 4개 넘으면 '더보기') -->
+        <div class="career">
+          <div class="career__col reveal">
+            <div class="career__head">
+              <h3 class="career__title">Experience <small>경력</small></h3>
+              <span class="career__count" id="expCount"></span>
+            </div>
+            <ul class="career__list" id="expList"></ul>
+            <button type="button" class="more-btn" id="expMore" hidden></button>
           </div>
-          <div class="block" data-block="campus">
-            <h3 class="block__title">교내활동 <span class="count" id="campCount"></span></h3>
-            <ul class="rows" id="campList"></ul>
+          <div class="career__col reveal">
+            <div class="career__head">
+              <h3 class="career__title">Training <small>교육 · 수료</small></h3>
+              <span class="career__count" id="trainCount"></span>
+            </div>
+            <ul class="career__list" id="trainList"></ul>
+            <button type="button" class="more-btn" id="trainMore" hidden></button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ===== 04 수상 · 어학 · 자격증 ===== -->
-    <section class="sec" id="credentials" aria-labelledby="t-cred">
-      <div class="wrap sec__in">
-        <header class="sec__head">
-          <p class="sec__num">04</p>
-          <h2 class="sec__title" id="t-cred">수상 · 어학 · 자격증</h2>
-          <p class="sec__en">Credentials</p>
-        </header>
-        <div class="sec__body">
-          <div class="block" data-block="awards">
-            <h3 class="block__title">수상 <span class="count" id="awardCount"></span></h3>
-            <ul class="rows" id="awardList"></ul>
+    <!-- ===== About 2 · Activities (대외활동 · 교내활동) ===== -->
+    <section class="section activities" id="activities">
+      <div class="container">
+        <p class="section__num reveal">02 — Activities</p>
+        <h2 class="section__title reveal">Beyond <em>Work</em></h2>
+        <!-- 요약 숫자 · 종류 버튼 · 목록: js/resume.js 의 activities 에서 자동 생성 -->
+        <div class="act-stats reveal" id="actStats"></div>
+        <div class="act-filter reveal" id="actFilter" role="group" aria-label="활동 종류"></div>
+        <ol class="act-list" id="actList"></ol>
+        <button type="button" class="more-btn" id="actMore" hidden></button>
+      </div>
+    </section>
+
+    <!-- ===== About 3 · Credentials (수상 + 어학 + 자격증) ===== -->
+    <section class="section credentials" id="credentials">
+      <div class="container">
+        <p class="section__num reveal">03 — Credentials</p>
+        <h2 class="section__title reveal" id="credTitle">Awards &amp; <em>Certificates</em></h2>
+
+        <!-- 수상: js/resume.js 의 awards 에서 자동 생성 -->
+        <div class="awards" id="awardList"></div>
+
+        <!-- 어학: js/resume.js 의 languages 에서 자동 생성 -->
+        <div class="langs reveal">
+          <div class="certs__head">
+            <h3 class="certs__title">Languages</h3>
+            <span class="certs__count" id="langCount"></span>
           </div>
-          <div class="block" data-block="languages">
-            <h3 class="block__title">어학 <span class="count" id="langCount"></span></h3>
-            <ul class="langs" id="langList"></ul>
+          <div class="langs__grid" id="langList"></div>
+        </div>
+
+        <!-- 자격증: 연도별 최신순 자동 묶음, 최근 3개 연도까지 보이고 나머지는 '더보기' -->
+        <div class="certs reveal">
+          <div class="certs__head">
+            <h3 class="certs__title">Certificates</h3>
+            <span class="certs__count" id="certCount"></span>
           </div>
-          <div class="block" data-block="certificates">
-            <h3 class="block__title">자격증 <span class="count" id="certCount"></span></h3>
-            <ul class="rows rows--table" id="certList"></ul>
+          <div class="cert-years" id="certList"></div>
+          <button type="button" class="more-btn" id="certMore" hidden></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Skills ===== -->
+    <section class="section skills" id="skills">
+      <div class="container">
+        <p class="section__num reveal">04 — Skills</p>
+        <h2 class="section__title reveal">Skills &amp; <em>Tools</em></h2>
+        <div class="skills__grid" id="skillsGrid">
+          <div class="skill-card reveal">
+            <h3>Design</h3>
+            <ul>
+              <li><span class="skill-icon"><img src="img/icons/brand-identity.svg" alt="" width="20" height="20" /></span>Brand Identity</li>
+              <li><span class="skill-icon"><img src="img/icons/ui-ux.svg" alt="" width="20" height="20" /></span>UI/UX Design</li>
+              <li><span class="skill-icon"><img src="img/icons/editorial.svg" alt="" width="20" height="20" /></span>Editorial Design</li>
+              <li><span class="skill-icon"><img src="img/icons/design-system.svg" alt="" width="20" height="20" /></span>Design System</li>
+            </ul>
+          </div>
+          <div class="skill-card reveal">
+            <h3>Tools</h3>
+            <ul>
+              <li><span class="skill-icon"><img src="img/icons/figma.svg" alt="" width="20" height="20" /></span>Figma</li>
+              <li><span class="skill-icon"><img src="img/icons/illustrator.svg" alt="" width="20" height="20" /></span>Adobe Illustrator</li>
+              <li><span class="skill-icon"><img src="img/icons/photoshop.svg" alt="" width="20" height="20" /></span>Adobe Photoshop</li>
+              <li><span class="skill-icon"><img src="img/icons/indesign.svg" alt="" width="20" height="20" /></span>Adobe InDesign</li>
+            </ul>
+          </div>
+          <div class="skill-card reveal">
+            <h3>Etc.</h3>
+            <ul>
+              <li><span class="skill-icon"><img src="img/icons/after-effects.svg" alt="" width="20" height="20" /></span>After Effects</li>
+              <li><span class="skill-icon"><img src="img/icons/blender.svg" alt="" width="20" height="20" /></span>Blender (Basic)</li>
+              <li><span class="skill-icon"><img src="img/icons/html-css.svg" alt="" width="20" height="20" /></span>HTML / CSS</li>
+              <li><span class="skill-icon"><img src="img/icons/notion.svg" alt="" width="20" height="20" /></span>Notion</li>
+            </ul>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ===== 05 스킬 (DB skills) ===== -->
-    <section class="sec" id="skills" aria-labelledby="t-skills">
-      <div class="wrap sec__in">
-        <header class="sec__head">
-          <p class="sec__num">05</p>
-          <h2 class="sec__title" id="t-skills">스킬 · 도구</h2>
-          <p class="sec__en">Skills</p>
-        </header>
-        <div class="sec__body">
-          <dl class="skills" id="skillsList"></dl>
-        </div>
+    <!-- ===== 작업물 보러가기 ===== -->
+    <section class="section projects-cta" id="projects">
+      <div class="container">
+        <p class="section__num reveal">05 — Projects</p>
+        <a href="works.html" data-keep="works.html" class="cta reveal">
+          <div class="cta__text">
+            <p class="cta__eyebrow">Projects · Archive</p>
+            <h2 class="cta__title">작업물<br /><em>보러가기</em></h2>
+            <p class="cta__meta" id="projectCount"></p>
+          </div>
+          <!-- 대표작 썸네일 3장: js/projects.js에서 자동으로 채워짐 -->
+          <div class="cta__stack" id="projectPreview" aria-hidden="true"></div>
+          <span class="cta__arrow" aria-hidden="true">→</span>
+        </a>
       </div>
     </section>
 
-    <!-- ===== 연락처 ===== -->
-    <section class="contact" id="contact" aria-labelledby="t-contact">
-      <div class="wrap contact__in">
-        <div>
-          <p class="sec__en">Contact</p>
-          <h2 class="contact__title" id="t-contact">함께 일하고 싶다면 편하게 연락주세요.</h2>
-        </div>
-        <!-- ✏️ 이메일 · 링크는 여기서 직접 고쳐요 -->
-        <div class="contact__side">
-          <a class="contact__mail" href="mailto:hello@example.com">hello@example.com</a>
-          <ul class="contact__links">
-            <li><a href="https://www.behance.net/" target="_blank" rel="noopener">Behance ↗</a></li>
-            <li><a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram ↗</a></li>
-            <li><a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn ↗</a></li>
-            <li><a href="files/resume.pdf" target="_blank" rel="noopener">이력서 PDF ↗</a></li>
-          </ul>
-        </div>
+    <!-- ===== Contact ===== -->
+    <section class="section contact" id="contact">
+      <div class="container">
+        <p class="contact__eyebrow reveal">Let's work together</p>
+        <a href="mailto:hello@example.com" class="contact__mail reveal">hello@example.com</a>
+        <ul class="contact__links reveal">
+          <li><a href="https://www.behance.net/" target="_blank" rel="noopener">Behance ↗</a></li>
+          <li><a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram ↗</a></li>
+          <li><a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn ↗</a></li>
+          <li><a href="files/resume.pdf" target="_blank" rel="noopener">Résumé ↗</a></li>
+        </ul>
       </div>
     </section>
   </main>
 
-  <footer class="foot">
-    <div class="wrap foot__in">
-      <p>© <span id="year"></span> PARK Younghee</p>
-      <a href="#top">맨 위로 ↑</a>
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p>© <span id="year"></span> PARK Younghee. All rights reserved.</p>
+      <a href="#top" class="footer__top">Back to top ↑</a>
     </div>
   </footer>
 
-  <script src="js/db.js?v=20261023b"></script>
-  <script src="js/data.js?v=20261023b"></script>
-  <script src="js/main.js?v=20261023b"></script>
+  <!-- 스크립트 -->
+  <script src="js/db.js?v=20261008f"></script>
+  <script src="js/data.js?v=20261008f"></script>
+  <script src="js/main.js?v=20261008f"></script>
 </body>
 </html>
