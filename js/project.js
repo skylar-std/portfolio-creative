@@ -55,18 +55,22 @@
           ${sc.image ? img(sc.image, sc.title) : ""}<span class="scenes__no">${pad2(i + 1)}</span><strong>${esc(sc.title)}</strong>${sc.desc ? `<span>${esc(sc.desc)}</span>` : ""}</li>`).join("")}</ol>
         ${scenes.some((x) => x.key) ? `<p class="hint">색 테두리 = 연출 포인트 장면</p>` : ""}`;
     },
-    mockup: (s, p) => `<figure class="fig">${img(s.image || p.image, s.caption || p.title)}${s.caption ? `<figcaption>${esc(s.caption)}</figcaption>` : ""}</figure>`,
+    // 목업: 전용 이미지가 없으면 표지를 또 보여주지 않고 '준비 중' 자리만
+    mockup: (s, p) => (s.image
+      ? `<figure class="fig fig--mockup">${img(s.image, s.caption || p.title)}</figure>`
+      : `<figure class="fig is-empty"><span class="fig__ph fig__ph--wide"><span>목업 이미지 준비 중</span></span></figure>`),
     gallery: (s) => `<div class="gallery">${(s.items || []).map((it) => `
-      <figure class="fig${it.image ? "" : " is-empty"}">${it.image ? img(it.image, it.title) : `<span class="fig__ph" aria-hidden="true"></span>`}
+      <figure class="fig${it.image ? "" : " is-empty"}">${it.image ? img(it.image, it.title) : `<span class="fig__ph"><span>이미지 준비 중</span></span>`}
         <figcaption><strong>${esc(it.title)}</strong>${it.desc ? ` ${esc(it.desc)}` : ""}</figcaption></figure>`).join("")}</div>`,
     palette: (s) => `${paras(s.body)}
+      ${(s.fonts || []).length ? `<h3 class="psub">컬러</h3>` : ""}
       <ul class="swatches">${(s.colors || []).filter((c) => HEX.test(c.hex)).map((c) => `
         <li><i style="background:${c.hex}" aria-hidden="true"></i><strong>${esc(c.name)}</strong><code>${esc(c.hex.toUpperCase())}</code></li>`).join("")}</ul>
-      ${(s.fonts || []).length ? `<ul class="fonts">${s.fonts.map((f) => `
+      ${(s.fonts || []).length ? `<h3 class="psub">서체</h3><ul class="fonts">${s.fonts.map((f) => `
         <li><span class="fonts__sample${f.style === "display" ? " is-display" : ""}">${esc(f.sample).replace(/\n/g, "<br />")}</span><small>${esc(f.note || "")}</small></li>`).join("")}</ul>` : ""}`,
     process: (s) => `${paras(s.body)}
       <ol class="steps">${(s.steps || []).map((st, i) => `<li><span class="steps__no">${pad2(i + 1)}</span><strong>${esc(st.title)}</strong>${st.desc ? `<span>${esc(st.desc)}</span>` : ""}</li>`).join("")}</ol>
-      ${s.note ? `<p class="hint">${esc(s.note)}</p>` : ""}`,
+      ${s.note ? `<p class="note-box">${esc(s.note)}</p>` : ""}`,
   };
 
   function sectionsOf(p) {
@@ -102,7 +106,7 @@
       return `<section class="psec" id="ps-${n}" aria-labelledby="pt-${n}">
           <header class="psec__head"><span class="psec__num">${pad2(n)}</span><span class="psec__label">${esc(s.label || "")}</span></header>
           <div class="psec__body">
-            ${s.title ? `<h2 class="psec__title" id="pt-${n}">${esc(s.title)}</h2>` : `<h2 class="sr-only" id="pt-${n}">${esc(s.label || "")}</h2>`}
+            ${(s.title || s.caption) ? `<h2 class="psec__title" id="pt-${n}">${esc(s.title || s.caption)}</h2>` : `<h2 class="sr-only" id="pt-${n}">${esc(s.label || "")}</h2>`}
             ${body}
           </div>
         </section>`;
@@ -184,16 +188,38 @@
     if (next && next.thumb) { const im = new Image(); im.src = next.thumb; }   // 다음 이미지를 미리 받아 둬요
   }
 
-  /* 왼쪽 목차: 지금 읽는 섹션 표시 */
+  /* 왼쪽 목차: 지금 읽는 섹션 표시
+     - 화면 위쪽 30% 선을 지난 마지막 섹션이 '지금 섹션'이에요
+     - 목차를 눌러 이동하면 누른 섹션을 바로 표시해요
+       (페이지 끝 근처라 그 섹션이 위까지 못 올라와도 누른 걸로 유지, 직접 스크롤하면 다시 자동) */
   function tocSpy() {
     const links = [...document.querySelectorAll(".ptoc a")];
-    const secs = links.map((a) => document.querySelector(a.getAttribute("href"))).filter(Boolean);
-    if (!secs.length || !("IntersectionObserver" in window)) return;
-    const io = new IntersectionObserver((es) => es.forEach((e) => {
-      if (!e.isIntersecting) return;
-      links.forEach((a) => { const on = a.getAttribute("href") === `#${e.target.id}`; a.classList.toggle("is-on", on); if (on) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
-    }), { rootMargin: "-30% 0px -60% 0px" });
-    secs.forEach((s) => io.observe(s));
+    const secs = links.map((a) => document.querySelector(a.getAttribute("href")));
+    if (!secs.length || secs.some((x) => !x)) return;
+    const head = document.querySelector(".head");
+    let pinned = -1, ticking = false;
+    const mark = (k) => links.forEach((a, i) => {
+      a.classList.toggle("is-on", i === k);
+      if (i === k) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current");
+    });
+    function update() {
+      ticking = false;
+      if (pinned >= 0) { mark(pinned); return; }
+      const line = (head ? head.offsetHeight : 64) + window.innerHeight * 0.3;
+      let k = -1;
+      secs.forEach((sec, i) => { if (sec.getBoundingClientRect().top <= line) k = i; });
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      if (atBottom) k = secs.length - 1;
+      mark(k);
+    }
+    const on = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    links.forEach((a, i) => a.addEventListener("click", () => { pinned = i; mark(i); }));
+    // 사용자가 직접 스크롤하기 시작하면 다시 자동 표시
+    const unpin = () => { if (pinned >= 0) { pinned = -1; on(); } };
+    ["wheel", "touchstart", "keydown"].forEach((ev) => window.addEventListener(ev, unpin, { passive: true }));
+    window.addEventListener("scroll", on, { passive: true });
+    window.addEventListener("resize", on);
+    update();
   }
 
   function notFound() {
