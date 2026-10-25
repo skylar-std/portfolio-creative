@@ -21,8 +21,10 @@
   /* 요약: 총 프로젝트 · 카테고리별 개수 · 많이 쓴 도구(전체 프로젝트 중 사용한 비율 %) */
   const TOOL_LIMIT = 5;
   const CAT_LIMIT = 4;          // 카테고리는 많은 순 4개까지, 나머지는 '기타'
-  const CAT_STYLE = "bars";     // "bars" = 막대 · "strip" = 한 줄 비율 띠
+  const CAT_STYLE = "donut";    // "donut" = 도넛(가운데 총 개수) · "bars" = 막대 · "strip" = 한 줄 비율 띠
   const STRIP_COLORS = ["#FF2E63", "#08D9D6", "#252A34", "#FF8AA8", "#7FE9E7"];
+  const DONUT_COLORS = ["#FF2E63", "#08D9D6", "#252A34", "#FF8AA8"];   // 상위 4개 · 나머지는 회색 '기타'
+  const OTHER_COLOR = "#D5D7DC";
   function summary() {
     const box = $("#summary");
     if (!ALL.length) { box.hidden = true; return; }
@@ -30,6 +32,13 @@
     const cats = Object.entries(count(ALL.map((p) => p.categoryLabel).filter(Boolean))).sort((a, b) => b[1] - a[1]);
     const tools = Object.entries(count(ALL.flatMap((p) => [...new Set(p.tools || [])]))).sort((a, b) => b[1] - a[1]).slice(0, TOOL_LIMIT);
     const pct = (n) => Math.round((n / ALL.length) * 100);
+    box.classList.toggle("summary--donut", CAT_STYLE === "donut");
+    if (CAT_STYLE === "donut") {
+      box.innerHTML = `
+      <div class="sum sum--donut">${catDonut(cats)}</div>
+      ${toolsHTML(tools, pct)}`;
+      return;
+    }
     box.innerHTML = `
       <div class="sum sum--total">
         <span class="sum__k">총 프로젝트</span>
@@ -39,13 +48,40 @@
         <span class="sum__k">카테고리 <b>${cats.length}</b> <small>전체 프로젝트 중 비율</small></span>
         ${CAT_STYLE === "strip" ? catStrip(cats) : catBars(cats)}
       </div>
-      ${tools.length ? `<div class="sum">
+      ${toolsHTML(tools, pct)}`;
+  }
+
+  const toolsHTML = (tools, pct) => (tools.length ? `<div class="sum">
         <span class="sum__k">많이 쓴 도구 <small>전체 프로젝트 중 사용 비율</small></span>
         <ul class="bars">${tools.map(([k, n]) => `
           <li><span class="bars__name">${esc(k)}</span>
             <span class="bars__track" aria-hidden="true"><span class="bars__fill${n === tools[0][1] ? " is-top" : ""}" style="width:${pct(n)}%"></span></span>
             <span class="bars__pct">${pct(n)}%</span></li>`).join("")}</ul>
-      </div>` : ""}`;
+      </div>` : "");
+
+  // 도넛: 상위 3개 + 기타, 가운데에 총 프로젝트 수
+  function catDonut(cats) {
+    const top = cats.slice(0, DONUT_COLORS.length);
+    const rest = cats.slice(DONUT_COLORS.length).reduce((n, [, c]) => n + c, 0);
+    const list = rest ? [...top.map((c, i) => [...c, DONUT_COLORS[i]]), ["기타", rest, OTHER_COLOR]] : top.map((c, i) => [...c, DONUT_COLORS[i]]);
+    const total = ALL.length;
+    let acc = 0;
+    const GAP = list.length > 1 ? 0.6 : 0;          // 조각 사이 아주 얇은 틈(%)
+    const stops = list.map(([, n, col]) => {
+      const from = (acc / total) * 100, to = ((acc += n) / total) * 100;
+      return `${col} ${from.toFixed(2)}% ${(to - GAP).toFixed(2)}%, transparent ${(to - GAP).toFixed(2)}% ${to.toFixed(2)}%`;
+    }).join(", ");
+    const few = total < 5;                         // 프로젝트가 적으면 % 대신 개수
+    const label = (n) => (few ? `${n}개` : `${pctOf(n)}%`);
+    return `
+      <div class="donut" role="img" aria-label="카테고리 비율: ${esc(list.map(([k, n]) => `${k} ${label(n)}`).join(", "))}">
+        <span class="donut__ring" style="background: conic-gradient(${stops})"></span>
+        <span class="donut__center"><strong>${total}</strong><small>Projects</small></span>
+      </div>
+      <div class="donut__side">
+        <span class="sum__k">카테고리 <b>${cats.length}</b></span>
+        <ul class="donut__legend">${list.map(([k, n, col]) => `<li><i style="background:${col}"></i><span>${esc(k)}</span><b>${label(n)}</b></li>`).join("")}</ul>
+      </div>`;
   }
 
   // 카테고리: 많은 순 CAT_LIMIT 개 + 나머지는 '기타'
