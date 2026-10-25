@@ -120,12 +120,42 @@
   /* ===== 보기: [종류별 | 연도별] 탭 + 옆으로 넘기는 줄 =====
      - 위 탭을 누르거나, 휴대폰에서 화면을 옆으로 밀면 두 보기가 바뀌어요
      - 각 묶음(종류 · 연도)은 카드 한 줄이고, 옆으로 밀거나 화살표로 넘겨요 */
+  // 도구 이름 → img/icons 파일 이름 (없으면 글자만)
+  const TOOL_ICON = { photoshop: "photoshop", illustrator: "illustrator", indesign: "indesign", figma: "figma", "after effects": "after-effects", blender: "blender", notion: "notion", "html / css": "html-css", html: "html-css" };
+  const toolIcon = (t) => TOOL_ICON[String(t).toLowerCase().replace(/^adobe\s+/, "")];
+  const teamSize = (p) => { const m = /(\d+)\s*인/.exec(p.team || ""); return m ? Number(m[1]) : 0; };
+  const isTeam = (p) => p.type === "team" || teamSize(p) > 1 || (p.contribution != null && p.contribution < 100);
+
+  // 카드 아래 '유형 · 기여도' 줄
+  function typeRow(p) {
+    const kind = KINDS[p.type] || (p.client ? "외주" : "개인");
+    const size = teamSize(p);
+    const team = isTeam(p);
+    const label = team && p.type !== "team" ? `${kind} · 팀${size ? ` ${size}인` : ""}` : team ? `팀 프로젝트${size ? ` · ${size}인` : ""}` : kind === "개인" ? "개인 프로젝트" : `${kind} · 개인`;
+    const pct = team && p.contribution != null ? Math.max(0, Math.min(100, Math.round(p.contribution))) : null;
+    return `<span class="sw-type ${team ? "sw-type--team" : ""}">
+        <span class="sw-type__label">${esc(label)}</span>
+        ${pct != null ? `<span class="sw-type__pct" aria-label="기여도 ${pct}%"><span class="sw-type__k" aria-hidden="true">기여도</span><span class="sw-type__bar"><i style="width:${pct}%"></i></span><b>${pct}%</b></span>` : ""}
+      </span>`;
+  }
+  // 카드 맨 아래 사용 도구 (3개까지 + 나머지 개수)
+  function toolsRow(p) {
+    const tools = p.tools || [];
+    if (!tools.length) return "";
+    const shown = tools.slice(0, 3);
+    return `<span class="sw-tools" aria-label="사용 도구: ${esc(tools.join(", "))}">${shown.map((t) => {
+      const ic = toolIcon(t);
+      return `<span class="sw-tool">${ic ? `<img src="img/icons/${ic}.svg" alt="" width="14" height="14" />` : ""}${esc(t)}</span>`;
+    }).join("")}${tools.length > 3 ? `<span class="sw-tool sw-tool--more">+${tools.length - 3}</span>` : ""}</span>`;
+  }
+
   const card = (p, meta) => `
     <li class="sw-card"><a href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(p.id)}`))}">
       <span class="sw-card__img"><img src="${esc(p.thumb)}" alt="" loading="lazy" />${p.featured ? '<span class="badge badge--img">대표</span>' : ""}</span>
       <span class="sw-card__meta">${esc(meta)}</span>
       <strong class="sw-card__title">${esc(p.title)}</strong>
       ${p.role ? `<span class="sw-card__role">${esc(p.role)}</span>` : ""}
+      <span class="sw-card__foot">${typeRow(p)}${toolsRow(p)}</span>
     </a></li>`;
 
   function groupsHTML(groups, metaOf, prefix) {
@@ -156,7 +186,7 @@
     };
     const byCat = by((p) => p.categoryLabel).sort((a, b) => b[1].length - a[1].length);   // 많은 순
     const byYear = by(yearOf).sort((a, b) => b[0] - a[0]);                                // 최신 연도 순
-    $("#panelCat").innerHTML = groupsHTML(byCat, (p) => `${yearOf(p)} · ${kindOf(p)}`, "gc");
+    $("#panelCat").innerHTML = groupsHTML(byCat, (p) => `${yearOf(p)}.${p.date.slice(5, 7)}`, "gc");
     // 연도별: 위에서 연도를 고르고, 아래에 그 해를 월별로 정리
     const yp = $("#panelYear");
     yp.innerHTML = `
@@ -175,7 +205,7 @@
       $("#yMonths").innerHTML = [...months].map(([m, list]) => `
         <section class="ym" aria-label="${esc(y)}년 ${m ? `${m}월` : "월 미정"}">
           <h4 class="ym__month"><b>${m || "–"}</b><strong>${m ? "월" : "월 미정"}</strong><span>${list.length}개</span></h4>
-          <ul class="ym__grid">${list.map((p) => card(p, `${p.categoryLabel} · ${kindOf(p)}`)).join("")}</ul>
+          <ul class="ym__grid">${list.map((p) => card(p, p.categoryLabel)).join("")}</ul>
         </section>`).join("");
       if (typeof fit === "function") fit();
     };
