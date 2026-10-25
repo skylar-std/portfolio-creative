@@ -219,6 +219,29 @@
     window.addEventListener("resize", () => { box.scrollLeft = cur * box.clientWidth; fit(); arrows(); });
     select(0, false);
     arrows();
+
+    /* 상세로 갈 때: 지금 보던 목록 순서와 자리를 기억해요
+       → 상세 페이지의 이전 · 다음이 이 순서를 따르고, '목록'을 누르면 이 자리로 돌아와요 */
+    const KEY = "pf.works";
+    const curYear = () => { const b = $(".ybar__btn[aria-selected=true]"); return b ? b.dataset.y : ""; };
+    box.addEventListener("click", (e) => {
+      const a = e.target.closest(".sw-card a"); if (!a) return;
+      const panel = panels[cur];
+      const ids = [...new Set($$(".sw-card a", panel).map((x) => new URL(x.href, location.href).searchParams.get("id")))];
+      const label = cur === 0 ? "종류별" : `${curYear()}년`;
+      try { sessionStorage.setItem(KEY, JSON.stringify({ ids, label, tab: cur, year: curYear(), y: window.scrollY })); } catch (err) { /* 저장이 안 돼도 이동은 돼요 */ }
+    });
+    // '목록'으로 돌아왔을 때 보던 탭 · 연도 · 위치 그대로
+    let saved = null;
+    try { saved = JSON.parse(sessionStorage.getItem(KEY) || "null"); } catch (err) { saved = null; }
+    let back = false;
+    try { back = sessionStorage.getItem("pf.back") === "1"; sessionStorage.removeItem("pf.back"); } catch (err) { back = false; }
+    const nav = (performance.getEntriesByType && performance.getEntriesByType("navigation")[0]) || {};
+    if (saved && (back || nav.type === "back_forward")) {
+      if (saved.year) { const b = $(`.ybar__btn[data-y="${saved.year}"]`); if (b) b.click(); }
+      if (saved.tab) { box.style.scrollBehavior = "auto"; select(saved.tab, false); box.scrollLeft = saved.tab * box.clientWidth; box.style.scrollBehavior = ""; }
+      requestAnimationFrame(() => window.scrollTo({ top: saved.y || 0, behavior: "instant" }));
+    }
   }
 
   function init() {
@@ -235,6 +258,9 @@
     summary();
     buildViews();
   }
+
+  // 뒤로 가기로 그대로 돌아온 경우(브라우저가 페이지를 보관해 둔 경우) 표시만 지워요
+  window.addEventListener("pageshow", (e) => { if (e.persisted) { try { sessionStorage.removeItem("pf.back"); } catch (err) { /* 무시 */ } } });
 
   (window.PROJECTS_READY || Promise.resolve()).then(() => {
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
