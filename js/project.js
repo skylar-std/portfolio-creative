@@ -145,7 +145,6 @@
           <nav class="ptoc" aria-label="이 프로젝트의 구성"><p>Contents</p><ol>${tocItems}</ol></nav>
           <div class="pbody__main">${secs}</div>
         </div>
-        ${(p.tags || []).length ? `<ul class="chips ptags" aria-label="태그">${p.tags.map((t) => `<li class="chip">#${esc(t)}</li>`).join("")}</ul>` : ""}
         <nav class="pnav" id="pnav" aria-label="다른 프로젝트">${link(prev, "← 이전 프로젝트", "pnav__a--prev")}${link(next, "다음 프로젝트 →", "pnav__a--next")}</nav>
       </div>
       <nav class="qbar" id="qbar" aria-label="빠른 이동">
