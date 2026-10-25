@@ -61,6 +61,34 @@
       ${toolsHTML(tools, pct)}`;
   }
 
+  /* 요약 등장 애니메이션: 화면에 보이면 도넛이 한 바퀴 채워지고, 막대가 차오르고, 숫자가 0부터 올라가요 */
+  function animateSummary() {
+    const box = $("#summary");
+    if (box.hidden || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const nums = $$(".donut__center strong, .donut__legend b, .bars__pct", box).map((el) => {
+      const m = /^(\d+)(.*)$/.exec(el.textContent.trim());
+      return m ? { el, to: Number(m[1]), suf: m[2] } : null;
+    }).filter(Boolean);
+    $$(".bars__fill", box).forEach((f, i) => f.style.setProperty("--d", `${i * 90}ms`));
+    $$(".donut__legend li", box).forEach((li, i) => li.style.setProperty("--d", `${300 + i * 70}ms`));
+    box.classList.add("is-pre");
+    nums.forEach((n) => { n.el.textContent = `0${n.suf}`; });
+    const run = () => {
+      void box.offsetWidth;
+      box.classList.remove("is-pre"); box.classList.add("is-in");
+      const t0 = performance.now(), DUR = 1100;
+      const tick = (t) => {
+        const k = Math.min(1, (t - t0) / DUR), e = 1 - Math.pow(1 - k, 3);
+        nums.forEach((n) => { n.el.textContent = `${Math.round(n.to * e)}${n.suf}`; });
+        if (k < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+    if (!("IntersectionObserver" in window)) { run(); return; }
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { io.disconnect(); requestAnimationFrame(run); } }, { threshold: 0.3 });
+    io.observe(box);
+  }
+
   const toolsHTML = (tools, pct) => (tools.length ? `<div class="sum">
         <span class="sum__k">많이 쓴 도구 <small>전체 프로젝트 중 사용 비율</small></span>
         <ul class="bars">${tools.map(([k, n]) => `
@@ -286,6 +314,7 @@
 
     $("#wkCount").textContent = ALL.length;
     summary();
+    animateSummary();
     buildViews();
   }
 

@@ -374,7 +374,17 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .summary--pie .donut__legend { gap: 7px; }
 .summary--pie .donut__legend li { font-size: 14px; }
 .donut { position: relative; flex: none; width: 168px; height: 168px; }
-.donut__ring { position: absolute; inset: 0; border-radius: 50%; -webkit-mask: radial-gradient(circle, transparent 57%, #000 58%); mask: radial-gradient(circle, transparent 57%, #000 58%); }
+@property --sweep { syntax: "<percentage>"; inherits: false; initial-value: 100%; }
+.donut__ring { --sweep: 100%; position: absolute; inset: 0; border-radius: 50%;
+  -webkit-mask: radial-gradient(circle, transparent 57%, #000 58%), conic-gradient(#000 var(--sweep), transparent 0); -webkit-mask-composite: source-in;
+  mask: radial-gradient(circle, transparent 57%, #000 58%), conic-gradient(#000 var(--sweep), transparent 0); mask-composite: intersect; }
+/* 요약 등장 애니메이션 (works.js animateSummary) */
+.summary.is-pre .donut__ring { --sweep: 0%; }
+.summary.is-pre .bars__fill { width: 0 !important; }
+.summary.is-pre .donut__legend li { opacity: 0; transform: translateX(-6px); }
+.summary.is-in .donut__ring { transition: --sweep 1.1s cubic-bezier(.3, .7, .2, 1); }
+.summary.is-in .bars__fill { transition: width .9s cubic-bezier(.3, .7, .2, 1) var(--d, 0ms); }
+.summary.is-in .donut__legend li { transition: opacity .4s var(--d, 0ms), transform .4s var(--d, 0ms); }
 .donut__center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .donut__center strong { font-size: 42px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: var(--ink); font-variant-numeric: tabular-nums; }
 .donut__center small { margin-top: 4px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
