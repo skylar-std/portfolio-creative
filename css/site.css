@@ -773,12 +773,17 @@ a.card:hover { border-color: var(--pink); }
 .side__list a.is-on .side__label { opacity: 1; transform: none; color: var(--pink-text); }
 .side:hover .side__label, .side:focus-within .side__label { opacity: 1; transform: none; }
 .side__list a:hover { color: var(--ink); }
-@media (max-width: 1359px) { .side { display: none; } }
+@media (max-width: 1199px) { .side { display: none; } }
+/* 노트북(1200~1359px): 여백이 좁아서 점만 보이고, 이름은 마우스를 올렸을 때만 */
+@media (min-width: 1200px) and (max-width: 1359px) {
+  .side__list a.is-on .side__label { opacity: 0; transform: translateX(6px); }
+  .side:hover .side__label, .side:focus-within .side__label, .side:hover .side__list a.is-on .side__label, .side:focus-within .side__list a.is-on .side__label { opacity: 1; transform: none; background: var(--surface); box-shadow: 0 4px 12px -6px rgba(37, 42, 52, .35); }
+}
 
 /* 휴대폰 · 태블릿 구역 이동: 오른쪽 아래 버튼(지금 구역 이름) → 위로 펼쳐지는 목록 */
 .jump { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 45; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; opacity: 0; transform: translateY(16px); pointer-events: none; transition: opacity .25s, transform .3s cubic-bezier(.2, .8, .2, 1); }
 .jump.is-visible { opacity: 1; transform: none; pointer-events: auto; }
-@media (min-width: 1360px) { .jump { display: none; } }
+@media (min-width: 1200px) { .jump { display: none; } }
 .jump__btn { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 8px 0 18px; border: 0; border-radius: 999px; background: var(--navy); color: #fff; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 12px 28px -10px rgba(37, 42, 52, .6); }
 .jump__now { max-width: 9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .jump__icon { display: grid; place-content: center; gap: 3px; width: 34px; height: 34px; border-radius: 50%; background: var(--pink); }
