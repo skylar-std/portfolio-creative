@@ -354,6 +354,46 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .cover { margin: 32px 0 8px; border-radius: 14px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); }
 .cover img { display: block; width: 100%; max-height: 640px; object-fit: contain; background: var(--surface); }
 
+/* ===== 프로젝트 상세: 네이비 머리 → 대표 이미지 → 한눈에 보기 → 목차 | 기록 ===== */
+.pmain { padding-bottom: clamp(64px, 8vw, 104px); }
+.phero { background: var(--navy); color: #fff; padding: 32px 0 120px; }
+.back--light { color: #C9CDD6; }
+.back--light:hover { color: var(--cyan); }
+.phero__meta { margin: 8px 0 0; font-size: 14.5px; font-weight: 600; color: var(--cyan); }
+.phero__title { margin: 8px 0 0; max-width: 860px; font-size: clamp(32px, 4.6vw, 52px); font-weight: 800; line-height: 1.18; letter-spacing: -0.04em; }
+.phero__lead { margin: 14px 0 0; max-width: 760px; font-size: 18px; color: #C9CDD6; }
+.phero__facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0 24px; margin: 28px 0 0; border-top: 1px solid rgba(255, 255, 255, .25); }
+.phero__facts div { padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, .12); }
+.phero__facts dt { font-size: 13px; color: #A9AFBC; }
+.phero__facts dd { margin: 2px 0 0; font-size: 15.5px; font-weight: 600; }
+.phero .btn { margin-top: 24px; }
+.phero :focus-visible { outline-color: var(--cyan); }
+.pcover { margin: -88px 0 0; border-radius: 16px; overflow: hidden; background: var(--surface); box-shadow: 0 24px 48px -28px rgba(0, 0, 0, .45); }
+.pcover img { display: block; width: 100%; max-height: 620px; object-fit: contain; background: var(--surface); }
+.glance { margin: 40px 0 8px; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--pink); border-radius: 12px; }
+.glance__title { margin: 0 0 16px; font-size: 18px; font-weight: 800; }
+.glance__list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin: 0; padding: 0; list-style: none; }
+.glance__list li { min-width: 0; }
+.glance__no { font-size: 13px; font-weight: 800; color: var(--pink-text); }
+.glance__list h3 { margin: 2px 0 8px; font-size: 16px; font-weight: 800; }
+.glance__list p, .glance__list ul { margin: 0; font-size: 14.5px; line-height: 1.65; color: var(--ink-2); }
+.glance__list ul { padding-left: 18px; }
+.glance__num { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px !important; }
+.glance__num strong { font-size: 30px; font-weight: 800; color: var(--pink-text); }
+.pbody { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 40px; }
+.ptoc { position: sticky; top: calc(var(--head-h) + 24px); align-self: start; padding-top: 44px; }
+.ptoc p { margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.ptoc ol { margin: 0; padding: 0; list-style: none; border-left: 2px solid var(--gray); }
+.ptoc a { display: flex; gap: 8px; margin-left: -2px; padding: 6px 0 6px 12px; border-left: 2px solid transparent; font-size: 13.5px; text-decoration: none; color: var(--ink-3); }
+.ptoc a span { font-weight: 700; font-variant-numeric: tabular-nums; }
+.ptoc a:hover { color: var(--ink); }
+.ptoc a.is-on { border-left-color: var(--pink); color: var(--pink-text); font-weight: 700; }
+.pbody .psec { grid-template-columns: minmax(0, 1fr); }
+.pbody .psec__head { flex-direction: row; gap: 10px; }
+.psec { scroll-margin-top: calc(var(--head-h) + 16px); }
+@media (max-width: 1099px) { .pbody { grid-template-columns: minmax(0, 1fr); gap: 0; } .ptoc { display: none; } }
+@media (max-width: 760px) { .glance__list { grid-template-columns: minmax(0, 1fr); gap: 18px; } .phero { padding-bottom: 96px; } .pcover { margin-top: -64px; } .phero__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; } .phero__lead { font-size: 16px; } }
+
 /* 상세 섹션: 왼쪽 번호 | 오른쪽 내용 */
 .psec { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 12px clamp(24px, 4vw, 48px); padding: 44px 0; border-bottom: 1px solid var(--line); }
 .psec__head { display: flex; flex-direction: column; gap: 2px; padding-top: 4px; }

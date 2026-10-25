@@ -99,37 +99,70 @@
       const body = s.type === "_result"
         ? `${p.result ? `<p class="result"><strong>${esc(p.result.value)}</strong>${esc(p.result.label)}</p>` : ""}${paras(p.resultText)}`
         : SECTION[s.type](s, p);
-      return `<section class="psec" aria-labelledby="ps-${n}">
+      return `<section class="psec" id="ps-${n}" aria-labelledby="pt-${n}">
           <header class="psec__head"><span class="psec__num">${pad2(n)}</span><span class="psec__label">${esc(s.label || "")}</span></header>
           <div class="psec__body">
-            ${s.title ? `<h2 class="psec__title" id="ps-${n}">${esc(s.title)}</h2>` : `<h2 class="sr-only" id="ps-${n}">${esc(s.label || "")}</h2>`}
+            ${s.title ? `<h2 class="psec__title" id="pt-${n}">${esc(s.title)}</h2>` : `<h2 class="sr-only" id="pt-${n}">${esc(s.label || "")}</h2>`}
             ${body}
           </div>
         </section>`;
     }).join("");
     const link = (q, label) => (q ? `<a class="pnav__a" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(q.id)}`))}"><span>${label}</span><strong>${esc(q.title)}</strong></a>` : "<span></span>");
 
+    // 한눈에 보기: 문제 → 내가 한 일 → 결과 (인사담당자가 여기까지만 봐도 되게)
+    const did = (p.did || []).slice(0, 3);
+    const glance = [
+      ["문제", p.problem ? `<p>${esc(p.problem)}</p>` : ""],
+      ["내가 한 일", p.action ? `<p>${esc(p.action)}</p>` : did.length ? `<ul>${did.map((d) => `<li>${esc(d)}</li>`).join("")}</ul>` : ""],
+      ["결과", p.result ? `<p class="glance__num"><strong>${esc(p.result.value)}</strong>${esc(p.result.label)}</p>${p.resultText ? `<p>${esc(p.resultText)}</p>` : ""}` : p.resultText ? `<p>${esc(p.resultText)}</p>` : ""],
+    ].filter(([, v]) => v);
+    const tocItems = sectionsOf(p).map((sec, i) => `<li><a href="#ps-${i + 1}"><span>${pad2(i + 1)}</span>${esc(sec.label || "")}</a></li>`).join("");
+
     $("#project").innerHTML = `
-      <a class="back" href="${esc(window.keepLink("works.html"))}">← 프로젝트 목록</a>
-      <header class="phead">
-        <p class="phead__meta">${esc(p.categoryLabel)}${p.date ? ` · ${esc(fmtDate(p.date))}` : ""}</p>
-        <h1 class="phead__title">${esc(p.title)}</h1>
-        ${p.summary ? `<p class="phead__lead">${esc(p.summary)}</p>` : ""}
-        <dl class="facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
-        ${p.link ? `<a class="btn" href="${esc(p.link)}" target="_blank" rel="noopener">작품 보러 가기 ↗</a>` : ""}
-      </header>
-      ${p.image ? `<figure class="cover">${img(p.image, p.title)}</figure>` : ""}
-      ${secs}
-      ${(p.tags || []).length ? `<ul class="chips ptags" aria-label="태그">${p.tags.map((t) => `<li class="chip">#${esc(t)}</li>`).join("")}</ul>` : ""}
-      <nav class="pnav" aria-label="다른 프로젝트">${link(prev, "← 이전 프로젝트")}${link(next, "다음 프로젝트 →")}</nav>`;
+      <section class="phero">
+        <div class="wrap">
+          <a class="back back--light" href="${esc(window.keepLink("works.html"))}">← 프로젝트 목록</a>
+          <p class="phero__meta">${esc(p.categoryLabel)}${p.date ? ` · ${esc(fmtDate(p.date))}` : ""}</p>
+          <h1 class="phero__title">${esc(p.title)}</h1>
+          ${p.summary ? `<p class="phero__lead">${esc(p.summary)}</p>` : ""}
+          <dl class="phero__facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
+          ${p.link ? `<a class="btn" href="${esc(p.link)}" target="_blank" rel="noopener">작품 보러 가기 ↗</a>` : ""}
+        </div>
+      </section>
+      <div class="wrap">
+        ${p.image ? `<figure class="pcover">${img(p.image, p.title)}</figure>` : ""}
+        ${glance.length ? `<section class="glance" aria-labelledby="glanceTitle">
+          <h2 class="glance__title" id="glanceTitle">한눈에 보기</h2>
+          <ol class="glance__list">${glance.map(([k, v], i) => `<li><span class="glance__no">${pad2(i + 1)}</span><h3>${k}</h3>${v}</li>`).join("")}</ol>
+        </section>` : ""}
+        <div class="pbody">
+          <nav class="ptoc" aria-label="이 프로젝트의 구성"><p>Contents</p><ol>${tocItems}</ol></nav>
+          <div class="pbody__main">${secs}</div>
+        </div>
+        ${(p.tags || []).length ? `<ul class="chips ptags" aria-label="태그">${p.tags.map((t) => `<li class="chip">#${esc(t)}</li>`).join("")}</ul>` : ""}
+        <nav class="pnav" aria-label="다른 프로젝트">${link(prev, "← 이전 프로젝트")}${link(next, "다음 프로젝트 →")}</nav>
+      </div>`;
+    tocSpy();
+  }
+
+  /* 왼쪽 목차: 지금 읽는 섹션 표시 */
+  function tocSpy() {
+    const links = [...document.querySelectorAll(".ptoc a")];
+    const secs = links.map((a) => document.querySelector(a.getAttribute("href"))).filter(Boolean);
+    if (!secs.length || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      if (!e.isIntersecting) return;
+      links.forEach((a) => { const on = a.getAttribute("href") === `#${e.target.id}`; a.classList.toggle("is-on", on); if (on) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
+    }), { rootMargin: "-30% 0px -60% 0px" });
+    secs.forEach((s) => io.observe(s));
   }
 
   function notFound() {
     document.title = "프로젝트를 찾을 수 없어요 | 박영희 Portfolio";
-    $("#project").innerHTML = `
+    $("#project").innerHTML = `<div class="wrap page">
       <a class="back" href="${esc(window.keepLink("works.html"))}">← 프로젝트 목록</a>
       <div class="phead"><h1 class="phead__title">프로젝트를 찾을 수 없어요</h1>
-      <p class="phead__lead">주소가 바뀌었거나 아직 공개되지 않은 프로젝트예요. 목록에서 다시 찾아주세요.</p></div>`;
+      <p class="phead__lead">주소가 바뀌었거나 아직 공개되지 않은 프로젝트예요. 목록에서 다시 찾아주세요.</p></div></div>`;
   }
 
   (window.PROJECTS_READY || Promise.resolve()).then(() => {
