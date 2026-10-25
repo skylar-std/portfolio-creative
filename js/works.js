@@ -21,7 +21,7 @@
   /* 요약: 총 프로젝트 · 카테고리별 개수 · 많이 쓴 도구(전체 프로젝트 중 사용한 비율 %) */
   const TOOL_LIMIT = 5;
   const CAT_LIMIT = 4;          // 카테고리는 많은 순 4개까지, 나머지는 '기타'
-  const CAT_STYLE = "pie";      // "pie" = 총 프로젝트 숫자 + 카테고리 원형 · "donut" = 도넛 가운데 총 개수 · "bars" = 막대 · "strip" = 한 줄 띠
+  const CAT_STYLE = "donut";    // "pie" = 총 프로젝트 숫자 + 카테고리 원형 · "donut" = 도넛 가운데 총 개수 · "bars" = 막대 · "strip" = 한 줄 띠
   const STRIP_COLORS = ["#FF2E63", "#08D9D6", "#252A34", "#FF8AA8", "#7FE9E7"];
   const DONUT_COLORS = ["#FF2E63", "#08D9D6", "#252A34", "#FF8AA8"];   // 상위 4개 · 나머지는 회색 '기타'
   const OTHER_COLOR = "#D5D7DC";
