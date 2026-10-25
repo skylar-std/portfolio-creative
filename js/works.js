@@ -172,9 +172,9 @@
         const m = Number(p.date.slice(5, 7)) || 0;
         if (!months.has(m)) months.set(m, []); months.get(m).push(p);
       });
-      $("#yMonths").innerHTML = [...months].map(([m, list]) => `
+      $("#yMonths").innerHTML = `<h3 class="yhead">${esc(y)}<sup>${items.length}</sup></h3>` + [...months].map(([m, list]) => `
         <section class="ym" aria-label="${esc(y)}년 ${m ? `${m}월` : "월 미정"}">
-          <h3 class="ym__month"><b>${m ? String(m).padStart(2, "0") : "–"}</b><span>${m ? "월" : "월 미정"} · ${list.length}개</span></h3>
+          <h4 class="ym__month"><b>${m || "–"}</b><strong>${m ? "월" : "월 미정"}</strong><span>${list.length}개</span></h4>
           <ul class="ym__grid">${list.map((p) => card(p, `${p.categoryLabel} · ${kindOf(p)}`)).join("")}</ul>
         </section>`).join("");
       if (typeof fit === "function") fit();
