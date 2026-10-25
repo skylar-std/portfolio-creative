@@ -256,15 +256,25 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .back { display: inline-block; margin-bottom: 24px; padding: 6px 0; font-size: 14.5px; font-weight: 600; color: var(--ink-2); text-decoration: none; }
 .back:hover { color: var(--accent); }
 
-/* ===== 프로젝트 페이지: 요약 ===== */
-.summary { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 0.9fr) minmax(0, 1.5fr) minmax(0, 1.7fr); margin: 0 0 32px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
-.sum { padding: 18px 20px; border-left: 1px solid var(--line); min-width: 0; }
+/* ===== 프로젝트 페이지: 요약 (총 프로젝트 · 카테고리 · 많이 쓴 도구) ===== */
+.summary { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.5fr) minmax(0, 1.7fr); margin: 0 0 32px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.sum { padding: 20px 22px; border-left: 1px solid var(--line); min-width: 0; }
 .sum:first-child { border-left: 0; }
-.sum__k { display: block; font-size: 13px; color: var(--ink-3); }
-.sum__v { display: block; margin-top: 4px; white-space: nowrap; font-size: 26px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-.sum__v small { margin-left: 2px; font-size: 14px; font-weight: 600; color: var(--ink-3); }
-.sum__list { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 0 0; padding: 0; list-style: none; font-size: 14.5px; color: var(--ink-2); }
-.sum__list b { color: var(--ink); }
+.sum__k { display: block; font-size: 13.5px; font-weight: 600; color: var(--ink-3); }
+.sum__k b { margin-left: 2px; color: var(--ink); }
+.sum__k small { margin-left: 6px; font-size: 12px; font-weight: 500; }
+.sum__v { display: block; margin-top: 6px; font-size: 44px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: var(--pink-text); }
+.sum__v small { margin-left: 4px; font-size: 16px; font-weight: 600; color: var(--ink-3); }
+.sum__cats { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; padding: 0; list-style: none; }
+.sum__cats li { padding: 4px 10px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); font-size: 13.5px; color: var(--ink-2); }
+.sum__cats b { margin-left: 2px; color: var(--ink); }
+.bars { margin: 12px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.bars li { display: grid; grid-template-columns: 96px minmax(0, 1fr) 40px; gap: 10px; align-items: center; font-size: 13.5px; }
+.bars__name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bars__track { height: 8px; border-radius: 4px; background: var(--gray); overflow: hidden; }
+.bars__fill { display: block; height: 100%; border-radius: 4px; background: #FF8AA8; }
+.bars__fill.is-top { background: var(--pink); }
+.bars__pct { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* ===== 아카이브 ===== */
 .arc-tools { display: flex; flex-direction: column; gap: 12px; padding: 18px 0 20px; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); margin-bottom: 8px; }
@@ -484,8 +494,8 @@ a.card:hover { border-color: var(--pink); }
 
 /* ===== 태블릿 ===== */
 @media (max-width: 960px) {
-  .summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .sum--wide { grid-column: span 3; border-left: 0; border-top: 1px solid var(--line); }
+  .summary { grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr); }
+  .summary .sum:nth-child(3) { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
   .cover__in { grid-template-columns: minmax(0, 1fr); }
   .arc-body { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .arc-years { position: static; flex-direction: row; flex-wrap: wrap; gap: 6px; padding-top: 16px; }
@@ -513,8 +523,10 @@ a.card:hover { border-color: var(--pink); }
 @media (max-width: 640px) {
   .allwork__link { grid-template-columns: minmax(0, 1fr) auto; }
   .allwork__thumbs { display: none; }
-  .sum { padding: 14px; }
-  .sum__v { font-size: 22px; }
+  .summary { grid-template-columns: minmax(0, 1fr); }
+  .summary .sum { border-left: 0; border-top: 1px solid var(--line); padding: 16px; }
+  .summary .sum:first-child { border-top: 0; }
+  .sum__v { font-size: 36px; }
   .profile { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .profile__photo { width: 140px; }
   .facts.facts--profile { grid-template-columns: minmax(0, 1fr); }

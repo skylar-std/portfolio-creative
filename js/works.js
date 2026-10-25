@@ -1,6 +1,6 @@
 /* =========================================
    프로젝트 페이지(works.html)
-   1. 요약: 총 프로젝트 수 · 기간 · 구분(개인/팀/공모전…)별 개수 · 많이 쓴 도구
+   1. 요약: 총 프로젝트 수 · 카테고리별 개수 · 많이 쓴 도구(사용 비율 %)
    2. 필터: 연도 · 종류(category). 한 가지뿐인 필터 줄은 숨겨요
    3. 목록: 연도별로 묶어 한 줄씩 (최신이 위)
    - 줄을 누르면 project.html?id=프로젝트id 로 이동
@@ -18,23 +18,31 @@
   const F = { year: "all", cat: "all" };
   let ALL = [];
 
+  /* 요약: 총 프로젝트 · 카테고리별 개수 · 많이 쓴 도구(전체 프로젝트 중 사용한 비율 %) */
+  const TOOL_LIMIT = 5;
   function summary() {
     const box = $("#summary");
     if (!ALL.length) { box.hidden = true; return; }
-    const years = ALL.map(yearOf);
-    const first = years[years.length - 1], last = years[0];
     const count = (arr) => arr.reduce((m, k) => (m[k] = (m[k] || 0) + 1, m), {});
-    const kinds = Object.entries(count(ALL.map(kindOf))).sort((a, b) => b[1] - a[1]);
-    const tools = Object.entries(count(ALL.flatMap((p) => p.tools || []))).sort((a, b) => b[1] - a[1]).slice(0, 4);
-    const cats = new Set(ALL.map((p) => p.categoryLabel).filter(Boolean)).size;
+    const cats = Object.entries(count(ALL.map((p) => p.categoryLabel).filter(Boolean))).sort((a, b) => b[1] - a[1]);
+    const tools = Object.entries(count(ALL.flatMap((p) => [...new Set(p.tools || [])]))).sort((a, b) => b[1] - a[1]).slice(0, TOOL_LIMIT);
+    const pct = (n) => Math.round((n / ALL.length) * 100);
     box.innerHTML = `
-      <div class="sum"><span class="sum__k">총 프로젝트</span><strong class="sum__v">${ALL.length}<small>개</small></strong></div>
-      <div class="sum"><span class="sum__k">기간</span><strong class="sum__v">${first === last ? first : `${first}–${last}`}</strong></div>
-      <div class="sum"><span class="sum__k">종류</span><strong class="sum__v">${cats}<small>가지</small></strong></div>
-      <div class="sum sum--wide"><span class="sum__k">구분</span>
-        <ul class="sum__list">${kinds.map(([k, n]) => `<li>${esc(k)} <b>${n}</b></li>`).join("")}</ul></div>
-      ${tools.length ? `<div class="sum sum--wide"><span class="sum__k">많이 쓴 도구</span>
-        <ul class="sum__list">${tools.map(([k, n]) => `<li>${esc(k)} <b>${n}</b></li>`).join("")}</ul></div>` : ""}`;
+      <div class="sum sum--total">
+        <span class="sum__k">총 프로젝트</span>
+        <strong class="sum__v">${ALL.length}<small>개</small></strong>
+      </div>
+      <div class="sum">
+        <span class="sum__k">카테고리 <b>${cats.length}</b></span>
+        <ul class="sum__cats">${cats.map(([k, n]) => `<li>${esc(k)} <b>${n}</b></li>`).join("")}</ul>
+      </div>
+      ${tools.length ? `<div class="sum">
+        <span class="sum__k">많이 쓴 도구 <small>전체 프로젝트 중 사용 비율</small></span>
+        <ul class="bars">${tools.map(([k, n]) => `
+          <li><span class="bars__name">${esc(k)}</span>
+            <span class="bars__track" aria-hidden="true"><span class="bars__fill${n === tools[0][1] ? " is-top" : ""}" style="width:${pct(n)}%"></span></span>
+            <span class="bars__pct">${pct(n)}%</span></li>`).join("")}</ul>
+      </div>` : ""}`;
   }
 
   function chips(box, key, items) {
@@ -95,6 +103,8 @@
     if (!ALL.length) $("#arcTools").hidden = true;
     chips($("#fYear"), "year", [...new Set(ALL.map(yearOf))]);
     chips($("#fCat"), "cat", [...new Set(ALL.map((p) => p.categoryLabel).filter(Boolean))]);
+    // 거를 게 없으면(연도 · 종류가 한 가지씩뿐) 필터 줄 전체를 숨겨요
+    if ($("#fYear").hidden && $("#fCat").hidden) $("#arcTools").hidden = true;
     $("#arcReset").addEventListener("click", () => {
       F.year = "all"; F.cat = "all";
       $$(".arc-filter button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === "all")));
