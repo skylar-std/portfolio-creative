@@ -1,7 +1,8 @@
 /* =========================================
    페이지 스크롤바 (모든 페이지 공통)
-   - 기본 스크롤바는 위 메뉴 옆까지 길게 내려와서 숨기고,
-     메뉴 아래부터 오른쪽 끝에 얇은 막대를 직접 그려요.
+   - 기본 스크롤바는 위 메뉴 · 아래 풋터 옆까지 길게 지나가서 숨기고,
+     메뉴 아래부터 풋터 위까지만 얇은 막대를 직접 그려요.
+     (풋터가 화면에 올라오면 그만큼 막대 끝이 위로 올라가요)
    - 끌어서 움직이거나, 빈 곳을 눌러 그 위치로 이동할 수 있어요.
    ========================================= */
 (function () {
@@ -17,6 +18,9 @@
   function update() {
     ticking = false;
     const max = doc.scrollHeight - window.innerHeight;
+    const foot = document.querySelector(".foot");
+    const footIn = foot ? Math.max(0, window.innerHeight - foot.getBoundingClientRect().top) : 0;
+    bar.style.bottom = `${footIn}px`;
     trackH = bar.clientHeight;
     bar.classList.toggle("is-on", max > 4);
     if (max <= 4) return;
