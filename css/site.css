@@ -1,16 +1,28 @@
 /* =========================================
    PARK Younghee — Portfolio
-   한 눈에 읽히는 이력서형 레이아웃. 색 · 글꼴은 :root 에서만 바꾸면 돼요.
+   한 눈에 읽히는 이력서형 레이아웃. 색 · 글꼴은 :root 에서 바꿔요.
+   색 쓰는 법: 핑크 = 메인, 네이비 = 기본, 시안 = 보조, 회색 = 선
    ========================================= */
 :root {
-  --bg: #F7F7F5;          /* 바탕 */
-  --surface: #FFFFFF;     /* 카드 · 첫 화면 */
-  --ink: #17191C;         /* 글자 */
-  --ink-2: #4B515A;       /* 본문 보조 */
-  --ink-3: #697079;       /* 날짜 · 설명 */
-  --line: #E4E4E0;        /* 구분선 */
-  --accent: #1F6B5C;      /* 포인트 색 */
-  --accent-soft: #E8F1EE;
+  /* 기본 4색 */
+  --navy: #252A34;        /* 기본 · 본문 글자 · 표지/Contact 배경 */
+  --pink: #FF2E63;        /* 메인 · 큰 강조 · 주요 버튼 */
+  --cyan: #08D9D6;        /* 보조 · 형광펜 · 네이비 위 강조 */
+  --gray: #EAEAEA;        /* 선 · 구분 */
+  /* 4색에서 만든 색 (글자가 잘 읽히도록) */
+  --pink-text: #D6114A;   /* 작은 핑크 글자 */
+  --pink-soft: #FFE3EA;   /* 핑크 연한 바탕 */
+  --cyan-text: #067A78;   /* 밝은 바탕 위 작은 시안 글자 */
+  --cyan-soft: #D7F8F7;   /* 시안 연한 바탕 */
+
+  --bg: #F7F7F7;          /* 페이지 배경 */
+  --surface: #FFFFFF;     /* 카드 */
+  --ink: var(--navy);     /* 글자 */
+  --ink-2: #3F4553;       /* 본문 보조 */
+  --ink-3: #5B6170;       /* 날짜 · 설명 */
+  --line: var(--gray);    /* 구분선 */
+  --accent: var(--pink-text);
+  --accent-soft: var(--pink-soft);
 
   --font: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --wrap: 1080px;
@@ -379,6 +391,58 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .admin-bar > span { padding: 0 8px; opacity: .7; }
 .admin-bar button, .admin-bar a { min-height: 32px; padding: 0 12px; border: 1px solid rgba(255, 255, 255, .25); border-radius: 6px; background: transparent; color: #fff; font: inherit; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
 .admin-bar button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
+
+/* =========================================
+   색 적용: 핑크 메인 · 네이비 기본 · 시안 보조
+   ========================================= */
+.btn { background: var(--pink); border-color: var(--pink); font-size: 18.7px; font-weight: 800; }   /* 흰 글씨 대비 → 18.7px 굵게 */
+.btn:hover { background: var(--navy); border-color: var(--navy); }
+.btn--line { background: transparent; color: var(--ink); border-color: #CFCFCF; font-size: 15px; font-weight: 600; }
+.btn--line:hover { background: transparent; color: var(--pink-text); border-color: var(--pink); }
+.btn--sm { font-size: 13.5px; }
+.nav a.is-on { color: var(--pink-text); }
+.nav a.is-on::after { content: ""; display: block; height: 2px; margin-top: 2px; background: var(--pink); border-radius: 1px; }
+.chip--btn[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); }
+.chip--btn:hover { border-color: var(--pink); color: var(--pink-text); }
+.badge { background: var(--pink-soft); color: #C80E45; }
+.row.is-now .row__tag { background: var(--cyan-soft); color: var(--navy); }
+.more-btn, .more-link, .link-btn { color: var(--pink-text); }
+.rows, .skills, .facts, .fonts, .steps, .dtable th { border-color: var(--navy); }
+.arc-tools { border-top-color: var(--navy); }
+.sec__num { color: var(--pink-text); }
+.prose strong, .cover__desc strong { box-shadow: inset 0 -0.45em 0 var(--cyan-soft); }
+
+/* 표지: 네이비 배경 */
+.mcover { background: var(--navy); color: #fff; border-bottom: 0; }
+.cover__eyebrow { color: var(--cyan); }
+.cover__title em { color: var(--pink); }
+.cover__title em:nth-of-type(2) { color: #fff; box-shadow: inset 0 -0.32em 0 var(--cyan); }
+.cover__desc { color: #C9CDD6; }
+.cover__desc strong { color: #fff; box-shadow: none; }
+.mcover .btn--line { color: #fff; border-color: rgba(255, 255, 255, .45); }
+.mcover .btn--line:hover { color: var(--navy); background: var(--cyan); border-color: var(--cyan); }
+.mcover .btn:hover { background: #fff; border-color: #fff; color: var(--navy); }
+.mcover :focus-visible { outline-color: var(--cyan); }
+.slide__link { border-color: transparent; color: var(--ink); }
+.slider__count { color: #C9CDD6; }
+.slider__dot::after { background: rgba(255, 255, 255, .25); }
+.slider__dot[aria-current="true"]::after { background: var(--pink); }
+.slider__btn { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .35); }
+.slider__btn:hover { background: var(--pink); border-color: var(--pink); }
+
+/* 카드 · 모든 프로젝트 · 요약 */
+a.card:hover { border-color: var(--pink); }
+.allwork__link:hover { border-color: var(--pink); }
+.allwork__arrow { background: var(--pink); }
+.allwork__link:hover .allwork__arrow { background: var(--navy); }
+.summary { border-top: 3px solid var(--pink); }
+
+/* Contact: 네이비 + 시안 */
+.contact { background: var(--navy); }
+.contact .sec__en { color: var(--cyan); }
+.contact__mail { border-bottom-color: var(--cyan); }
+.contact__mail:hover { color: var(--cyan); }
+.contact__links a:hover { color: var(--cyan); }
 
 /* ===== 태블릿 ===== */
 @media (max-width: 960px) {
