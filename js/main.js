@@ -195,74 +195,7 @@
     $("#allMeta").textContent = list.length
       ? `${list.length}개 프로젝트 · ${years[years.length - 1] === years[0] ? years[0] : `${years[years.length - 1]}–${years[0]}`} · 연도 · 종류별로 정리`
       : "프로젝트가 정리되는 대로 이곳에 쌓여요";
-    renderAllPeek(sorted);
-  }
-
-  /* '모든 프로젝트 보러가기' 오른쪽 미리보기
-     ALL_STYLE: "stats"(숫자 3개) · "cats"(카테고리 칩) · "years"(연도별 막대) · "donut"(작은 도넛) · "thumbs"(이미지) */
-  const ALL_STYLE = "icon3";
-  // 아이콘 시안 (브랜드 색 4개만 사용)
-  const P = "#FF2E63", CY = "#08D9D6", N = "#252A34", G = "#EAEAEA";
-  const ICONS = {
-    // 1. 겹쳐 쌓인 카드 → 올리면 부채꼴로 펼쳐져요
-    icon1: `<svg class="ai ai--stack" viewBox="0 0 120 96" width="120" height="96" aria-hidden="true">
-      <rect class="ai-c3" x="34" y="8" width="62" height="46" rx="8" fill="${G}"/>
-      <rect class="ai-c2" x="26" y="18" width="62" height="46" rx="8" fill="${CY}"/>
-      <g class="ai-c1"><rect x="22" y="32" width="66" height="50" rx="8" fill="${N}"/>
-      <rect x="30" y="40" width="50" height="24" rx="4" fill="${P}"/>
-      <rect x="30" y="70" width="30" height="4" rx="2" fill="#fff" opacity=".7"/></g></svg>`,
-    // 2. 4칸 갤러리 → 올리면 칸이 시계 방향으로 자리를 바꿔요
-    icon2: `<svg class="ai ai--grid" viewBox="0 0 96 96" width="96" height="96" aria-hidden="true">
-      <rect class="ai-t1" x="8" y="8" width="38" height="38" rx="10" fill="${P}"/>
-      <rect class="ai-t2" x="50" y="8" width="38" height="38" rx="19" fill="${CY}"/>
-      <rect class="ai-t3" x="50" y="50" width="38" height="38" rx="10" fill="${G}"/>
-      <rect class="ai-t4" x="8" y="50" width="38" height="38" rx="10" fill="${N}"/></svg>`,
-    // 3. 파일 폴더 → 올리면 안의 종이가 위로 올라와요
-    icon3: `<svg class="ai ai--folder" viewBox="0 0 120 96" width="120" height="96" aria-hidden="true">
-      <path d="M14 22 a8 8 0 0 1 8-8 h24 l8 9 h44 a8 8 0 0 1 8 8 v49 a8 8 0 0 1-8 8 H22 a8 8 0 0 1-8-8z" fill="${N}"/>
-      <rect class="ai-s1" x="28" y="20" width="56" height="40" rx="5" fill="${G}"/>
-      <rect class="ai-s2" x="36" y="24" width="56" height="40" rx="5" fill="${CY}"/>
-      <g class="ai-front"><path d="M10 44 a6 6 0 0 1 6-6 h88 a6 6 0 0 1 6 6 l-5 36 a8 8 0 0 1-8 7 H23 a8 8 0 0 1-8-7z" fill="${P}"/>
-      <rect x="48" y="56" width="24" height="5" rx="2.5" fill="#fff"/></g></svg>`,
-    // 4. 펜 툴 → 올리면 곡선이 다시 그려지고 손잡이가 움직여요
-    icon4: `<svg class="ai ai--pen" viewBox="0 0 120 96" width="120" height="96" aria-hidden="true">
-      <path class="ai-curve" d="M14 76 C 34 20, 70 20, 100 50" fill="none" stroke="${N}" stroke-width="4" stroke-linecap="round" pathLength="100"/>
-      <g class="ai-handle"><line x1="34" y1="34" x2="72" y2="20" stroke="${CY}" stroke-width="2.5"/>
-      <circle cx="34" cy="34" r="5" fill="${CY}"/><circle cx="72" cy="20" r="5" fill="${CY}"/></g>
-      <rect x="8" y="70" width="12" height="12" rx="2" fill="#fff" stroke="${N}" stroke-width="3"/>
-      <rect x="94" y="44" width="12" height="12" rx="2" fill="#fff" stroke="${N}" stroke-width="3"/>
-      <g class="ai-nib"><circle cx="54" cy="25" r="11" fill="${P}"/><path d="M50 25 l4-7 l4 7 l-4 4z" fill="#fff"/></g></svg>`,
-  };
-
-  function renderAllPeek(sorted) {
-    const box = $("#allThumbs");
-    const style = window.__ALL_STYLE || ALL_STYLE;
-    box.className = `allwork__peek allwork__peek--${style}`;
-    if (!sorted.length) { box.innerHTML = ""; return; }
-    const count = (key) => { const m = new Map(); sorted.forEach((p) => { const k = key(p); if (k) m.set(k, (m.get(k) || 0) + 1); }); return [...m]; };
-    const cats = count((p) => p.categoryLabel).sort((a, b) => b[1] - a[1]);
-    const years = count((p) => p.date.slice(0, 4)).sort((a, b) => a[0].localeCompare(b[0]));
-    const tools = new Set(sorted.flatMap((p) => p.tools || []));
-    if (style.startsWith("icon")) { box.innerHTML = ICONS[style] || ICONS.icon1; return; }
-    if (style === "stats") {
-      box.innerHTML = [[sorted.length, "Projects"], [cats.length, "Categories"], [tools.size, "Tools"]]
-        .map(([n, l]) => `<span class="peek-stat"><b>${n}</b><span>${l}</span></span>`).join("");
-    } else if (style === "cats") {
-      box.innerHTML = cats.slice(0, 5).map(([c, n]) => `<span class="peek-chip">${esc(c)}<b>${n}</b></span>`).join("")
-        + (cats.length > 5 ? `<span class="peek-chip peek-chip--more">+${cats.length - 5}</span>` : "");
-    } else if (style === "years") {
-      const max = Math.max(...years.map((y) => y[1]));
-      box.innerHTML = years.slice(-4).map(([y, n]) => `<span class="peek-year"><span class="peek-year__bar" style="height:${Math.round((n / max) * 100)}%"><b>${n}</b></span><span class="peek-year__label">${y}</span></span>`).join("");
-    } else if (style === "donut") {
-      const C = ["#FF2E63", "#08D9D6", "#252A34", "#FF8AA8"];
-      let acc = 0; const total = sorted.length;
-      const top = cats.slice(0, 4), rest = total - top.reduce((a, c) => a + c[1], 0);
-      const stops = [...top.map((c, i) => [C[i], c[1]]), ...(rest ? [["#D5D7DC", rest]] : [])]
-        .map(([col, n]) => { const a = acc; acc += n; return `${col} ${(a / total) * 360}deg ${(acc / total) * 360}deg`; }).join(",");
-      box.innerHTML = `<span class="peek-donut" style="background:conic-gradient(${stops})"><span><b>${total}</b>Projects</span></span>`;
-    } else {
-      box.innerHTML = sorted.slice(0, 4).map((p) => `<img src="${esc(p.thumb)}" alt="" loading="lazy" />`).join("");
-    }
+    $("#allThumbs").innerHTML = sorted.slice(0, 4).map((p) => `<img src="${esc(p.thumb)}" alt="" loading="lazy" />`).join("");
   }
 
   /* 내용이 없는 칸 숨기기 → 섹션 번호 · 메뉴 다시 매기기 */
