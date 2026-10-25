@@ -11,108 +11,62 @@
   <meta property="og:image" content="img/og-image.svg" />
 
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
-
-  <!-- 폰트 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
-
-  <!-- 스타일 -->
-  <link rel="stylesheet" href="css/reset.css?v=20261001e" />
-  <link rel="stylesheet" href="css/style.css?v=20261008f" />
-  <link rel="stylesheet" href="css/responsive.css?v=20261001e" />
-
+  <link rel="stylesheet" href="css/reset.css?v=20261026a" />
+  <link rel="stylesheet" href="css/site.css?v=20261026a" />
 </head>
-<body>
+<body data-keep-title="1">
 
-  <!-- ===== Header ===== -->
-  <header class="header" id="header">
-    <div class="container header__inner">
-      <a href="index.html" class="logo" data-keep="index.html">PARK<span>.</span></a>
+  <a class="skip" href="#main">본문으로 건너뛰기</a>
 
-      <nav class="nav" id="nav">
-        <a href="index.html#profile" class="nav__link" data-keep="index.html#profile">About</a>
-        <a href="works.html" class="nav__link is-current" aria-current="page">Projects</a>
+  <header class="head" id="header">
+    <div class="wrap head__in">
+      <a href="index.html" data-keep="index.html" class="logo">PARK Younghee</a>
+      <nav class="nav" aria-label="주요 메뉴">
+        <a href="index.html" data-keep="index.html">Home</a>
+        <a href="index.html#profile" data-keep="index.html#profile">Profile</a>
+        <a href="works.html" class="is-on" aria-current="page">Projects</a>
       </nav>
-
-      <button class="menu-btn" id="menuBtn" aria-label="메뉴 열기" aria-expanded="false">
-        <span></span><span></span>
-      </button>
+      <a class="btn btn--sm btn--line" href="files/resume.pdf" target="_blank" rel="noopener">이력서 PDF</a>
     </div>
   </header>
 
-  <main id="top">
+  <main id="main" class="page">
+    <div class="wrap">
+      <header class="page__head">
+        <p class="sec__en">Projects</p>
+        <h1 class="page__title">전체 프로젝트 <span class="count" id="wkCount"></span></h1>
+        <p class="page__lead" id="wkLead">지금까지 한 작업을 연도별로 정리했어요. 누르면 자세히 볼 수 있어요.</p>
+      </header>
 
-    <!-- ===== Projects : 무엇을 했고 어떤 능력이 있는지 ===== -->
-    <section class="section works archive--page" id="works">
-      <div class="container">
-        <div class="works__head reveal">
-          <h1 class="page-title">Projects</h1>
-          <p class="works__lead">어떤 작업을 했고, 그 안에서 제가 무엇을 맡았는지 정리했어요. 이미지를 누르면 자세히 볼 수 있어요.</p>
-        </div>
+      <!-- 1. 요약: DB projects 로 자동 계산 -->
+      <section class="summary" id="summary" aria-label="요약"></section>
 
-        <!-- 한눈에 보는 능력: js/projects.js 의 category · tools 로 자동 계산 -->
-        <div class="overview reveal" aria-label="한눈에 보기">
-          <div class="overview__count"><strong id="ovCount">0</strong><span>Projects</span></div>
-          <div class="overview__block">
-            <p class="overview__label">작업 분야</p>
-            <ul class="overview__fields" id="ovFields"></ul>
-          </div>
-          <div class="overview__block">
-            <p class="overview__label">많이 쓴 도구</p>
-            <ul class="overview__tools" id="ovTools"></ul>
-          </div>
-        </div>
-
-        <div class="view-toggle reveal" id="viewToggle" role="tablist" aria-label="보기 방식: 프로젝트 또는 아카이브">
-          <button type="button" role="tab" data-view="cards" aria-selected="true">프로젝트</button>
-          <button type="button" role="tab" data-view="timeline" aria-selected="false">아카이브</button>
-        </div>
-        <div class="filter reveal" id="filter" role="group" aria-label="분야로 보기"></div>
-        <div class="works__list" id="worksList"></div>
-
-        <!-- 날짜별로 한 번에 보기: date 값으로 연도별 자동 정리 -->
-        <section class="yarch yarch--tab reveal" id="timeline" hidden aria-labelledby="timelineTitle">
-          <div class="yarch__head">
-            <h2 class="yarch__title" id="timelineTitle">아카이브</h2>
-            <p class="yarch__lead">언제, 어떤 순서로 작업했는지 한 번에 볼 수 있어요. 누르면 위의 작업으로 이동해요.</p>
-          </div>
-          <div class="yarch__years" id="timelineList"></div>
-        </section>
+      <!-- 2. 보기: 종류별 · 연도별 (탭을 누르거나 옆으로 밀기) -->
+      <div class="vtabs" id="viewTabs" role="tablist" aria-label="보기 기준">
+        <button type="button" role="tab" id="tabCat" aria-controls="panelCat" aria-selected="true">종류별</button>
+        <button type="button" role="tab" id="tabYear" aria-controls="panelYear" aria-selected="false" tabindex="-1">연도별</button>
+        <span class="vtabs__pill" aria-hidden="true"></span>
       </div>
-    </section>
+      <p class="vtabs__hint">옆으로 밀어도 바뀌어요</p>
+
+      <!-- 3. 묶음마다 카드 한 줄 -->
+      <div class="views" id="views">
+        <div class="views__panel" id="panelCat" role="tabpanel" aria-labelledby="tabCat"></div>
+        <div class="views__panel" id="panelYear" role="tabpanel" aria-labelledby="tabYear"></div>
+      </div>
+    </div>
   </main>
 
-  <footer class="footer footer--light">
-    <div class="container footer__inner">
-      <p>© <span id="year"></span> PARK Younghee. All rights reserved.</p>
-      <a href="#top" class="footer__top">Back to top ↑</a>
+  <footer class="foot">
+    <div class="wrap foot__in">
+      <p>© <span id="year"></span> PARK Younghee</p>
+      <a href="#top">맨 위로 ↑</a>
     </div>
   </footer>
 
-  <!-- ===== Project Modal ===== -->
-  <div class="modal" id="modal" aria-hidden="true">
-    <div class="modal__backdrop" data-close></div>
-    <article class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <button class="modal__close" data-close aria-label="닫기">✕</button>
-      <!-- 케이스 스터디: DB projects.detail 이 있는 프로젝트만 여기에 그려져요 -->
-      <div class="cs" id="modalCase" hidden></div>
-      <img class="modal__img" id="modalImg" src="" alt="" />
-      <div class="modal__body">
-        <p class="modal__meta" id="modalMeta"></p>
-        <h3 class="modal__title" id="modalTitle"></h3>
-        <p class="modal__desc" id="modalDesc"></p>
-        <ul class="modal__tags" id="modalTags"></ul>
-        <a class="btn btn--primary modal__link" id="modalLink" href="#" target="_blank" rel="noopener">자세히 보기 ↗</a>
-      </div>
-    </article>
-  </div>
-
-  <!-- 스크립트 (순서 중요: 데이터 → 작업물 페이지 → 공통) -->
-  <script src="js/db.js?v=20261008f"></script>
-  <script src="js/data.js?v=20261008f"></script>
-  <script src="js/works.js?v=20261008f"></script>
-  <script src="js/main.js?v=20261008f"></script>
+  <script src="js/db.js?v=20261026a"></script>
+  <script src="js/data.js?v=20261026a"></script>
+  <script src="js/works.js?v=20261026a"></script>
 </body>
 </html>

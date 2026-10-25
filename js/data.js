@@ -16,9 +16,6 @@
   const $ = (s) => document.querySelector(s);
   const ym = (d, sep) => (d ? d.slice(0, 4) + sep + d.slice(5, 7) : "");
   const domReady = new Promise((ok) => (document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", ok) : ok()));
-  const icon = (name, label) => (name
-    ? `<img src="img/icons/${name}.svg" alt="" width="20" height="20" />`
-    : `<b aria-hidden="true">${label.charAt(0)}</b>`);
 
   /* DB 모양 → 화면 코드가 쓰는 모양 */
   function toRole(d) {
@@ -45,6 +42,7 @@
       link: (p.links && (p.links.detail || p.links.behance || p.links.demo)) || "",
       period: p.period_label || "",
       detail: p.detail || {},
+      problem: p.problem || "", action: p.action || "", resultText: p.result || "", team: p.team || "",
     };
   }
   function toResume(rows) {
@@ -61,26 +59,33 @@
     };
   }
 
-  /* 표지 · 흐르는 띠 · 스킬 채우기 */
+  /* 공통: 페이지 제목, 다른 페이지로 가는 링크에 같은 직무 코드 붙이기 */
+  window.keepLink = (path) => {
+    const [p, hash] = path.split("#");
+    const sep = p.includes("?") ? "&" : "?";
+    return `${p}${code ? `${sep}v=${encodeURIComponent(code)}` : ""}${hash ? `#${hash}` : ""}`;
+  };
+  window.esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  /* 프로젝트 카드: 메인 미리보기 · 프로젝트 목록에서 같이 써요 */
+  window.projectCard = (p) => `
+    <a class="card" href="${window.esc(window.keepLink(`project.html?id=${encodeURIComponent(p.id)}`))}">
+      <span class="card__img"><img src="${window.esc(p.thumb)}" alt="" loading="lazy" /></span>
+      <span class="card__meta">${window.esc(p.categoryLabel)}${p.date ? ` · ${window.esc(p.date.replace("-", "."))}` : ""}</span>
+      <strong class="card__title">${window.esc(p.title)}</strong>
+      ${p.summary ? `<span class="card__sum">${window.esc(p.summary)}</span>` : ""}
+      ${p.role ? `<span class="card__role"><b>역할</b>${window.esc(p.role)}</span>` : ""}
+    </a>`;
+  window.emptyCard = () => `
+    <div class="card card--empty" role="note">
+      <span class="card__img" aria-hidden="true"></span>
+      <strong class="card__title">준비 중인 프로젝트</strong>
+      <span class="card__sum">새 프로젝트가 정리되는 대로 이곳에 올라와요.</span>
+    </div>`;
+
   function apply(R) {
     document.documentElement.dataset.role = R.id;
-    document.title = `박영희 | ${R.label} Portfolio`;
-    const put = (sel, html) => { const el = $(sel); if (el) el.innerHTML = html; };
-    put("#heroEyebrow", R.eyebrow);
-    put("#heroTitle", R.title);
-    put("#heroDesc", R.desc);
-    const words = R.marquee.map((w) => `<span>${w}</span><span>✦</span>`).join("");
-    put("#marqueeTrack", words + words);
-    put("#skillsGrid", R.skills.map((c) => `
-      <div class="skill-card reveal is-visible">
-        <h3>${c.title}</h3>
-        <ul>${c.items.map(([label, ico]) => `<li><span class="skill-icon">${icon(ico, label)}</span>${label}</li>`).join("")}</ul>
-      </div>`).join(""));
-    // 다른 페이지로 가는 링크에도 같은 코드를 붙여요
-    document.querySelectorAll("a[data-keep]").forEach((a) => {
-      const [path, hash] = a.getAttribute("data-keep").split("#");
-      a.href = `${path}${code ? `?v=${encodeURIComponent(code)}` : ""}${hash ? `#${hash}` : ""}`;
-    });
+    if (!document.body.dataset.keepTitle) document.title = `박영희 | ${R.label} Portfolio`;
+    document.querySelectorAll("a[data-keep]").forEach((a) => { a.href = window.keepLink(a.getAttribute("data-keep")); });
   }
 
   /* 관리자 막대: 관리 페이지에서 로그인하고 '관리자 모드'를 켠 브라우저에만 보여요 */
@@ -115,6 +120,7 @@
       if (!d || !d.role) throw new Error("empty");
       const R = toRole(d);
       window.ROLE = R.id;
+      window.ROLE_DATA = R;
       window.PROJECTS = (d.projects || []).map(toProject).sort((a, b) => b.date.localeCompare(a.date));
       window.RESUME = toResume(d.resume || []);
       apply(R);

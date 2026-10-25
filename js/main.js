@@ -1,24 +1,23 @@
 /* =========================================
-   공통 스크립트 (index.html, works.html 모두 사용)
-   - 헤더, 모바일 메뉴, 스크롤 등장 효과, 메뉴 하이라이트, 푸터 연도
-   - 메인의 '작업물 보러가기' 썸네일 미리보기
+   메인(index.html): 표지 슬라이드(대표 프로젝트) · 이력 · 스킬을 DB 내용으로 채우기
+   - 내용이 없는 칸은 제목까지 숨기고, 섹션 번호 · 메뉴도 남은 것만으로 다시 매겨요.
+   - 처음에 보여줄 개수는 아래 LIMITS 에서 바꿔요. 넘치면 '더보기'로 접혀요.
    ========================================= */
 (function () {
   "use strict";
 
-  const $ = (sel, ctx = document) => ctx.querySelector(sel);
-  const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
+  const $ = (s, c = document) => c.querySelector(s);
+  const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+  const esc = window.esc;
+  const pad2 = (n) => String(n).padStart(2, "0");
 
-  /* 처음에 보여줄 개수 (넘으면 '더보기'로 접힘) */
-  const LIMITS = { experience: 4, training: 4, certYears: 3 };
+  const LIMITS = { experience: 4, training: 4, activities: 4, certificates: 6, slides: 5, featured: 4, autoplay: 4500 };
 
-  /* ---------- 0. 이력 렌더링 (js/resume.js) ---------- */
-  const NOW = (() => { const d = new Date(); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}`; })();
+  const NOW = (() => { const d = new Date(); return `${d.getFullYear()}.${pad2(d.getMonth() + 1)}`; })();
   const latestFirst = (k) => (a, b) => (b[k] || NOW).localeCompare(a[k] || NOW);
-  const period = (s, e) => `${s} — ${e || "현재"}`;
-
-  // 기간 계산: "2022.03" ~ "2024.02" → "2년"
+  const period = (s, e) => (!s ? "" : !e ? `${s} – 현재` : s === e ? s : `${s} – ${e}`);
   function duration(s, e) {
+    if (!s) return "";
     const [sy, sm] = s.split(".").map(Number);
     const [ey, em] = (e || NOW).split(".").map(Number);
     const total = (ey - sy) * 12 + (em - sm) + 1;
@@ -26,363 +25,236 @@
     return [y ? `${y}년` : "", m ? `${m}개월` : ""].filter(Boolean).join(" ") || "1개월";
   }
 
-  // 일정 개수 이상이면 접고 '더보기' 버튼 연결
-  function collapse(listEl, btnEl, limit, label) {
-    if (!listEl || !btnEl) return;
-    const items = [...listEl.children];
-    const hidden = items.slice(limit);
-    if (!hidden.length) { btnEl.hidden = true; return; }
-    const count = hidden.reduce((n, el) => n + Number(el.dataset.count || 1), 0);
-    let open = false;
-    const set = () => {
-      hidden.forEach((el) => { el.hidden = !open; });
-      btnEl.textContent = open ? "접기 ↑" : `${label} ${count}개 더보기 ↓`;
-      btnEl.setAttribute("aria-expanded", String(open));
-    };
-    btnEl.hidden = false;
-    btnEl.addEventListener("click", () => { open = !open; set(); });
-    set();
+  /* 한 줄: 날짜 | 이름 · 부제 · 설명 | 오른쪽 꼬리표 */
+  const row = ({ date, title, sub, desc, tag, now }) => `
+    <li class="row${now ? " is-now" : ""}">
+      <span class="row__date">${esc(date)}</span>
+      <div class="row__main">
+        <strong class="row__title">${esc(title)}</strong>
+        ${sub ? `<span class="row__sub">${esc(sub)}</span>` : ""}
+        ${desc ? `<p class="row__desc">${esc(desc)}</p>` : ""}
+      </div>
+      ${tag ? `<span class="row__tag">${esc(tag)}</span>` : ""}
+    </li>`;
+
+  function fill(listId, countId, items, limit, label) {
+    const list = $(listId);
+    if (!list) return;
+    list.innerHTML = items.join("");
+    if (countId) { const c = $(countId); if (c) c.textContent = items.length || ""; }
+    // 많으면 접기
+    const extra = limit ? items.length - limit : 0;
+    if (extra > 0) {
+      const lis = [...list.children];
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "more-btn";
+      let open = false;
+      const set = () => {
+        lis.forEach((li, i) => { li.hidden = !open && i >= limit; });
+        btn.textContent = open ? "접기 ↑" : `${label} ${extra}개 더보기 ↓`;
+        btn.setAttribute("aria-expanded", String(open));
+      };
+      btn.addEventListener("click", () => { open = !open; set(); });
+      list.after(btn);
+      set();
+    }
   }
 
-  /* 대외활동 · 교내활동: 요약 숫자 + 종류 버튼 + 목록(4개 넘으면 더보기) */
-  const ACT_TYPES = { external: "대외활동", campus: "교내활동" };
-  function renderActivities(all) {
-    const box = $("#activities");
-    const acts = all.filter((a) => ACT_TYPES[a.type]).sort(latestFirst("start"));
-    if (!box) return;
-    if (!acts.length) { box.hidden = true; return; }
-    const count = (t) => acts.filter((a) => a.type === t).length;
-    $("#actStats").innerHTML = [[count("external"), "개", "대외활동"], [count("campus"), "개", "교내활동"]]
-      .map(([v, u, l]) => `<div class="act-stat"><strong>${v}<small>${u}</small></strong><span>${l}</span></div>`).join("");
+  function renderResume(R) {
+    if (!R) return;
+    fill("#eduList", null, [...(R.education || [])].sort(latestFirst("start")).map((e) =>
+      row({ date: e.end || e.start, title: e.school, sub: [e.major, e.status].filter(Boolean).join(" · ") })));
 
-    let filter = "all", open = false;
-    const LIMIT = 4;
-    const period = (s, e) => (!e ? `${s} — 현재` : s === e ? s : `${s} — ${e}`);
-    const drawFilter = () => {
-      $("#actFilter").innerHTML = [["all", "전체", acts.length], ...Object.entries(ACT_TYPES).map(([k, l]) => [k, l, count(k)])]
-        .filter((o) => o[2]).map(([k, l, n]) => `<button type="button" data-f="${k}" aria-pressed="${k === filter}">${l}<sup>${n}</sup></button>`).join("");
-    };
-    const drawList = () => {
-      const shown = acts.filter((a) => filter === "all" || a.type === filter);
-      $("#actList").innerHTML = shown.map((a, i) => `
-        <li class="act act--${a.type}"${!open && i >= LIMIT ? " hidden" : ""}>
-          <span class="act__date">${period(a.start, a.end)}</span>
-          <div class="act__body">
-            <span class="act__type">${ACT_TYPES[a.type]}</span>
-            <strong class="act__title">${a.title}</strong>
-            ${a.org ? `<span class="act__org">${a.org}</span>` : ""}
-            ${a.desc ? `<p class="act__desc">${a.desc}</p>` : ""}
-          </div>
-          <div class="act__side">${a.role ? `<b>${a.role}</b><span>역할</span>` : ""}</div>
-        </li>`).join("");
-      const more = $("#actMore"), extra = shown.length - LIMIT;
-      more.hidden = extra <= 0;
-      more.textContent = open ? "접기 ↑" : `활동 ${extra}개 더보기 ↓`;
-      more.setAttribute("aria-expanded", String(open));
-    };
-    $("#actFilter").addEventListener("click", (e) => {
-      const b = e.target.closest("button[data-f]"); if (!b) return;
-      filter = b.dataset.f; open = false; drawFilter(); drawList();
-    });
-    $("#actMore").addEventListener("click", () => { open = !open; drawList(); });
-    drawFilter(); drawList();
-  }
+    fill("#expList", null, [...(R.experience || [])].sort(latestFirst("start")).map((x) =>
+      row({ date: period(x.start, x.end), title: x.company, sub: x.role, desc: x.desc, tag: x.end ? duration(x.start, x.end) : "재직 중", now: !x.end })),
+      LIMITS.experience, "경력");
 
-  function renderResume() {
-    if (!window.RESUME) return;
-    const R = window.RESUME;
-    const put = (id, html) => { const el = $(id); if (el) el.innerHTML = html; };
-    const text = (id, t) => { const el = $(id); if (el) el.textContent = t; };
+    fill("#trainList", "#trainCount", [...(R.training || [])].sort(latestFirst("start")).map((x) =>
+      row({ date: period(x.start, x.end), title: x.title, sub: x.org, desc: x.desc, tag: x.end ? "" : "수강 중", now: !x.end })),
+      LIMITS.training, "교육");
 
-    // 학력
-    put("#eduList", [...(R.education || [])].sort(latestFirst("start")).map((e) => `
-      <li class="edu__row">
-        <span class="edu__date">${e.end || e.start}</span>
-        <span class="edu__what"><strong>${e.school}</strong> ${e.major}${e.status ? ` · ${e.status}` : ""}</span>
-      </li>`).join(""));
+    const acts = [...(R.activities || [])].sort(latestFirst("start"));
+    const act = (a) => row({ date: period(a.start, a.end), title: a.title, sub: a.org, desc: a.desc, tag: a.role });
+    fill("#extList", "#extCount", acts.filter((a) => a.type === "external").map(act), LIMITS.activities, "대외활동");
+    fill("#campList", "#campCount", acts.filter((a) => a.type === "campus").map(act), LIMITS.activities, "교내활동");
 
-    // 경력
-    const exp = [...(R.experience || [])].sort(latestFirst("start"));
-    text("#expCount", exp.length);
-    put("#expList", exp.map((x) => `
-      <li class="career__item${x.end ? "" : " is-now"}">
-        <div class="career__meta">
-          <span class="career__date">${period(x.start, x.end)}</span>
-          <span class="career__dur">${x.end ? duration(x.start, x.end) : "재직 중"}</span>
-        </div>
-        <strong class="career__name">${x.company}</strong>
-        <span class="career__sub">${x.role}</span>
-        ${x.desc ? `<p class="career__desc">${x.desc}</p>` : ""}
-      </li>`).join(""));
-    collapse($("#expList"), $("#expMore"), LIMITS.experience, "경력");
+    fill("#awardList", "#awardCount", [...(R.awards || [])].sort(latestFirst("date")).map((a) =>
+      row({ date: a.date, title: a.title, sub: a.org, desc: a.desc })));
 
-    // 교육
-    const tr = [...(R.training || [])].sort(latestFirst("start"));
-    text("#trainCount", tr.length);
-    put("#trainList", tr.map((x) => `
-      <li class="career__item${x.end ? "" : " is-now"}">
-        <div class="career__meta">
-          <span class="career__date">${period(x.start, x.end)}</span>
-          ${x.end ? "" : `<span class="career__dur">수강 중</span>`}
-        </div>
-        <strong class="career__name">${x.title}</strong>
-        <span class="career__sub">${x.org}</span>
-        ${x.desc ? `<p class="career__desc">${x.desc}</p>` : ""}
-      </li>`).join(""));
-    collapse($("#trainList"), $("#trainMore"), LIMITS.training, "교육");
-
-    // 수상
-    const aw = [...(R.awards || [])].sort(latestFirst("date"));
-    const awardEl = $("#awardList");
-    if (awardEl) awardEl.classList.toggle("is-multi", aw.length > 1);
-    put("#awardList", aw.map((a) => `
-      <article class="award reveal">
-        <div>
-          <p class="award__label">Award</p>
-          <h3 class="award__name">${a.title}</h3>
-          ${a.desc ? `<p class="award__desc">${a.desc}</p>` : ""}
-        </div>
-        <div class="award__side">
-          <span class="award__year">${a.date.slice(0, 4)}</span>
-          <span class="award__org">${a.org}</span>
-        </div>
-      </article>`).join(""));
-
-    // 대외활동 · 교내활동
-    renderActivities(R.activities || []);
-
-    // 어학: 최신순, 유효기간 지나면 흐리게
     const langs = [...(R.languages || [])].sort(latestFirst("date"));
-    text("#langCount", langs.length);
-    put("#langList", langs.map((l) => {
+    fill("#langList", "#langCount", langs.map((l) => {
       const expired = l.expires && l.expires < NOW;
       const state = !l.expires ? "평생 유효" : expired ? `만료 · ${l.expires}` : `유효 ~${l.expires}`;
-      return `
-      <div class="lang${expired ? " is-expired" : ""}">
-        <span class="lang__test">${l.test}</span>
-        <strong class="lang__score">${l.score}</strong>
-        <div class="lang__meta">
-          <span>${l.date} 취득${l.org ? ` · ${l.org}` : ""}</span>
-          <span class="lang__state">${state}</span>
-        </div>
-      </div>`;
-    }).join(""));
-    const langBox = $(".langs"); if (langBox && !langs.length) langBox.hidden = true;
+      return `<li class="lang${expired ? " is-expired" : ""}">
+        <span class="lang__test">${esc(l.test)}</span>
+        <strong class="lang__score">${esc(l.score)}</strong>
+        <span class="lang__meta">${esc(l.date)} 취득${l.org ? ` · ${esc(l.org)}` : ""}<br />${esc(state)}</span>
+      </li>`;
+    }));
 
-    // 자격증: 연도별 묶음
-    const certs = [...(R.certificates || [])].sort(latestFirst("date"));
-    text("#certCount", certs.length);
-    const byYear = [];
-    certs.forEach((c) => {
-      const y = c.date.slice(0, 4);
-      const last = byYear[byYear.length - 1];
-      if (last && last.y === y) last.items.push(c); else byYear.push({ y, items: [c] });
-    });
-    put("#certList", byYear.map((g) => `
-      <div class="cert-year" data-count="${g.items.length}">
-        <p class="cert-year__label"><em>${g.y}</em><span>${g.items.length}</span></p>
-        <ul class="cert-year__list">
-          ${g.items.map((c) => `
-            <li class="cert-row">
-              <strong class="cert-row__name">${c.name}</strong>
-              <span class="cert-row__org">${c.org}</span>
-              <span class="cert-row__month">${c.date.slice(5)}월</span>
-            </li>`).join("")}
-        </ul>
-      </div>`).join(""));
-    collapse($("#certList"), $("#certMore"), LIMITS.certYears, "이전 자격증");
+    fill("#certList", "#certCount", [...(R.certificates || [])].sort(latestFirst("date")).map((c) =>
+      `<li class="trow"><span class="row__date">${esc(c.date)}</span><strong>${esc(c.name)}</strong><span class="trow__org">${esc(c.org)}</span></li>`),
+      LIMITS.certificates, "자격증");
   }
 
-  /* ---------- 0-1. 내용이 없는 칸은 통째로 숨기기 ----------
-     DB(지금은 resume.js · roles.js · projects.js)에 내용이 없으면
-     제목까지 안 보이게 하고, 섹션 번호와 오른쪽 점 메뉴도 남은 것만으로 다시 매겨요. */
-  function hideEmpty() {
-    const empty = (sel) => { const el = $(sel); return !el || !el.children.length; };
-    const hide = (el, yes) => { if (el) el.hidden = yes; };
-
-    // Profile: 학력 · 경력 · 교육
-    hide($(".edu"), empty("#eduList"));
-    const expCol = $("#expList") && $("#expList").closest(".career__col");
-    const trainCol = $("#trainList") && $("#trainList").closest(".career__col");
-    hide(expCol, empty("#expList"));
-    hide(trainCol, empty("#trainList"));
-    const career = $(".career");
-    if (career) {
-      const shown = [expCol, trainCol].filter((c) => c && !c.hidden).length;
-      career.hidden = shown === 0;
-      career.classList.toggle("is-single", shown === 1);
-    }
-
-    // Credentials: 수상 · 어학 · 자격증 → 셋 다 없으면 섹션째로
-    hide($("#awardList"), empty("#awardList"));
-    hide($(".langs"), empty("#langList"));
-    hide($(".certs"), empty("#certList"));
-    const cred = $("#credentials");
-    if (cred) {
-      const blocks = [$("#awardList"), $(".langs"), $(".certs")].filter((b) => b && !b.hidden);
-      cred.hidden = blocks.length === 0;
-      blocks.forEach((b, i) => b.classList.toggle("is-first", i === 0));
-      // 제목도 있는 것만: 수상·자격증이 다 있으면 그대로, 아니면 남은 이름으로
-      const has = { Awards: !$("#awardList").hidden, Languages: !$(".langs").hidden, Certificates: !$(".certs").hidden };
-      const names = Object.keys(has).filter((k) => has[k]);
-      const title = $("#credTitle");
-      if (title && !(has.Awards && has.Certificates) && names.length) {
-        const last = names.pop();
-        title.innerHTML = names.length ? `${names.join(", ")} &amp; <em>${last}</em>` : `My <em>${last}</em>`;
-      }
-    }
-
-    // Skills · 작업물 보러가기
-    hide($("#skills"), empty("#skillsGrid"));
-    hide($("#projects"), typeof PROJECTS !== "undefined" && !PROJECTS.length);
-
-    // 섹션 번호 01, 02 … 다시 매기기
-    $$(".section__num").filter((n) => !n.closest("section").hidden).forEach((n, i) => {
-      n.textContent = n.textContent.replace(/^\d+/, String(i + 1).padStart(2, "0"));
-    });
-    // 숨긴 섹션은 오른쪽 점 메뉴에서도 빼기
-    $$(".dots__item").forEach((a) => { const t = $(a.getAttribute("href")); if (!t || t.hidden) a.remove(); });
+  function renderRole(role) {
+    if (!role) return;
+    if (role.eyebrow) $("#heroEyebrow").textContent = role.eyebrow;
+    if (role.title) $("#heroTitle").innerHTML = role.title;      // DB 문장 (<em>, <br> 사용)
+    if (role.desc) $("#heroDesc").innerHTML = role.desc.replace(/<br class="pc-only"\s*\/?>/g, " ");
+    $("#skillsList").innerHTML = (role.skills || []).filter((g) => g.items.length).map((g) => `
+      <div class="skills__col">
+        <dt>${esc(g.title)} <span class="count">${g.items.length}</span></dt>
+        <dd><ul class="skills__list">${g.items.map(([label, icon]) => `<li>${icon ? `<img src="img/icons/${esc(icon)}.svg" alt="" width="20" height="20" />` : `<span class="skills__dot" aria-hidden="true"></span>`}${esc(label)}</li>`).join("")}</ul></dd>
+      </div>`).join("");
   }
 
-  /* ---------- 1. 메인: 작업물 보러가기 미리보기 ---------- */
-  function renderPreview() {
-    const stack = $("#projectPreview");
-    if (!stack || typeof PROJECTS === "undefined") return;
+  /* 표지 슬라이드: featured 켠 작업(없으면 최신순), 최대 LIMITS.slides 장
+     LIMITS.autoplay(ms)마다 자동으로 넘어가요. 마우스를 올리거나 만지는 동안, 화면을 보지 않을 때는 멈춰요. */
+  function renderSlider(list) {
+    const track = $("#slideTrack");
+    if (!track) return;
+    const sorted = [...list].sort((a, b) => b.date.localeCompare(a.date));
+    let pick = sorted.filter((p) => p.featured);
+    if (!pick.length) pick = sorted;
+    pick = pick.slice(0, LIMITS.slides);
+    const KINDS = { personal: "개인 프로젝트", team: "팀 프로젝트", contest: "공모전", school: "학교 과제", client: "외주" };
+    track.innerHTML = pick.length ? pick.map((p, i) => `
+      <article class="slide" aria-roledescription="slide" aria-label="${i + 1} / ${pick.length}">
+        <a class="slide__link" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(p.id)}`))}">
+          <span class="slide__img"><img src="${esc(p.image || p.thumb)}" alt="" ${i ? 'loading="lazy"' : ""} /></span>
+          <span class="slide__info">
+            <span class="slide__meta">${esc(p.categoryLabel)}${p.date ? ` · ${esc(p.date.slice(0, 4))}` : ""}${KINDS[p.type] ? ` · ${KINDS[p.type]}` : ""}</span>
+            <strong class="slide__title">${esc(p.title)}</strong>
+            ${p.role ? `<span class="slide__role"><b>역할</b>${esc(p.role)}</span>` : ""}
+            <span class="slide__go">자세히 보기 <span aria-hidden="true">→</span></span>
+          </span>
+        </a>
+      </article>`).join("")
+      : `<article class="slide slide--empty"><span class="slide__img" aria-hidden="true"></span><span class="slide__info"><strong class="slide__title">준비 중인 프로젝트</strong><span class="slide__role">새 프로젝트가 정리되는 대로 이곳에 올라와요.</span></span></article>`;
 
-    const featured = PROJECTS
-      .filter((p) => p.featured !== false)
-      .sort((a, b) => b.date.localeCompare(a.date))
-      .slice(0, 3);
-    stack.innerHTML = featured.map((p) => `<img src="${p.thumb}" alt="" />`).join("");
-
-    const count = $("#projectCount");
-    if (count && PROJECTS.length) {
-      const years = PROJECTS.map((p) => +p.date.slice(0, 4));
-      count.textContent = `${PROJECTS.length} Projects · ${Math.min(...years)} — ${Math.max(...years)}`;
-    }
-  }
-
-  /* ---------- 2. 헤더 스크롤 상태 ---------- */
-  function initHeader() {
-    const header = $("#header");
-    if (!header) return;
-    const onScroll = () => header.classList.toggle("is-scrolled", window.scrollY > 20);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-  }
-
-  /* ---------- 3. 모바일 메뉴 ---------- */
-  function initMenu() {
-    const btn = $("#menuBtn");
-    const nav = $("#nav");
-    if (!btn || !nav) return;
-
-    const setOpen = (open) => {
-      nav.classList.toggle("is-open", open);
-      btn.setAttribute("aria-expanded", String(open));
-      btn.setAttribute("aria-label", open ? "메뉴 닫기" : "메뉴 열기");
-      document.body.classList.toggle("is-locked", open);
+    const n = Math.max(1, pick.length);
+    const dots = $("#slideDots");
+    dots.innerHTML = pick.length > 1 ? pick.map((p, i) => `<button type="button" class="slider__dot" data-i="${i}" aria-label="${i + 1}번째 슬라이드: ${esc(p.title)}"></button>`).join("") : "";
+    $(".slider__arrows").hidden = pick.length < 2;
+    let cur = 0;
+    const go = (i) => { cur = (i + n) % n; track.scrollTo({ left: cur * track.clientWidth, behavior: "smooth" }); };
+    const mark = () => {
+      cur = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
+      $("#slideCount").textContent = pick.length ? `${String(cur + 1).padStart(2, "0")} / ${String(n).padStart(2, "0")}` : "";
+      $$(".slider__dot", dots).forEach((d, i) => d.setAttribute("aria-current", String(i === cur)));
     };
+    let t = 0;
+    track.addEventListener("scroll", () => { clearTimeout(t); t = setTimeout(mark, 60); }, { passive: true });
+    $("#slidePrev").addEventListener("click", () => go(cur - 1));
+    $("#slideNext").addEventListener("click", () => go(cur + 1));
+    dots.addEventListener("click", (e) => { const d = e.target.closest("[data-i]"); if (d) go(+d.dataset.i); });
+    $("#slider").addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") { e.preventDefault(); go(cur - 1); }
+      if (e.key === "ArrowRight") { e.preventDefault(); go(cur + 1); }
+    });
+    mark();
 
-    btn.addEventListener("click", () => setOpen(!nav.classList.contains("is-open")));
-    $$(".nav__link", nav).forEach((a) => a.addEventListener("click", () => setOpen(false)));
+    // 자동 넘김: 점(막대)이 차오르는 동안 기다렸다가 다음 장으로
+    const slider = $("#slider");
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (pick.length < 2 || still || !LIMITS.autoplay) return;
+    slider.style.setProperty("--auto", `${LIMITS.autoplay}ms`);
+    slider.classList.add("is-auto");
+    let timer = 0, paused = false;
+    const restart = () => {
+      clearTimeout(timer);
+      slider.classList.remove("is-run"); void slider.offsetWidth;
+      if (paused || document.hidden) return;
+      slider.classList.add("is-run");
+      timer = setTimeout(() => go(cur + 1), LIMITS.autoplay);
+    };
+    const pause = () => { paused = true; restart(); };
+    const resume = () => { paused = false; restart(); };
+    track.addEventListener("scroll", () => { clearTimeout(timer); clearTimeout(t2); t2 = setTimeout(restart, 120); }, { passive: true });
+    let t2 = 0;
+    slider.addEventListener("mouseenter", pause);
+    slider.addEventListener("mouseleave", resume);
+    slider.addEventListener("focusin", pause);
+    slider.addEventListener("focusout", resume);
+    track.addEventListener("touchstart", pause, { passive: true });
+    track.addEventListener("touchend", () => setTimeout(resume, 1500), { passive: true });
+    document.addEventListener("visibilitychange", restart);
+    restart();
   }
 
-  /* ---------- 4. 스크롤 등장 애니메이션 ---------- */
-  function initReveal() {
-    const targets = $$(".reveal");
-    if (!("IntersectionObserver" in window)) {
-      targets.forEach((el) => el.classList.add("is-visible"));
-      return;
-    }
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          io.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
-    targets.forEach((el) => io.observe(el));
+  /* 대표 프로젝트 카드 4개 + 맨 아래 '모든 프로젝트 보러가기' */
+  function renderFeatured(list) {
+    const sorted = [...list].sort((a, b) => b.date.localeCompare(a.date));
+    let pick = sorted.filter((p) => p.featured);
+    if (!pick.length) pick = sorted;
+    pick = pick.slice(0, LIMITS.featured);
+    $("#featList").innerHTML = pick.length ? pick.map(window.projectCard).join("") : window.emptyCard();
+    const years = sorted.map((p) => p.date.slice(0, 4)).filter(Boolean);
+    $("#allMeta").textContent = list.length
+      ? `${list.length}개 프로젝트 · ${years[years.length - 1] === years[0] ? years[0] : `${years[years.length - 1]}–${years[0]}`} · 연도 · 종류별로 정리`
+      : "프로젝트가 정리되는 대로 이곳에 쌓여요";
+    $("#allThumbs").innerHTML = sorted.slice(0, 4).map((p) => `<img src="${esc(p.thumb)}" alt="" loading="lazy" />`).join("");
   }
 
-  /* ---------- 5. 현재 섹션 메뉴 하이라이트 (같은 페이지 #링크만) ---------- */
-  function initActiveNav() {
-    const links = $$(".nav__link").filter((l) => l.getAttribute("href").startsWith("#"));
-    const sections = links.map((l) => $(l.getAttribute("href"))).filter(Boolean);
-    if (!sections.length || !("IntersectionObserver" in window)) return;
-
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          links.forEach((l) => l.classList.toggle("is-current", l.getAttribute("href") === `#${entry.target.id}`));
-        }
-      });
-    }, { rootMargin: "-45% 0px -50% 0px" });
-    sections.forEach((s) => io.observe(s));
+  /* 내용이 없는 칸 숨기기 → 섹션 번호 · 메뉴 다시 매기기 */
+  function hideEmpty() {
+    $$("[data-block]").forEach((b) => { const l = $("ul, ol, dl", b); b.hidden = !l || !l.children.length; });
+    $$(".sec").forEach((sec) => {
+      if (sec.id === "profile" || sec.id === "featured") return;          // 프로필 · 대표 프로젝트는 항상 보여요
+      const blocks = $$("[data-block]", sec);
+      const sk = $(".skills", sec);
+      const empty = blocks.length ? blocks.every((b) => b.hidden) : !(sk && sk.children.length);
+      sec.hidden = empty;
+    });
+    $$(".sec").filter((s) => !s.hidden).forEach((s, i) => { $(".sec__num", s).textContent = pad2(i + 1); });
+    // 오른쪽 구역 이동 바에서도 숨긴 구역은 빼기
+    $$(".side__list li").forEach((li) => { const t = $($("a", li).getAttribute("href")); if (!t || t.hidden) li.remove(); });
   }
 
-  /* ---------- 6. 오른쪽 섹션 이동 바 ---------- */
-  function initDots() {
-    const dots = $("#dots");
-    if (!dots) return;
-    const items = $$(".dots__item", dots);
-    const fill = $("#dotsFill");
-    const sections = items.map((a) => $(a.getAttribute("href")));
-    if (sections.some((s) => !s)) return;
-
+  /* 위 메뉴(Home · Profile)와 오른쪽 구역 이동 바에 지금 위치 표시 */
+  function trackPosition() {
+    const side = $("#side");
+    const items = $$(".side__list a", side).map((a) => ({ a, sec: $(a.getAttribute("href")) })).filter((x) => x.sec);
+    const home = $(".nav a[href='#top']"), prof = $(".nav a[href='#profile']");
+    const cover = $("#top"), profile = $("#profile");
+    const fill = $("#sideFill");
+    const set = (a, on) => { if (!a) return; a.classList.toggle("is-on", on); if (on) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); };
     let ticking = false;
     function update() {
       ticking = false;
-      const vh = window.innerHeight;
-      const probe = window.scrollY + vh * 0.4;          // 화면 위쪽 40% 지점 기준
-      const first = sections[0];
-      const last = sections[sections.length - 1];
-      const start = first.offsetTop - vh * 0.5;
-      const end = last.offsetTop + last.offsetHeight - vh * 0.4;
-
-      // Profile ~ Projects 구간에서만 보이기 (표지·Contact에서는 숨김)
-      dots.classList.toggle("is-visible", window.scrollY > start && window.scrollY < end);
-
-      let active = 0;
-      sections.forEach((s, i) => { if (s.offsetTop <= probe) active = i; });
-      items.forEach((a, i) => {
-        a.classList.toggle("is-active", i === active);
-        a.classList.toggle("is-passed", i < active);
-        if (i === active) a.setAttribute("aria-current", "true");
-        else a.removeAttribute("aria-current");
-      });
-
-      // 진행 막대: 첫 원 중심 → 현재 원 중심
-      if (fill) {
-        const c = (el) => el.offsetTop + el.offsetHeight / 2;
-        fill.style.height = `${c(items[active]) - c(items[0])}px`;
-      }
+      const probe = window.scrollY + window.innerHeight * 0.4;
+      // 위 메뉴: 표지에서는 Home, 그 아래는 Profile
+      const inHome = probe < profile.offsetTop;
+      set(home, inHome); set(prof, !inHome);
+      // 오른쪽 바: 표지가 지나면 보이기
+      side.classList.toggle("is-visible", window.scrollY > cover.offsetHeight * 0.6 && items.length > 0);
+      let active = -1;
+      items.forEach((x, i) => { if (x.sec.offsetTop <= probe) active = i; });
+      items.forEach((x, i) => { set(x.a, i === active); x.a.classList.toggle("is-passed", i < active); });
+      if (fill && items.length > 1) fill.style.height = `${Math.max(0, active) / (items.length - 1) * 100}%`;
     }
-
-    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    const on = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    window.addEventListener("scroll", on, { passive: true });
+    window.addEventListener("resize", on);
     update();
   }
 
-  /* ---------- 8. 푸터 연도 ---------- */
-  function initYear() {
-    const y = $("#year");
-    if (y) y.textContent = new Date().getFullYear();
+  function headerShadow() {
+    const h = $("#header");
+    const on = () => h.classList.toggle("is-scrolled", window.scrollY > 8);
+    on(); window.addEventListener("scroll", on, { passive: true });
   }
 
-  /* ---------- Init ---------- */
-  initHeader();
-  initMenu();
-  initYear();
-  // 내용은 DB(js/data.js)에서 불러오므로, 도착한 뒤에 그리고 → 빈 칸 정리 → 등장 효과 · 메뉴 연결
+  const y = $("#year"); if (y) y.textContent = new Date().getFullYear();
+  headerShadow();
   (window.PROJECTS_READY || Promise.resolve()).then(() => {
-    renderResume();
-    renderPreview();
+    renderRole(window.ROLE_DATA);
+    renderResume(window.RESUME);
+    renderSlider(window.PROJECTS || []);
+    renderFeatured(window.PROJECTS || []);
     hideEmpty();
-    initReveal();
-    initActiveNav();
-    initDots();
+    trackPosition();
   });
 })();
