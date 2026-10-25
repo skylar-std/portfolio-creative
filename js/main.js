@@ -200,7 +200,7 @@
 
   /* '모든 프로젝트 보러가기' 오른쪽 미리보기
      ALL_STYLE: "stats"(숫자 3개) · "cats"(카테고리 칩) · "years"(연도별 막대) · "donut"(작은 도넛) · "thumbs"(이미지) */
-  const ALL_STYLE = "icon1";
+  const ALL_STYLE = "icon3";
   // 아이콘 시안 (브랜드 색 4개만 사용)
   const P = "#FF2E63", CY = "#08D9D6", N = "#252A34", G = "#EAEAEA";
   const ICONS = {
