@@ -423,7 +423,7 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 /* 연도별 보기: 연도 버튼 + 월별 정리 */
 /* 연도: 글자 탭. 고른 연도만 진하게 + 밑줄, 나머지는 연한 회색 */
 .ybar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px 28px; padding: 28px 0 0; border-bottom: 1px solid var(--line); }
-.ybar__btn { position: relative; padding: 0 0 12px; border: 0; background: none; font: inherit; font-size: clamp(28px, 3.2vw, 36px); font-weight: 900; line-height: 1; letter-spacing: -0.04em; color: #C4C7CE; cursor: pointer; font-variant-numeric: tabular-nums; transition: color .2s; }
+.ybar__btn { position: relative; padding: 0 0 12px; border: 0; background: none; font: inherit; font-size: clamp(24px, 2.6vw, 30px); font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: #C4C7CE; cursor: pointer; font-variant-numeric: tabular-nums; transition: color .2s; }
 .ybar__btn sup { margin-left: 2px; font-size: .38em; font-weight: 800; letter-spacing: 0; color: inherit; vertical-align: top; position: relative; top: -.1em; }
 .ybar__btn::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: var(--navy); transform: scaleX(0); transform-origin: left; transition: transform .25s; }
 .ybar__btn:hover { color: var(--ink-3); }
@@ -436,7 +436,7 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .ym { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px 24px; padding: 24px 0; border-top: 1px solid var(--line); }
 .ym:first-child { border-top: 0; }
 .ym__month { display: flex; align-items: baseline; gap: 6px; margin: 0; align-self: start; }
-.ym__month b { font-family: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif; font-style: italic; font-size: 40px; font-weight: 500; line-height: .9; letter-spacing: -0.04em; color: var(--pink); font-variant-numeric: lining-nums; }
+.ym__month b { font-size: 30px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: var(--pink); font-variant-numeric: tabular-nums; }
 .ym__month strong { font-size: 16px; font-weight: 800; color: var(--navy); }
 .ym__month span { margin-left: 6px; font-size: 13px; color: var(--ink-3); }
 .ym__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
@@ -444,9 +444,9 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 @media (max-width: 640px) {
   .ybar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 20px; }
   .ybar::-webkit-scrollbar { display: none; }
-  .ybar__btn { flex: none; font-size: 26px; }
+  .ybar__btn { flex: none; font-size: 24px; }
   .ym { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 22px 0; }
-  .ym__month b { font-size: 34px; }
+  .ym__month b { font-size: 26px; }
   .ym__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .ym__grid .sw-card__role { display: none; }
   .ym__grid .sw-card__title { font-size: 14.5px; }
