@@ -11,7 +11,7 @@
   const esc = window.esc;
   const pad2 = (n) => String(n).padStart(2, "0");
 
-  const LIMITS = { experience: 4, training: 4, activities: 4, certificates: 6, slides: 5 };
+  const LIMITS = { experience: 4, training: 4, activities: 4, certificates: 6, slides: 5, featured: 3 };
 
   const NOW = (() => { const d = new Date(); return `${d.getFullYear()}.${pad2(d.getMonth() + 1)}`; })();
   const latestFirst = (k) => (a, b) => (b[k] || NOW).localeCompare(a[k] || NOW);
@@ -157,11 +157,25 @@
     mark();
   }
 
+  /* 대표 프로젝트 카드 3개 + 맨 아래 '모든 프로젝트 보러가기' */
+  function renderFeatured(list) {
+    const sorted = [...list].sort((a, b) => b.date.localeCompare(a.date));
+    let pick = sorted.filter((p) => p.featured);
+    if (!pick.length) pick = sorted;
+    pick = pick.slice(0, LIMITS.featured);
+    $("#featList").innerHTML = pick.length ? pick.map(window.projectCard).join("") : window.emptyCard();
+    const years = sorted.map((p) => p.date.slice(0, 4)).filter(Boolean);
+    $("#allMeta").textContent = list.length
+      ? `${list.length}개 프로젝트 · ${years[years.length - 1] === years[0] ? years[0] : `${years[years.length - 1]}–${years[0]}`} · 연도 · 종류별로 정리`
+      : "프로젝트가 정리되는 대로 이곳에 쌓여요";
+    $("#allThumbs").innerHTML = sorted.slice(0, 4).map((p) => `<img src="${esc(p.thumb)}" alt="" loading="lazy" />`).join("");
+  }
+
   /* 내용이 없는 칸 숨기기 → 섹션 번호 · 메뉴 다시 매기기 */
   function hideEmpty() {
     $$("[data-block]").forEach((b) => { const l = $("ul, ol, dl", b); b.hidden = !l || !l.children.length; });
     $$(".sec").forEach((sec) => {
-      if (sec.id === "profile") return;          // 소개는 항상 보여요
+      if (sec.id === "profile" || sec.id === "featured") return;          // 프로필 · 대표 프로젝트는 항상 보여요
       const blocks = $$("[data-block]", sec);
       const sk = $(".skills", sec);
       const empty = blocks.length ? blocks.every((b) => b.hidden) : !(sk && sk.children.length);
@@ -195,6 +209,7 @@
     renderRole(window.ROLE_DATA);
     renderResume(window.RESUME);
     renderSlider(window.PROJECTS || []);
+    renderFeatured(window.PROJECTS || []);
     hideEmpty();
     activeNav();
   });

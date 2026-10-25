@@ -196,6 +196,27 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .featured__title { margin: 4px 0 0; font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
 .featured .card { background: var(--bg); }
 
+/* 메인: 대표 프로젝트는 제목을 위에, 카드를 가로 전체로 */
+.sec--wide .sec__in { grid-template-columns: minmax(0, 1fr); }
+.sec--wide .sec__head { position: static; display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
+.sec--wide .sec__title, .sec--wide .sec__en { margin: 0; }
+.sec--wide .sec__num { width: 100%; }
+.sec.sec--wide { border-bottom: 0; padding-bottom: 32px; }
+.sec--wide + .allwork { padding-top: 0; }
+
+/* 메인: 모든 프로젝트 보러가기 */
+.allwork { padding: clamp(40px, 6vw, 64px) 0; }
+.allwork__link { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 24px 32px; align-items: center; padding: clamp(24px, 4vw, 40px); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; text-decoration: none; transition: border-color .2s, box-shadow .2s; }
+.allwork__link:hover { border-color: var(--ink); box-shadow: 0 16px 36px -24px rgba(0, 0, 0, .35); }
+.allwork__text { display: flex; flex-direction: column; gap: 6px; }
+.allwork__title { font-size: clamp(24px, 3vw, 32px); font-weight: 800; letter-spacing: -0.03em; }
+.allwork__meta { font-size: 15px; color: var(--ink-2); }
+.allwork__thumbs { display: flex; }
+.allwork__thumbs img { width: 84px; height: 84px; object-fit: cover; border-radius: 10px; border: 3px solid var(--surface); margin-left: -18px; background: var(--bg); }
+.allwork__thumbs img:first-child { margin-left: 0; }
+.allwork__arrow { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--ink); color: #fff; font-size: 22px; transition: background .2s; }
+.allwork__link:hover .allwork__arrow { background: var(--accent); }
+
 /* ===== 연락처 · 푸터 ===== */
 .contact { padding: clamp(56px, 8vw, 96px) 0; background: var(--ink); color: #fff; }
 .contact .sec__en { color: rgba(255, 255, 255, .6); }
@@ -389,6 +410,8 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 }
 /* ===== 휴대폰 ===== */
 @media (max-width: 640px) {
+  .allwork__link { grid-template-columns: minmax(0, 1fr) auto; }
+  .allwork__thumbs { display: none; }
   .sum { padding: 14px; }
   .sum__v { font-size: 22px; }
   .profile { grid-template-columns: minmax(0, 1fr); gap: 20px; }

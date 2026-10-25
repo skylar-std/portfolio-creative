@@ -34,6 +34,7 @@
         <a href="#awards" class="nav__sec">수상</a>
         <a href="#certificates" class="nav__sec">자격증</a>
         <a href="#skills" class="nav__sec">Skills</a>
+        <a href="#featured" class="nav__sec">대표작</a>
         <a href="works.html" data-keep="works.html">Projects</a>
         <a href="#contact" class="nav__sec">Contact</a>
       </nav>
@@ -201,6 +202,35 @@
         <div class="sec__body">
           <dl class="skills" id="skillsList"></dl>
         </div>
+      </div>
+    </section>
+
+    <!-- ===== 대표 프로젝트 (DB projects.featured, 최대 3개) ===== -->
+    <section class="sec sec--wide" id="featured" aria-labelledby="t-feat">
+      <div class="wrap sec__in">
+        <header class="sec__head">
+          <p class="sec__num">08</p>
+          <h2 class="sec__title" id="t-feat">대표 프로젝트</h2>
+          <p class="sec__en">Selected Work</p>
+        </header>
+        <div class="sec__body">
+          <div class="cards cards--3 cards--feat" id="featList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 모든 프로젝트 보러가기 ===== -->
+    <section class="allwork" aria-labelledby="t-all">
+      <div class="wrap">
+        <a class="allwork__link" href="works.html" data-keep="works.html">
+          <span class="allwork__text">
+            <span class="sec__en">All Projects</span>
+            <strong class="allwork__title" id="t-all">모든 프로젝트 보러가기</strong>
+            <span class="allwork__meta" id="allMeta"></span>
+          </span>
+          <span class="allwork__thumbs" id="allThumbs" aria-hidden="true"></span>
+          <span class="allwork__arrow" aria-hidden="true">→</span>
+        </a>
       </div>
     </section>
 
