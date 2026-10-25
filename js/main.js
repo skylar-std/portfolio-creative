@@ -284,8 +284,18 @@
   function trackPosition() {
     const side = $("#side");
     const items = $$(".side__list a", side).map((a) => ({ a, sec: $(a.getAttribute("href")) })).filter((x) => x.sec);
-    const home = $(".nav a[href='#top']"), prof = $(".nav a[href='#profile']");
-    const cover = $("#top"), profile = $("#profile");
+    const home = $(".nav a[href='#top']"), prof = $(".nav a[href='#profile']"), cont = $(".nav a[href='#contact']");
+    const cover = $("#top"), profile = $("#profile"), contact = $("#contact");
+    // 휴대폰 · 태블릿 구역 이동: 프로필 + 오른쪽 바와 같은 목록
+    const jump = $("#jump"), jBtn = $("#jumpBtn"), jPanel = $("#jumpPanel"), jNow = $("#jumpNow");
+    const jItems = [{ href: "#profile", label: "Profile" }, ...items.map((x) => ({ href: x.a.getAttribute("href"), label: $(".side__label", x.a).textContent }))];
+    $("#jumpList").innerHTML = jItems.map((x) => `<li><a href="${x.href}">${esc(x.label)}</a></li>`).join("");
+    const jLinks = $$("#jumpList a");
+    const openJ = (open) => { jPanel.hidden = !open; jBtn.setAttribute("aria-expanded", String(open)); jump.classList.toggle("is-open", open); if (open) jLinks.find((a) => a.classList.contains("is-on"))?.focus(); };
+    jBtn.addEventListener("click", () => openJ(jPanel.hidden));
+    jPanel.addEventListener("click", (e) => { if (e.target.closest("a")) openJ(false); });
+    document.addEventListener("click", (e) => { if (!jPanel.hidden && !jump.contains(e.target)) openJ(false); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !jPanel.hidden) { openJ(false); jBtn.focus(); } });
     const fill = $("#sideFill");
     const set = (a, on) => { if (!a) return; a.classList.toggle("is-on", on); if (on) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); };
     let ticking = false;
@@ -294,7 +304,15 @@
       const probe = window.scrollY + window.innerHeight * 0.4;
       // 위 메뉴: 표지에서는 Home, 그 아래는 Profile
       const inHome = probe < profile.offsetTop;
-      set(home, inHome); set(prof, !inHome);
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      const inContact = !!contact && (probe >= contact.offsetTop || atBottom);
+      set(home, inHome); set(prof, !inHome && !inContact); set(cont, inContact);
+      // 구역 이동 버튼: 표지가 지나면 보이고, 지금 구역 이름을 보여줘요
+      const jIdx = jItems.reduce((k, x, i) => { const t = $(x.href); return t && !t.hidden && t.offsetTop <= probe ? i : k; }, 0);
+      const jLast = atBottom ? jItems.length - 1 : jIdx;
+      jLinks.forEach((a, i) => { a.classList.toggle("is-on", i === jLast); if (i === jLast) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
+      jNow.textContent = jItems[jLast] ? jItems[jLast].label : "";
+      jump.classList.toggle("is-visible", window.scrollY > cover.offsetHeight * 0.6);
       // 오른쪽 바: 표지가 지나면 보이기
       side.classList.toggle("is-visible", window.scrollY > cover.offsetHeight * 0.6 && items.length > 0);
       let active = -1;
