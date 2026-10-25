@@ -21,7 +21,7 @@
   /* 요약: 총 프로젝트 · 카테고리별 개수 · 많이 쓴 도구(전체 프로젝트 중 사용한 비율 %) */
   const TOOL_LIMIT = 5;
   const CAT_LIMIT = 4;          // 카테고리는 많은 순 4개까지, 나머지는 '기타'
-  const CAT_STYLE = "donut";    // "donut" = 도넛(가운데 총 개수) · "bars" = 막대 · "strip" = 한 줄 비율 띠
+  const CAT_STYLE = "pie";      // "pie" = 총 프로젝트 숫자 + 카테고리 원형 · "donut" = 도넛 가운데 총 개수 · "bars" = 막대 · "strip" = 한 줄 띠
   const STRIP_COLORS = ["#FF2E63", "#08D9D6", "#252A34", "#FF8AA8", "#7FE9E7"];
   const DONUT_COLORS = ["#FF2E63", "#08D9D6", "#252A34", "#FF8AA8"];   // 상위 4개 · 나머지는 회색 '기타'
   const OTHER_COLOR = "#D5D7DC";
@@ -33,6 +33,17 @@
     const tools = Object.entries(count(ALL.flatMap((p) => [...new Set(p.tools || [])]))).sort((a, b) => b[1] - a[1]).slice(0, TOOL_LIMIT);
     const pct = (n) => Math.round((n / ALL.length) * 100);
     box.classList.toggle("summary--donut", CAT_STYLE === "donut");
+    box.classList.toggle("summary--pie", CAT_STYLE === "pie");
+    if (CAT_STYLE === "pie") {
+      box.innerHTML = `
+      <div class="sum sum--total">
+        <span class="sum__k">총 프로젝트</span>
+        <strong class="sum__v">${ALL.length}<small>개</small></strong>
+      </div>
+      <div class="sum sum--donut">${catDonut(cats, cats.length, "Categories", false)}</div>
+      ${toolsHTML(tools, pct)}`;
+      return;
+    }
     if (CAT_STYLE === "donut") {
       box.innerHTML = `
       <div class="sum sum--donut">${catDonut(cats)}</div>
@@ -60,7 +71,7 @@
       </div>` : "");
 
   // 도넛: 상위 3개 + 기타, 가운데에 총 프로젝트 수
-  function catDonut(cats) {
+  function catDonut(cats, centerNum = ALL.length, centerLabel = "Projects", showCount = true) {
     const top = cats.slice(0, DONUT_COLORS.length);
     const rest = cats.slice(DONUT_COLORS.length).reduce((n, [, c]) => n + c, 0);
     const list = rest ? [...top.map((c, i) => [...c, DONUT_COLORS[i]]), ["기타", rest, OTHER_COLOR]] : top.map((c, i) => [...c, DONUT_COLORS[i]]);
@@ -76,10 +87,10 @@
     return `
       <div class="donut" role="img" aria-label="카테고리 비율: ${esc(list.map(([k, n]) => `${k} ${label(n)}`).join(", "))}">
         <span class="donut__ring" style="background: conic-gradient(${stops})"></span>
-        <span class="donut__center"><strong>${total}</strong><small>Projects</small></span>
+        <span class="donut__center"><strong>${centerNum}</strong><small>${centerLabel}</small></span>
       </div>
       <div class="donut__side">
-        <span class="sum__k">카테고리 <b>${cats.length}</b></span>
+        <span class="sum__k">카테고리${showCount ? ` <b>${cats.length}</b>` : ""}</span>
         <ul class="donut__legend">${list.map(([k, n, col]) => `<li><i style="background:${col}"></i><span>${esc(k)}</span><b>${label(n)}</b></li>`).join("")}</ul>
       </div>`;
   }
