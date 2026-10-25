@@ -161,7 +161,7 @@
     const yp = $("#panelYear");
     yp.innerHTML = `
       <div class="ybar" role="tablist" aria-label="연도 선택">
-        ${byYear.map(([y, items], i) => `<button type="button" role="tab" class="ybar__btn" data-y="${esc(y)}" aria-selected="${i === 0}">${esc(y)}<span>${items.length}</span></button>`).join("")}
+        ${byYear.map(([y, items], i) => `<button type="button" role="tab" class="ybar__btn" data-y="${esc(y)}" aria-selected="${i === 0}">${esc(y)}<sup>${items.length}</sup></button>`).join("")}
       </div>
       <div class="ymonths" id="yMonths" role="tabpanel" aria-live="polite"></div>`;
     const showYear = (y) => {
@@ -172,7 +172,7 @@
         const m = Number(p.date.slice(5, 7)) || 0;
         if (!months.has(m)) months.set(m, []); months.get(m).push(p);
       });
-      $("#yMonths").innerHTML = `<h3 class="yhead">${esc(y)}<sup>${items.length}</sup></h3>` + [...months].map(([m, list]) => `
+      $("#yMonths").innerHTML = [...months].map(([m, list]) => `
         <section class="ym" aria-label="${esc(y)}년 ${m ? `${m}월` : "월 미정"}">
           <h4 class="ym__month"><b>${m || "–"}</b><strong>${m ? "월" : "월 미정"}</strong><span>${list.length}개</span></h4>
           <ul class="ym__grid">${list.map((p) => card(p, `${p.categoryLabel} · ${kindOf(p)}`)).join("")}</ul>

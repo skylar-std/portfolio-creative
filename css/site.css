@@ -403,32 +403,32 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .views__panel { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; }
 .views__panel[aria-hidden="true"] { visibility: hidden; transition: visibility 0s .3s; }
 /* 연도별 보기: 연도 버튼 + 월별 정리 */
-.ybar { display: flex; flex-wrap: wrap; gap: 8px; padding: 28px 0 8px; }
-.ybar__btn { display: inline-flex; align-items: baseline; gap: 6px; min-height: 44px; padding: 0 18px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font: inherit; font-size: 17px; font-weight: 800; color: var(--ink-3); cursor: pointer; font-variant-numeric: tabular-nums; transition: background .2s, color .2s, border-color .2s; }
-.ybar__btn span { font-size: 12.5px; font-weight: 700; color: var(--pink-text); }
-.ybar__btn:hover { border-color: var(--navy); color: var(--navy); }
-.ybar__btn[aria-selected="true"] { background: var(--pink); border-color: var(--pink); color: #fff; }
-.ybar__btn[aria-selected="true"] span { color: #fff; opacity: .85; }
+/* 연도: 글자 탭. 고른 연도만 진하게 + 밑줄, 나머지는 연한 회색 */
+.ybar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px 28px; padding: 28px 0 0; border-bottom: 1px solid var(--line); }
+.ybar__btn { position: relative; padding: 0 0 12px; border: 0; background: none; font: inherit; font-size: clamp(28px, 3.2vw, 36px); font-weight: 900; line-height: 1; letter-spacing: -0.04em; color: #C4C7CE; cursor: pointer; font-variant-numeric: tabular-nums; transition: color .2s; }
+.ybar__btn sup { margin-left: 2px; font-size: .38em; font-weight: 800; letter-spacing: 0; color: inherit; vertical-align: top; position: relative; top: -.1em; }
+.ybar__btn::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: var(--navy); transform: scaleX(0); transform-origin: left; transition: transform .25s; }
+.ybar__btn:hover { color: var(--ink-3); }
+.ybar__btn[aria-selected="true"] { color: var(--navy); }
+.ybar__btn[aria-selected="true"] sup { color: var(--pink); }
+.ybar__btn[aria-selected="true"]::after { transform: scaleX(1); }
+.ybar__btn:focus-visible { outline: 2px solid var(--pink); outline-offset: 4px; }
 .ymonths { display: flex; flex-direction: column; }
-/* 고른 연도: 큰 숫자 + 개수 위첨자 + 굵은 밑줄 */
-.yhead { align-self: flex-start; margin: 20px 0 0; padding-bottom: 10px; border-bottom: 4px solid var(--navy); font-size: clamp(56px, 7vw, 80px); font-weight: 900; line-height: 1; letter-spacing: -0.05em; color: var(--navy); font-variant-numeric: tabular-nums; }
-.yhead sup { margin-left: 4px; font-size: .28em; font-weight: 800; letter-spacing: 0; color: var(--pink); vertical-align: top; position: relative; top: .1em; }
 /* 월: 이탤릭 세리프 숫자(핑크) + 굵은 '월' + 회색 개수 */
-.ym { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 16px 24px; padding: 28px 0; border-top: 1px solid var(--line); }
-.yhead + .ym { border-top: 0; }
+.ym { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px 24px; padding: 24px 0; border-top: 1px solid var(--line); }
+.ym:first-child { border-top: 0; }
 .ym__month { display: flex; align-items: baseline; gap: 6px; margin: 0; align-self: start; }
-.ym__month b { font-family: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif; font-style: italic; font-size: 64px; font-weight: 500; line-height: .9; letter-spacing: -0.04em; color: var(--pink); font-variant-numeric: lining-nums; }
-.ym__month strong { font-size: 20px; font-weight: 800; color: var(--navy); }
-.ym__month span { margin-left: 8px; font-size: 14px; color: var(--ink-3); }
+.ym__month b { font-family: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif; font-style: italic; font-size: 40px; font-weight: 500; line-height: .9; letter-spacing: -0.04em; color: var(--pink); font-variant-numeric: lining-nums; }
+.ym__month strong { font-size: 16px; font-weight: 800; color: var(--navy); }
+.ym__month span { margin-left: 6px; font-size: 13px; color: var(--ink-3); }
 .ym__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
 .ym__grid .sw-card { flex: none; }
 @media (max-width: 640px) {
-  .ybar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .ybar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 20px; }
   .ybar::-webkit-scrollbar { display: none; }
-  .ybar__btn { flex: none; }
+  .ybar__btn { flex: none; font-size: 26px; }
   .ym { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 22px 0; }
-  .ym__month b { font-size: 48px; }
-  .yhead { font-size: 52px; }
+  .ym__month b { font-size: 34px; }
   .ym__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .ym__grid .sw-card__role { display: none; }
   .ym__grid .sw-card__title { font-size: 14.5px; }
