@@ -11,7 +11,7 @@
   const esc = window.esc;
   const pad2 = (n) => String(n).padStart(2, "0");
 
-  const LIMITS = { experience: 4, training: 4, activities: 4, certificates: 6, slides: 5, featured: 3 };
+  const LIMITS = { experience: 4, training: 4, activities: 4, certificates: 6, slides: 5, featured: 4, autoplay: 4500 };
 
   const NOW = (() => { const d = new Date(); return `${d.getFullYear()}.${pad2(d.getMonth() + 1)}`; })();
   const latestFirst = (k) => (a, b) => (b[k] || NOW).localeCompare(a[k] || NOW);
@@ -104,14 +104,14 @@
     if (role.title) $("#heroTitle").innerHTML = role.title;      // DB 문장 (<em>, <br> 사용)
     if (role.desc) $("#heroDesc").innerHTML = role.desc.replace(/<br class="pc-only"\s*\/?>/g, " ");
     $("#skillsList").innerHTML = (role.skills || []).filter((g) => g.items.length).map((g) => `
-      <div class="skills__row">
-        <dt>${esc(g.title)}</dt>
-        <dd><ul class="chips">${g.items.map(([label, icon]) => `<li class="chip">${icon ? `<img src="img/icons/${esc(icon)}.svg" alt="" width="16" height="16" />` : ""}${esc(label)}</li>`).join("")}</ul></dd>
+      <div class="skills__col">
+        <dt>${esc(g.title)} <span class="count">${g.items.length}</span></dt>
+        <dd><ul class="skills__list">${g.items.map(([label, icon]) => `<li>${icon ? `<img src="img/icons/${esc(icon)}.svg" alt="" width="20" height="20" />` : `<span class="skills__dot" aria-hidden="true"></span>`}${esc(label)}</li>`).join("")}</ul></dd>
       </div>`).join("");
   }
 
   /* 표지 슬라이드: featured 켠 작업(없으면 최신순), 최대 LIMITS.slides 장
-     옆으로 밀거나(휴대폰) 화살표 · 점으로 넘겨요. 자동으로 넘어가지는 않아요. */
+     LIMITS.autoplay(ms)마다 자동으로 넘어가요. 마우스를 올리거나 만지는 동안, 화면을 보지 않을 때는 멈춰요. */
   function renderSlider(list) {
     const track = $("#slideTrack");
     if (!track) return;
@@ -155,9 +155,36 @@
       if (e.key === "ArrowRight") { e.preventDefault(); go(cur + 1); }
     });
     mark();
+
+    // 자동 넘김: 점(막대)이 차오르는 동안 기다렸다가 다음 장으로
+    const slider = $("#slider");
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (pick.length < 2 || still || !LIMITS.autoplay) return;
+    slider.style.setProperty("--auto", `${LIMITS.autoplay}ms`);
+    slider.classList.add("is-auto");
+    let timer = 0, paused = false;
+    const restart = () => {
+      clearTimeout(timer);
+      slider.classList.remove("is-run"); void slider.offsetWidth;
+      if (paused || document.hidden) return;
+      slider.classList.add("is-run");
+      timer = setTimeout(() => go(cur + 1), LIMITS.autoplay);
+    };
+    const pause = () => { paused = true; restart(); };
+    const resume = () => { paused = false; restart(); };
+    track.addEventListener("scroll", () => { clearTimeout(timer); clearTimeout(t2); t2 = setTimeout(restart, 120); }, { passive: true });
+    let t2 = 0;
+    slider.addEventListener("mouseenter", pause);
+    slider.addEventListener("mouseleave", resume);
+    slider.addEventListener("focusin", pause);
+    slider.addEventListener("focusout", resume);
+    track.addEventListener("touchstart", pause, { passive: true });
+    track.addEventListener("touchend", () => setTimeout(resume, 1500), { passive: true });
+    document.addEventListener("visibilitychange", restart);
+    restart();
   }
 
-  /* 대표 프로젝트 카드 3개 + 맨 아래 '모든 프로젝트 보러가기' */
+  /* 대표 프로젝트 카드 4개 + 맨 아래 '모든 프로젝트 보러가기' */
   function renderFeatured(list) {
     const sorted = [...list].sort((a, b) => b.date.localeCompare(a.date));
     let pick = sorted.filter((p) => p.featured);

@@ -42,6 +42,12 @@ a { color: inherit; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gutter); }
 html { scroll-padding-top: calc(var(--head-h) + 16px); scroll-behavior: smooth; }
+/* 스크롤바: 기본 회색 막대 대신 얇은 네이비 막대 */
+html { scrollbar-width: thin; scrollbar-color: rgba(37, 42, 52, .35) transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(37, 42, 52, .3); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background-color: var(--pink); }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
 .skip { position: absolute; left: 12px; top: -48px; z-index: 100; padding: 10px 14px; background: var(--ink); color: #fff; text-decoration: none; border-radius: 6px; }
@@ -175,15 +181,24 @@ html { scroll-padding-top: calc(var(--head-h) + 16px); scroll-behavior: smooth; 
 .lang__meta { display: block; margin-top: 6px; font-size: 13px; color: var(--ink-3); }
 .lang.is-expired { opacity: .55; }
 
-.skills { margin: 0; border-top: 1px solid var(--ink); }
-.skills__row { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 8px 20px; padding: 16px 0; border-bottom: 1px solid var(--line); }
-.skills__row dt { font-weight: 700; padding-top: 4px; }
-.skills__row dd { margin: 0; }
+/* Skills & Tools: 묶음(Design · Tools · Etc.)을 가로 3칸으로 */
+.skills { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.skills__col { display: flex; flex-direction: column; gap: 14px; padding: 20px 20px 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.skills__col dt { display: flex; align-items: baseline; gap: 6px; padding-bottom: 12px; border-bottom: 2px solid var(--navy); font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+.skills__col dt .count { font-size: 13px; font-weight: 700; color: var(--pink-text); }
+.skills__col dd { margin: 0; }
+.skills__list { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.skills__list li { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 500; color: var(--ink-2); }
+.skills__list img { width: 20px; height: 20px; flex: none; }
+.skills__dot { width: 8px; height: 8px; margin: 0 6px; border-radius: 50%; background: var(--cyan); flex: none; }
+.skills__col:first-child dt { border-color: var(--pink); }
 
 /* ===== 프로젝트 카드 ===== */
 .cards { display: grid; gap: 20px; }
 .cards--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .cards--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.cards--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.cards--4 .card__title { font-size: 17px; }
 .card {
   display: flex; flex-direction: column; gap: 6px; padding: 12px 12px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
   text-decoration: none; transition: border-color .2s, box-shadow .2s, transform .2s;
@@ -321,7 +336,8 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .sw-group__arrows { display: flex; gap: 6px; }
 .sw-group .slider__btn { width: 38px; height: 38px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
 .sw-group .slider__btn:hover { background: var(--pink); border-color: var(--pink); color: #fff; }
-.sw-track { display: flex; gap: 16px; margin: 0; padding: 16px 0 6px; list-style: none; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: thin; }
+.sw-track { display: flex; gap: 16px; margin: 0; padding: 16px 0 6px; list-style: none; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; }
+.sw-track::-webkit-scrollbar { display: none; }
 .sw-card { flex: 0 0 280px; scroll-snap-align: start; }
 .sw-card a { display: flex; flex-direction: column; gap: 4px; height: 100%; padding: 10px 10px 14px; box-sizing: border-box; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; text-decoration: none; transition: border-color .2s, transform .2s, box-shadow .2s; }
 .sw-card a:hover { border-color: var(--pink); transform: translateY(-2px); box-shadow: 0 12px 24px -18px rgba(0, 0, 0, .35); }
@@ -541,6 +557,10 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .slider__count { color: #C9CDD6; }
 .slider__dot::after { background: rgba(255, 255, 255, .25); }
 .slider__dot[aria-current="true"]::after { background: var(--pink); }
+/* 자동 넘김: 지금 칸의 막대가 왼쪽부터 차올라요 */
+.slider.is-auto .slider__dot[aria-current="true"]::after { background: linear-gradient(var(--pink), var(--pink)) 0 0 / 0% 100% no-repeat, rgba(255, 255, 255, .25); }
+.slider.is-auto.is-run .slider__dot[aria-current="true"]::after { animation: slideFill var(--auto, 4500ms) linear forwards; }
+@keyframes slideFill { to { background-size: 100% 100%; } }
 .slider__btn { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .35); }
 .slider__btn:hover { background: var(--pink); border-color: var(--pink); }
 
@@ -620,7 +640,7 @@ a.card:hover { border-color: var(--pink); }
   .sec__head { position: static; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
   .sec__title { margin: 0; }
   .sec__en { margin: 0; }
-  .cards--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cards--3, .cards--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .contact__in { grid-template-columns: minmax(0, 1fr); }
   .psec { grid-template-columns: minmax(0, 1fr); }
   .psec__head { flex-direction: row; gap: 10px; }
@@ -657,8 +677,10 @@ a.card:hover { border-color: var(--pink); }
   .row__main { grid-column: 1; }
   .rows--table .trow { grid-template-columns: minmax(0, 1fr); gap: 2px; }
   .trow__org { text-align: left; }
-  .skills__row { grid-template-columns: minmax(0, 1fr); }
-  .cards--2, .cards--3 { grid-template-columns: minmax(0, 1fr); }
+  .cards--2, .cards--3, .skills { grid-template-columns: minmax(0, 1fr); }
+  .cards--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .cards--4 .card__sum, .cards--4 .card__role { display: none; }
+  .cards--4 .card__title { font-size: 15px; }
   .steps li { grid-template-columns: 32px minmax(0, 1fr); }
   .steps li span:last-child { grid-column: 2; }
   .fonts li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
