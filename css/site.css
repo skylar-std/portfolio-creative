@@ -43,7 +43,15 @@ a { color: inherit; }
 .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gutter); }
 html { scroll-padding-top: calc(var(--head-h) + 16px); scroll-behavior: smooth; }
 /* 스크롤바: 기본 회색 막대 대신 얇은 네이비 막대 */
-html { scrollbar-width: thin; scrollbar-color: rgba(37, 42, 52, .35) transparent; }
+/* 페이지 스크롤바: 기본 막대는 숨기고(위 메뉴 옆까지 내려오지 않게) js/scrollbar.js 가 메뉴 아래에만 그려요 */
+html { scrollbar-width: none; }
+html::-webkit-scrollbar { display: none; }
+.sbar { position: fixed; top: var(--head-h); right: 0; bottom: 0; z-index: 60; width: 12px; opacity: 0; transition: opacity .3s; }
+.sbar.is-on { opacity: 1; }
+.sbar__thumb { position: absolute; top: 0; right: 3px; width: 5px; border-radius: 4px; background: rgba(37, 42, 52, .32); transition: width .15s, background .15s, right .15s; touch-action: none; cursor: grab; }
+.sbar:hover .sbar__thumb, .sbar.is-drag .sbar__thumb { right: 2px; width: 8px; background: var(--pink); }
+.sbar.is-drag .sbar__thumb { cursor: grabbing; }
+@media (pointer: coarse) { .sbar { pointer-events: none; width: 8px; } .sbar__thumb { width: 4px; } }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(37, 42, 52, .3); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
