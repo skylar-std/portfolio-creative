@@ -1,9 +1,8 @@
 /* =========================================
-   전체 프로젝트 아카이브(works.html)
-   - 연도별로 묶어서 한 줄씩 (최신 연도 · 최신 날짜가 위)
-   - 거르기: 검색(제목 · 요약 · 역할 · 도구 · 태그) · 분야(category) · 구분(kind)
-     분야나 구분이 한 가지뿐이면 그 버튼 줄은 숨겨요
-   - 왼쪽(휴대폰은 위쪽) 연도 목록을 누르면 그 해로 이동
+   프로젝트 페이지(works.html)
+   1. 요약: 총 프로젝트 수 · 기간 · 구분(개인/팀/공모전…)별 개수 · 많이 쓴 도구
+   2. 필터: 연도 · 종류(category). 한 가지뿐인 필터 줄은 숨겨요
+   3. 목록: 연도별로 묶어 한 줄씩 (최신이 위)
    - 줄을 누르면 project.html?id=프로젝트id 로 이동
    - 예전 주소 works.html#프로젝트id 로 들어오면 그 상세 페이지로 보내요
    ========================================= */
@@ -15,7 +14,28 @@
   const esc = window.esc;
   const KINDS = { personal: "개인", team: "팀", contest: "공모전", school: "학교 과제", client: "외주" };
   const kindOf = (p) => KINDS[p.type] || (p.client ? "외주" : "개인");
-  const F = { q: "", cat: "all", kind: "all" };
+  const yearOf = (p) => p.date.slice(0, 4);
+  const F = { year: "all", cat: "all" };
+  let ALL = [];
+
+  function summary() {
+    const box = $("#summary");
+    if (!ALL.length) { box.hidden = true; return; }
+    const years = ALL.map(yearOf);
+    const first = years[years.length - 1], last = years[0];
+    const count = (arr) => arr.reduce((m, k) => (m[k] = (m[k] || 0) + 1, m), {});
+    const kinds = Object.entries(count(ALL.map(kindOf))).sort((a, b) => b[1] - a[1]);
+    const tools = Object.entries(count(ALL.flatMap((p) => p.tools || []))).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    const cats = new Set(ALL.map((p) => p.categoryLabel).filter(Boolean)).size;
+    box.innerHTML = `
+      <div class="sum"><span class="sum__k">총 프로젝트</span><strong class="sum__v">${ALL.length}<small>개</small></strong></div>
+      <div class="sum"><span class="sum__k">기간</span><strong class="sum__v">${first === last ? first : `${first}–${last}`}</strong></div>
+      <div class="sum"><span class="sum__k">종류</span><strong class="sum__v">${cats}<small>가지</small></strong></div>
+      <div class="sum sum--wide"><span class="sum__k">구분</span>
+        <ul class="sum__list">${kinds.map(([k, n]) => `<li>${esc(k)} <b>${n}</b></li>`).join("")}</ul></div>
+      ${tools.length ? `<div class="sum sum--wide"><span class="sum__k">많이 쓴 도구</span>
+        <ul class="sum__list">${tools.map(([k, n]) => `<li>${esc(k)} <b>${n}</b></li>`).join("")}</ul></div>` : ""}`;
+  }
 
   function chips(box, key, items) {
     if (items.length < 2) { box.hidden = true; return; }
@@ -30,7 +50,6 @@
     });
   }
 
-  let ALL = [];
   const row = (p) => `
     <li><a class="arc-row" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(p.id)}`))}">
       <span class="arc-row__img"><img src="${esc(p.thumb)}" alt="" loading="lazy" /></span>
@@ -45,36 +64,26 @@
     </a></li>`;
 
   function draw() {
-    const q = F.q.trim().toLowerCase();
-    const shown = ALL.filter((p) => {
-      if (F.cat !== "all" && p.categoryLabel !== F.cat) return false;
-      if (F.kind !== "all" && kindOf(p) !== F.kind) return false;
-      if (q && ![p.title, p.summary, p.role, p.categoryLabel, ...(p.tools || []), ...(p.tags || [])].join(" ").toLowerCase().includes(q)) return false;
-      return true;
-    });
-    const filtered = F.q || F.cat !== "all" || F.kind !== "all";
+    const shown = ALL.filter((p) => (F.year === "all" || yearOf(p) === F.year) && (F.cat === "all" || p.categoryLabel === F.cat));
+    const filtered = F.year !== "all" || F.cat !== "all";
     $("#arcReset").hidden = !filtered;
-    $("#arcResult").textContent = filtered ? `${shown.length}개 찾았어요` : "";
-
-    const years = [...new Set(shown.map((p) => p.date.slice(0, 4)))].sort((a, b) => b - a);
-    $("#arcYears").innerHTML = years.map((y) => `<a href="#y${y}">${y}<span>${shown.filter((p) => p.date.startsWith(y)).length}</span></a>`).join("");
-    $("#arcYears").hidden = years.length < 2;
+    $("#arcResult").textContent = filtered ? `${shown.length}개` : "";
+    const years = [...new Set(shown.map(yearOf))];
     $("#archive").innerHTML = years.length
       ? years.map((y) => {
-        const items = shown.filter((p) => p.date.startsWith(y));
-        return `<section class="arc-year" id="y${y}" aria-labelledby="yh${y}">
+        const items = shown.filter((p) => yearOf(p) === y);
+        return `<section class="arc-year" aria-labelledby="yh${y}">
             <h2 class="arc-year__head" id="yh${y}">${y}<span>${items.length}개</span></h2>
             <ul class="arc-list">${items.map(row).join("")}</ul>
           </section>`;
       }).join("")
-      : `<p class="arc-empty">${filtered ? "조건에 맞는 프로젝트가 없어요. 검색어나 필터를 바꿔보세요." : "아직 등록된 프로젝트가 없어요. 정리되는 대로 이곳에 쌓일 거예요."}</p>`;
+      : `<p class="arc-empty">${filtered ? "조건에 맞는 프로젝트가 없어요. 필터를 바꿔보세요." : "아직 등록된 프로젝트가 없어요. 정리되는 대로 이곳에 쌓일 거예요."}</p>`;
   }
 
   function init() {
     ALL = [...(window.PROJECTS || [])].filter((p) => p.date).sort((a, b) => b.date.localeCompare(a.date));
     const y = $("#year"); if (y) y.textContent = new Date().getFullYear();
 
-    // 예전 링크(#id) → 상세 페이지
     const hash = decodeURIComponent(location.hash.slice(1));
     if (hash && ALL.some((p) => p.id === hash)) {
       location.replace(window.keepLink(`project.html?id=${encodeURIComponent(hash)}`));
@@ -82,16 +91,12 @@
     }
 
     $("#wkCount").textContent = ALL.length;
-    const yrs = ALL.map((p) => p.date.slice(0, 4));
-    if (yrs.length) $("#wkLead").textContent = `${yrs[yrs.length - 1]}년부터 지금까지 한 작업을 연도별로 정리했어요. 누르면 자세히 볼 수 있어요.`;
-
-    if (!ALL.length) { $("#arcTools").hidden = true; }
+    summary();
+    if (!ALL.length) $("#arcTools").hidden = true;
+    chips($("#fYear"), "year", [...new Set(ALL.map(yearOf))]);
     chips($("#fCat"), "cat", [...new Set(ALL.map((p) => p.categoryLabel).filter(Boolean))]);
-    chips($("#fKind"), "kind", [...new Set(ALL.map(kindOf))]);
-    $("#q").addEventListener("input", (e) => { F.q = e.target.value; draw(); });
     $("#arcReset").addEventListener("click", () => {
-      F.q = ""; F.cat = "all"; F.kind = "all";
-      $("#q").value = "";
+      F.year = "all"; F.cat = "all";
       $$(".arc-filter button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === "all")));
       draw();
     });

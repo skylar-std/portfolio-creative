@@ -12,8 +12,8 @@
 
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-  <link rel="stylesheet" href="css/reset.css?v=20261023b" />
-  <link rel="stylesheet" href="css/site.css?v=20261023b" />
+  <link rel="stylesheet" href="css/reset.css?v=20261025a" />
+  <link rel="stylesheet" href="css/site.css?v=20261025a" />
 </head>
 <body data-keep-title="1">
 
@@ -23,9 +23,9 @@
     <div class="wrap head__in">
       <a href="index.html" data-keep="index.html" class="logo">PARK Younghee</a>
       <nav class="nav" aria-label="주요 메뉴">
-        <a href="index.html" data-keep="index.html">소개</a>
-        <a href="works.html" class="is-on" aria-current="page">아카이브</a>
-        <a href="index.html#contact" data-keep="index.html#contact">연락처</a>
+        <a href="index.html" data-keep="index.html">Profile</a>
+        <a href="works.html" class="is-on" aria-current="page">Projects</a>
+        <a href="index.html#contact" data-keep="index.html#contact">Contact</a>
       </nav>
       <a class="btn btn--sm btn--line" href="files/resume.pdf" target="_blank" rel="noopener">이력서 PDF</a>
     </div>
@@ -34,30 +34,26 @@
   <main id="main" class="page">
     <div class="wrap">
       <header class="page__head">
-        <p class="sec__en">Archive</p>
+        <p class="sec__en">Projects</p>
         <h1 class="page__title">전체 프로젝트 <span class="count" id="wkCount"></span></h1>
         <p class="page__lead" id="wkLead">지금까지 한 작업을 연도별로 정리했어요. 누르면 자세히 볼 수 있어요.</p>
       </header>
 
-      <!-- 거르기: 검색 · 분야(category) · 구분(kind) · 연도 -->
+      <!-- 1. 요약: DB projects 로 자동 계산 -->
+      <section class="summary" id="summary" aria-label="요약"></section>
+
+      <!-- 2. 필터: 연도 · 종류(category) -->
       <div class="arc-tools" id="arcTools">
-        <label class="search">
-          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13M15.5 15.5L20 20" /></svg>
-          <span class="sr-only">프로젝트 검색</span>
-          <input type="search" id="q" placeholder="제목, 역할, 도구로 검색" autocomplete="off" />
-        </label>
-        <div class="arc-filter" id="fCat" role="group" aria-label="분야"></div>
-        <div class="arc-filter" id="fKind" role="group" aria-label="구분"></div>
+        <div class="arc-filter" id="fYear" role="group" aria-label="연도"></div>
+        <div class="arc-filter" id="fCat" role="group" aria-label="종류"></div>
         <div class="arc-status">
           <p id="arcResult" aria-live="polite"></p>
           <button type="button" class="link-btn" id="arcReset" hidden>필터 초기화</button>
         </div>
       </div>
 
-      <div class="arc-body">
-        <nav class="arc-years" id="arcYears" aria-label="연도로 이동"></nav>
-        <div id="archive"></div>
-      </div>
+      <!-- 3. 목록: 연도별 -->
+      <div id="archive"></div>
     </div>
   </main>
 
@@ -68,8 +64,8 @@
     </div>
   </footer>
 
-  <script src="js/db.js?v=20261023b"></script>
-  <script src="js/data.js?v=20261023b"></script>
-  <script src="js/works.js?v=20261023b"></script>
+  <script src="js/db.js?v=20261025a"></script>
+  <script src="js/data.js?v=20261025a"></script>
+  <script src="js/works.js?v=20261025a"></script>
 </body>
 </html>

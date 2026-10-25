@@ -1,5 +1,5 @@
 /* =========================================
-   메인(index.html): DB 내용으로 이력 · 스킬 · 프로젝트 미리보기 채우기
+   메인(index.html): 표지 슬라이드(대표 프로젝트) · 이력 · 스킬을 DB 내용으로 채우기
    - 내용이 없는 칸은 제목까지 숨기고, 섹션 번호 · 메뉴도 남은 것만으로 다시 매겨요.
    - 처음에 보여줄 개수는 아래 LIMITS 에서 바꿔요. 넘치면 '더보기'로 접혀요.
    ========================================= */
@@ -11,7 +11,7 @@
   const esc = window.esc;
   const pad2 = (n) => String(n).padStart(2, "0");
 
-  const LIMITS = { experience: 4, training: 4, activities: 4, certificates: 6, preview: 3 };
+  const LIMITS = { experience: 4, training: 4, activities: 4, certificates: 6, slides: 5 };
 
   const NOW = (() => { const d = new Date(); return `${d.getFullYear()}.${pad2(d.getMonth() + 1)}`; })();
   const latestFirst = (k) => (a, b) => (b[k] || NOW).localeCompare(a[k] || NOW);
@@ -66,7 +66,7 @@
     fill("#eduList", null, [...(R.education || [])].sort(latestFirst("start")).map((e) =>
       row({ date: e.end || e.start, title: e.school, sub: [e.major, e.status].filter(Boolean).join(" · ") })));
 
-    fill("#expList", "#expCount", [...(R.experience || [])].sort(latestFirst("start")).map((x) =>
+    fill("#expList", null, [...(R.experience || [])].sort(latestFirst("start")).map((x) =>
       row({ date: period(x.start, x.end), title: x.company, sub: x.role, desc: x.desc, tag: x.end ? duration(x.start, x.end) : "재직 중", now: !x.end })),
       LIMITS.experience, "경력");
 
@@ -110,15 +110,51 @@
       </div>`).join("");
   }
 
-  function renderPreview(list) {
-    const box = $("#projectPreview");
-    if (!box) return;
+  /* 표지 슬라이드: featured 켠 작업(없으면 최신순), 최대 LIMITS.slides 장
+     옆으로 밀거나(휴대폰) 화살표 · 점으로 넘겨요. 자동으로 넘어가지는 않아요. */
+  function renderSlider(list) {
+    const track = $("#slideTrack");
+    if (!track) return;
     const sorted = [...list].sort((a, b) => b.date.localeCompare(a.date));
     let pick = sorted.filter((p) => p.featured);
     if (!pick.length) pick = sorted;
-    pick = pick.slice(0, LIMITS.preview);
-    box.innerHTML = pick.length ? pick.map(window.projectCard).join("") : window.emptyCard();
-    $("#projectCount").textContent = list.length ? `(${list.length})` : "";
+    pick = pick.slice(0, LIMITS.slides);
+    const KINDS = { personal: "개인 프로젝트", team: "팀 프로젝트", contest: "공모전", school: "학교 과제", client: "외주" };
+    track.innerHTML = pick.length ? pick.map((p, i) => `
+      <article class="slide" aria-roledescription="slide" aria-label="${i + 1} / ${pick.length}">
+        <a class="slide__link" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(p.id)}`))}">
+          <span class="slide__img"><img src="${esc(p.image || p.thumb)}" alt="" ${i ? 'loading="lazy"' : ""} /></span>
+          <span class="slide__info">
+            <span class="slide__meta">${esc(p.categoryLabel)}${p.date ? ` · ${esc(p.date.slice(0, 4))}` : ""}${KINDS[p.type] ? ` · ${KINDS[p.type]}` : ""}</span>
+            <strong class="slide__title">${esc(p.title)}</strong>
+            ${p.role ? `<span class="slide__role"><b>역할</b>${esc(p.role)}</span>` : ""}
+            <span class="slide__go">자세히 보기 <span aria-hidden="true">→</span></span>
+          </span>
+        </a>
+      </article>`).join("")
+      : `<article class="slide slide--empty"><span class="slide__img" aria-hidden="true"></span><span class="slide__info"><strong class="slide__title">준비 중인 프로젝트</strong><span class="slide__role">새 프로젝트가 정리되는 대로 이곳에 올라와요.</span></span></article>`;
+
+    const n = Math.max(1, pick.length);
+    const dots = $("#slideDots");
+    dots.innerHTML = pick.length > 1 ? pick.map((p, i) => `<button type="button" class="slider__dot" data-i="${i}" aria-label="${i + 1}번째 슬라이드: ${esc(p.title)}"></button>`).join("") : "";
+    $(".slider__arrows").hidden = pick.length < 2;
+    let cur = 0;
+    const go = (i) => { cur = (i + n) % n; track.scrollTo({ left: cur * track.clientWidth, behavior: "smooth" }); };
+    const mark = () => {
+      cur = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
+      $("#slideCount").textContent = pick.length ? `${String(cur + 1).padStart(2, "0")} / ${String(n).padStart(2, "0")}` : "";
+      $$(".slider__dot", dots).forEach((d, i) => d.setAttribute("aria-current", String(i === cur)));
+    };
+    let t = 0;
+    track.addEventListener("scroll", () => { clearTimeout(t); t = setTimeout(mark, 60); }, { passive: true });
+    $("#slidePrev").addEventListener("click", () => go(cur - 1));
+    $("#slideNext").addEventListener("click", () => go(cur + 1));
+    dots.addEventListener("click", (e) => { const d = e.target.closest("[data-i]"); if (d) go(+d.dataset.i); });
+    $("#slider").addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") { e.preventDefault(); go(cur - 1); }
+      if (e.key === "ArrowRight") { e.preventDefault(); go(cur + 1); }
+    });
+    mark();
   }
 
   /* 내용이 없는 칸 숨기기 → 섹션 번호 · 메뉴 다시 매기기 */
@@ -127,7 +163,8 @@
     $$(".sec").forEach((sec) => {
       if (sec.id === "profile") return;          // 소개는 항상 보여요
       const blocks = $$("[data-block]", sec);
-      const empty = blocks.length ? blocks.every((b) => b.hidden) : !$(".skills", sec).children.length;
+      const sk = $(".skills", sec);
+      const empty = blocks.length ? blocks.every((b) => b.hidden) : !(sk && sk.children.length);
       sec.hidden = empty;
     });
     $$(".sec").filter((s) => !s.hidden).forEach((s, i) => { $(".sec__num", s).textContent = pad2(i + 1); });
@@ -157,7 +194,7 @@
   (window.PROJECTS_READY || Promise.resolve()).then(() => {
     renderRole(window.ROLE_DATA);
     renderResume(window.RESUME);
-    renderPreview(window.PROJECTS || []);
+    renderSlider(window.PROJECTS || []);
     hideEmpty();
     activeNav();
   });
