@@ -402,6 +402,32 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .views::-webkit-scrollbar { display: none; }
 .views__panel { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; }
 .views__panel[aria-hidden="true"] { visibility: hidden; transition: visibility 0s .3s; }
+/* 연도별 보기: 연도 버튼 + 월별 정리 */
+.ybar { display: flex; flex-wrap: wrap; gap: 8px; padding: 28px 0 8px; }
+.ybar__btn { display: inline-flex; align-items: baseline; gap: 6px; min-height: 44px; padding: 0 18px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font: inherit; font-size: 17px; font-weight: 800; color: var(--ink-3); cursor: pointer; font-variant-numeric: tabular-nums; transition: background .2s, color .2s, border-color .2s; }
+.ybar__btn span { font-size: 12.5px; font-weight: 700; color: var(--pink-text); }
+.ybar__btn:hover { border-color: var(--navy); color: var(--navy); }
+.ybar__btn[aria-selected="true"] { background: var(--pink); border-color: var(--pink); color: #fff; }
+.ybar__btn[aria-selected="true"] span { color: #fff; opacity: .85; }
+.ymonths { display: flex; flex-direction: column; }
+.ym { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 16px 24px; padding: 24px 0; border-top: 1px solid var(--line); }
+.ym:first-child { border-top: 1px solid var(--navy); }
+.ym__month { display: flex; flex-direction: column; margin: 0; }
+.ym__month b { font-size: 40px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; color: var(--navy); font-variant-numeric: tabular-nums; }
+.ym__month span { margin-top: 6px; font-size: 13px; font-weight: 600; color: var(--ink-3); }
+.ym__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
+.ym__grid .sw-card { flex: none; }
+@media (max-width: 640px) {
+  .ybar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .ybar::-webkit-scrollbar { display: none; }
+  .ybar__btn { flex: none; }
+  .ym { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .ym__month { flex-direction: row; align-items: baseline; gap: 8px; }
+  .ym__month b { font-size: 28px; }
+  .ym__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .ym__grid .sw-card__role { display: none; }
+  .ym__grid .sw-card__title { font-size: 14.5px; }
+}
 .sw-group { padding-top: 32px; }
 .sw-group__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--navy); }
 .sw-group__head h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }

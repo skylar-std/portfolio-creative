@@ -157,7 +157,30 @@
     const byCat = by((p) => p.categoryLabel).sort((a, b) => b[1].length - a[1].length);   // 많은 순
     const byYear = by(yearOf).sort((a, b) => b[0] - a[0]);                                // 최신 연도 순
     $("#panelCat").innerHTML = groupsHTML(byCat, (p) => `${yearOf(p)} · ${kindOf(p)}`, "gc");
-    $("#panelYear").innerHTML = groupsHTML(byYear, (p) => `${p.categoryLabel} · ${p.date.slice(5, 7)}월`, "gy");
+    // 연도별: 위에서 연도를 고르고, 아래에 그 해를 월별로 정리
+    const yp = $("#panelYear");
+    yp.innerHTML = `
+      <div class="ybar" role="tablist" aria-label="연도 선택">
+        ${byYear.map(([y, items], i) => `<button type="button" role="tab" class="ybar__btn" data-y="${esc(y)}" aria-selected="${i === 0}">${esc(y)}<span>${items.length}</span></button>`).join("")}
+      </div>
+      <div class="ymonths" id="yMonths" role="tabpanel" aria-live="polite"></div>`;
+    const showYear = (y) => {
+      $$(".ybar__btn", yp).forEach((b) => b.setAttribute("aria-selected", String(b.dataset.y === y)));
+      const items = (byYear.find((g) => g[0] === y) || [, []])[1];
+      const months = new Map();
+      [...items].sort((a, b) => b.date.localeCompare(a.date)).forEach((p) => {
+        const m = Number(p.date.slice(5, 7)) || 0;
+        if (!months.has(m)) months.set(m, []); months.get(m).push(p);
+      });
+      $("#yMonths").innerHTML = [...months].map(([m, list]) => `
+        <section class="ym" aria-label="${esc(y)}년 ${m ? `${m}월` : "월 미정"}">
+          <h3 class="ym__month"><b>${m ? String(m).padStart(2, "0") : "–"}</b><span>${m ? "월" : "월 미정"} · ${list.length}개</span></h3>
+          <ul class="ym__grid">${list.map((p) => card(p, `${p.categoryLabel} · ${kindOf(p)}`)).join("")}</ul>
+        </section>`).join("");
+      if (typeof fit === "function") fit();
+    };
+    yp.addEventListener("click", (e) => { const b = e.target.closest(".ybar__btn"); if (b) showYear(b.dataset.y); });
+    if (byYear.length) showYear(byYear[0][0]);
 
     // 넘칠 때만 화살표
     const arrows = () => $$(".sw-group").forEach((g) => {
@@ -173,7 +196,7 @@
     const tabs = $$("#viewTabs [role=tab]");
     const panels = [$("#panelCat"), $("#panelYear")];
     let cur = 0;
-    const fit = () => { box.style.height = `${panels[cur].offsetHeight}px`; };
+    var fit = () => { box.style.height = `${panels[cur].offsetHeight}px`; };
     const select = (i, scroll = true) => {
       cur = i;
       tabs.forEach((t, k) => { t.setAttribute("aria-selected", String(k === i)); t.tabIndex = k === i ? 0 : -1; });
