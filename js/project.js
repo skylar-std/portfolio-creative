@@ -83,7 +83,7 @@
     return secs;
   }
 
-  function render(p, prev, next) {
+  function render(p, prev, next, seq) {
     document.title = `${p.title} | 박영희 Portfolio`;
     const facts = [
       ["역할", p.role],
@@ -107,7 +107,9 @@
           </div>
         </section>`;
     }).join("");
-    const link = (q, label) => (q ? `<a class="pnav__a" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(q.id)}`))}"><span>${label}</span><strong>${esc(q.title)}</strong></a>` : "<span></span>");
+    const link = (q, label, cls) => (q ? `<a class="pnav__a ${cls}" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(q.id)}`))}">
+        <span class="pnav__img"><img src="${esc(q.thumb)}" alt="" loading="lazy" /></span>
+        <span class="pnav__txt"><span>${label}</span><strong>${esc(q.title)}</strong><em>${esc(q.categoryLabel)}</em></span></a>` : `<span class="pnav__a pnav__a--none"></span>`);
 
     // 한눈에 보기: 문제 → 내가 한 일 → 결과 (인사담당자가 여기까지만 봐도 되게)
     const did = (p.did || []).slice(0, 3);
@@ -121,7 +123,7 @@
     $("#project").innerHTML = `
       <section class="phero">
         <div class="wrap">
-          <a class="back back--light" href="${esc(window.keepLink("works.html"))}">← 프로젝트 목록</a>
+          <a class="back back--light js-back" href="${esc(window.keepLink("works.html"))}">← 프로젝트 목록</a>
           <p class="phero__meta">${esc(p.categoryLabel)}${p.date ? ` · ${esc(fmtDate(p.date))}` : ""}</p>
           <h1 class="phero__title">${esc(p.title)}</h1>
           ${p.summary ? `<p class="phero__lead">${esc(p.summary)}</p>` : ""}
@@ -140,9 +142,46 @@
           <div class="pbody__main">${secs}</div>
         </div>
         ${(p.tags || []).length ? `<ul class="chips ptags" aria-label="태그">${p.tags.map((t) => `<li class="chip">#${esc(t)}</li>`).join("")}</ul>` : ""}
-        <nav class="pnav" aria-label="다른 프로젝트">${link(prev, "← 이전 프로젝트")}${link(next, "다음 프로젝트 →")}</nav>
-      </div>`;
+        <nav class="pnav" id="pnav" aria-label="다른 프로젝트">${link(prev, "← 이전 프로젝트", "pnav__a--prev")}${link(next, "다음 프로젝트 →", "pnav__a--next")}</nav>
+      </div>
+      <nav class="qbar" id="qbar" aria-label="빠른 이동">
+        <a class="qbar__back js-back" href="${esc(window.keepLink("works.html"))}"><span aria-hidden="true">←</span> 목록</a>
+        <span class="qbar__sep" aria-hidden="true"></span>
+        ${prev ? `<a class="qbar__btn" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(prev.id)}`))}" aria-label="이전 프로젝트: ${esc(prev.title)}" title="이전 (←)">‹</a>` : `<span class="qbar__btn is-off" aria-hidden="true">‹</span>`}
+        <span class="qbar__pos"><span><b>${pad2(seq.i + 1)}</b> / ${pad2(seq.n)}</span><small>${esc(seq.label)}</small></span>
+        ${next ? `<a class="qbar__btn" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(next.id)}`))}" aria-label="다음 프로젝트: ${esc(next.title)}" title="다음 (→)">›</a>` : `<span class="qbar__btn is-off" aria-hidden="true">›</span>`}
+      </nav>`;
     tocSpy();
+    quickNav(prev, next);
+  }
+
+  /* 빠른 이동
+     - 아래 떠 있는 막대: 머리 영역을 지나면 나타나고, 맨 아래 이전 · 다음 카드가 보이면 숨어요
+     - 키보드: ← 이전 · → 다음 · Esc 목록
+     - '목록': 목록에서 왔으면 뒤로 가기(보던 자리 그대로), 아니면 목록 페이지로 */
+  function quickNav(prev, next) {
+    const bar = $("#qbar"), hero = $(".phero"), pnav = $("#pnav");
+    let pastHero = false, atEnd = false;
+    const show = () => bar.classList.toggle("is-on", pastHero && !atEnd);
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(([e]) => { pastHero = !e.isIntersecting; show(); }).observe(hero);
+      new IntersectionObserver(([e]) => { atEnd = e.isIntersecting; show(); }).observe(pnav);
+    }
+    const toList = (e) => {
+      try { sessionStorage.setItem("pf.back", "1"); } catch (err) { /* 무시 */ }
+      let fromList = false;
+      try { fromList = !!document.referrer && new URL(document.referrer).pathname.endsWith("works.html"); } catch (err) { fromList = false; }
+      if (fromList && history.length > 1) { e && e.preventDefault(); history.back(); }
+    };
+    document.querySelectorAll(".js-back").forEach((a) => a.addEventListener("click", toList));
+    const go = (q) => { if (q) location.href = window.keepLink(`project.html?id=${encodeURIComponent(q.id)}`); };
+    document.addEventListener("keydown", (e) => {
+      if (e.altKey || e.ctrlKey || e.metaKey || /input|textarea|select/i.test(e.target.tagName)) return;
+      if (e.key === "ArrowLeft") go(prev);
+      else if (e.key === "ArrowRight") go(next);
+      else if (e.key === "Escape") { const a = $(".qbar__back"); toList(null); location.href = a.href; }
+    });
+    if (next && next.thumb) { const im = new Image(); im.src = next.thumb; }   // 다음 이미지를 미리 받아 둬요
   }
 
   /* 왼쪽 목차: 지금 읽는 섹션 표시 */
@@ -168,9 +207,19 @@
   (window.PROJECTS_READY || Promise.resolve()).then(() => {
     const y = $("#year"); if (y) y.textContent = new Date().getFullYear();
     const id = new URLSearchParams(location.search).get("id") || "";
-    const list = [...(window.PROJECTS || [])].sort((a, b) => b.date.localeCompare(a.date));
+    const all = [...(window.PROJECTS || [])].sort((a, b) => b.date.localeCompare(a.date));
+    // 목록에서 보던 순서(종류별 · 그 연도)를 따라가요. 없으면 최신순 전체
+    let list = all, label = "전체";
+    try {
+      const s = JSON.parse(sessionStorage.getItem("pf.works") || "null");
+      if (s && Array.isArray(s.ids) && s.ids.includes(id)) {
+        const byId = new Map(all.map((p) => [p.id, p]));
+        const seq = s.ids.map((k) => byId.get(k)).filter(Boolean);
+        if (seq.length) { list = seq; label = s.label || label; }
+      }
+    } catch (err) { /* 기본 순서 사용 */ }
     const i = list.findIndex((p) => p.id === id);
     if (i < 0) { notFound(); return; }
-    render(list[i], list[i - 1] || null, list[i + 1] || null);
+    render(list[i], list[i - 1] || null, list[i + 1] || null, { i, n: list.length, label });
   });
 })();

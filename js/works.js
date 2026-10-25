@@ -61,6 +61,34 @@
       ${toolsHTML(tools, pct)}`;
   }
 
+  /* 요약 등장 애니메이션: 화면에 보이면 도넛이 한 바퀴 채워지고, 막대가 차오르고, 숫자가 0부터 올라가요 */
+  function animateSummary() {
+    const box = $("#summary");
+    if (box.hidden || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const nums = $$(".donut__center strong, .donut__legend b, .bars__pct", box).map((el) => {
+      const m = /^(\d+)(.*)$/.exec(el.textContent.trim());
+      return m ? { el, to: Number(m[1]), suf: m[2] } : null;
+    }).filter(Boolean);
+    $$(".bars__fill", box).forEach((f, i) => f.style.setProperty("--d", `${i * 90}ms`));
+    $$(".donut__legend li", box).forEach((li, i) => li.style.setProperty("--d", `${300 + i * 70}ms`));
+    box.classList.add("is-pre");
+    nums.forEach((n) => { n.el.textContent = `0${n.suf}`; });
+    const run = () => {
+      void box.offsetWidth;
+      box.classList.remove("is-pre"); box.classList.add("is-in");
+      const t0 = performance.now(), DUR = 1100;
+      const tick = (t) => {
+        const k = Math.min(1, (t - t0) / DUR), e = 1 - Math.pow(1 - k, 3);
+        nums.forEach((n) => { n.el.textContent = `${Math.round(n.to * e)}${n.suf}`; });
+        if (k < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+    if (!("IntersectionObserver" in window)) { run(); return; }
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { io.disconnect(); requestAnimationFrame(run); } }, { threshold: 0.3 });
+    io.observe(box);
+  }
+
   const toolsHTML = (tools, pct) => (tools.length ? `<div class="sum">
         <span class="sum__k">많이 쓴 도구 <small>전체 프로젝트 중 사용 비율</small></span>
         <ul class="bars">${tools.map(([k, n]) => `
@@ -120,12 +148,42 @@
   /* ===== 보기: [종류별 | 연도별] 탭 + 옆으로 넘기는 줄 =====
      - 위 탭을 누르거나, 휴대폰에서 화면을 옆으로 밀면 두 보기가 바뀌어요
      - 각 묶음(종류 · 연도)은 카드 한 줄이고, 옆으로 밀거나 화살표로 넘겨요 */
+  // 도구 이름 → img/icons 파일 이름 (없으면 글자만)
+  const TOOL_ICON = { photoshop: "photoshop", illustrator: "illustrator", indesign: "indesign", figma: "figma", "after effects": "after-effects", blender: "blender", notion: "notion", "html / css": "html-css", html: "html-css" };
+  const toolIcon = (t) => TOOL_ICON[String(t).toLowerCase().replace(/^adobe\s+/, "")];
+  const teamSize = (p) => { const m = /(\d+)\s*인/.exec(p.team || ""); return m ? Number(m[1]) : 0; };
+  const isTeam = (p) => p.type === "team" || teamSize(p) > 1 || (p.contribution != null && p.contribution < 100);
+
+  // 카드 아래 '유형 · 기여도' 줄
+  function typeRow(p) {
+    const kind = KINDS[p.type] || (p.client ? "외주" : "개인");
+    const size = teamSize(p);
+    const team = isTeam(p);
+    const label = team && p.type !== "team" ? `${kind} · 팀${size ? ` ${size}인` : ""}` : team ? `팀 프로젝트${size ? ` · ${size}인` : ""}` : kind === "개인" ? "개인 프로젝트" : `${kind} · 개인`;
+    const pct = team && p.contribution != null ? Math.max(0, Math.min(100, Math.round(p.contribution))) : null;
+    return `<span class="sw-type ${team ? "sw-type--team" : ""}">
+        <span class="sw-type__label">${esc(label)}</span>
+        ${pct != null ? `<span class="sw-type__pct" aria-label="기여도 ${pct}%"><span class="sw-type__k" aria-hidden="true">기여도</span><span class="sw-type__bar"><i style="width:${pct}%"></i></span><b>${pct}%</b></span>` : ""}
+      </span>`;
+  }
+  // 카드 맨 아래 사용 도구 (3개까지 + 나머지 개수)
+  function toolsRow(p) {
+    const tools = p.tools || [];
+    if (!tools.length) return "";
+    const shown = tools.slice(0, 3);
+    return `<span class="sw-tools" aria-label="사용 도구: ${esc(tools.join(", "))}">${shown.map((t) => {
+      const ic = toolIcon(t);
+      return `<span class="sw-tool">${ic ? `<img src="img/icons/${ic}.svg" alt="" width="14" height="14" />` : ""}${esc(t)}</span>`;
+    }).join("")}${tools.length > 3 ? `<span class="sw-tool sw-tool--more">+${tools.length - 3}</span>` : ""}</span>`;
+  }
+
   const card = (p, meta) => `
     <li class="sw-card"><a href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(p.id)}`))}">
       <span class="sw-card__img"><img src="${esc(p.thumb)}" alt="" loading="lazy" />${p.featured ? '<span class="badge badge--img">대표</span>' : ""}</span>
       <span class="sw-card__meta">${esc(meta)}</span>
       <strong class="sw-card__title">${esc(p.title)}</strong>
       ${p.role ? `<span class="sw-card__role">${esc(p.role)}</span>` : ""}
+      <span class="sw-card__foot">${typeRow(p)}${toolsRow(p)}</span>
     </a></li>`;
 
   function groupsHTML(groups, metaOf, prefix) {
@@ -156,8 +214,31 @@
     };
     const byCat = by((p) => p.categoryLabel).sort((a, b) => b[1].length - a[1].length);   // 많은 순
     const byYear = by(yearOf).sort((a, b) => b[0] - a[0]);                                // 최신 연도 순
-    $("#panelCat").innerHTML = groupsHTML(byCat, (p) => `${yearOf(p)} · ${kindOf(p)}`, "gc");
-    $("#panelYear").innerHTML = groupsHTML(byYear, (p) => `${p.categoryLabel} · ${p.date.slice(5, 7)}월`, "gy");
+    $("#panelCat").innerHTML = groupsHTML(byCat, (p) => `${yearOf(p)}.${p.date.slice(5, 7)}`, "gc");
+    // 연도별: 위에서 연도를 고르고, 아래에 그 해를 월별로 정리
+    const yp = $("#panelYear");
+    yp.innerHTML = `
+      <div class="ybar" role="tablist" aria-label="연도 선택">
+        ${byYear.map(([y, items], i) => `<button type="button" role="tab" class="ybar__btn" data-y="${esc(y)}" aria-selected="${i === 0}">${esc(y)}<sup>${items.length}</sup></button>`).join("")}
+      </div>
+      <div class="ymonths" id="yMonths" role="tabpanel" aria-live="polite"></div>`;
+    const showYear = (y) => {
+      $$(".ybar__btn", yp).forEach((b) => b.setAttribute("aria-selected", String(b.dataset.y === y)));
+      const items = (byYear.find((g) => g[0] === y) || [, []])[1];
+      const months = new Map();
+      [...items].sort((a, b) => b.date.localeCompare(a.date)).forEach((p) => {
+        const m = Number(p.date.slice(5, 7)) || 0;
+        if (!months.has(m)) months.set(m, []); months.get(m).push(p);
+      });
+      $("#yMonths").innerHTML = [...months].map(([m, list]) => `
+        <section class="ym" aria-label="${esc(y)}년 ${m ? `${m}월` : "월 미정"}">
+          <h4 class="ym__month"><b>${m || "–"}</b><strong>${m ? "월" : "월 미정"}</strong><span>${list.length}개</span></h4>
+          <ul class="ym__grid">${list.map((p) => card(p, p.categoryLabel)).join("")}</ul>
+        </section>`).join("");
+      if (typeof fit === "function") fit();
+    };
+    yp.addEventListener("click", (e) => { const b = e.target.closest(".ybar__btn"); if (b) showYear(b.dataset.y); });
+    if (byYear.length) showYear(byYear[0][0]);
 
     // 넘칠 때만 화살표
     const arrows = () => $$(".sw-group").forEach((g) => {
@@ -173,7 +254,7 @@
     const tabs = $$("#viewTabs [role=tab]");
     const panels = [$("#panelCat"), $("#panelYear")];
     let cur = 0;
-    const fit = () => { box.style.height = `${panels[cur].offsetHeight}px`; };
+    var fit = () => { box.style.height = `${panels[cur].offsetHeight}px`; };
     const select = (i, scroll = true) => {
       cur = i;
       tabs.forEach((t, k) => { t.setAttribute("aria-selected", String(k === i)); t.tabIndex = k === i ? 0 : -1; });
@@ -196,6 +277,29 @@
     window.addEventListener("resize", () => { box.scrollLeft = cur * box.clientWidth; fit(); arrows(); });
     select(0, false);
     arrows();
+
+    /* 상세로 갈 때: 지금 보던 목록 순서와 자리를 기억해요
+       → 상세 페이지의 이전 · 다음이 이 순서를 따르고, '목록'을 누르면 이 자리로 돌아와요 */
+    const KEY = "pf.works";
+    const curYear = () => { const b = $(".ybar__btn[aria-selected=true]"); return b ? b.dataset.y : ""; };
+    box.addEventListener("click", (e) => {
+      const a = e.target.closest(".sw-card a"); if (!a) return;
+      const panel = panels[cur];
+      const ids = [...new Set($$(".sw-card a", panel).map((x) => new URL(x.href, location.href).searchParams.get("id")))];
+      const label = cur === 0 ? "종류별" : `${curYear()}년`;
+      try { sessionStorage.setItem(KEY, JSON.stringify({ ids, label, tab: cur, year: curYear(), y: window.scrollY })); } catch (err) { /* 저장이 안 돼도 이동은 돼요 */ }
+    });
+    // '목록'으로 돌아왔을 때 보던 탭 · 연도 · 위치 그대로
+    let saved = null;
+    try { saved = JSON.parse(sessionStorage.getItem(KEY) || "null"); } catch (err) { saved = null; }
+    let back = false;
+    try { back = sessionStorage.getItem("pf.back") === "1"; sessionStorage.removeItem("pf.back"); } catch (err) { back = false; }
+    const nav = (performance.getEntriesByType && performance.getEntriesByType("navigation")[0]) || {};
+    if (saved && (back || nav.type === "back_forward")) {
+      if (saved.year) { const b = $(`.ybar__btn[data-y="${saved.year}"]`); if (b) b.click(); }
+      if (saved.tab) { box.style.scrollBehavior = "auto"; select(saved.tab, false); box.scrollLeft = saved.tab * box.clientWidth; box.style.scrollBehavior = ""; }
+      requestAnimationFrame(() => window.scrollTo({ top: saved.y || 0, behavior: "instant" }));
+    }
   }
 
   function init() {
@@ -210,8 +314,12 @@
 
     $("#wkCount").textContent = ALL.length;
     summary();
+    animateSummary();
     buildViews();
   }
+
+  // 뒤로 가기로 그대로 돌아온 경우(브라우저가 페이지를 보관해 둔 경우) 표시만 지워요
+  window.addEventListener("pageshow", (e) => { if (e.persisted) { try { sessionStorage.removeItem("pf.back"); } catch (err) { /* 무시 */ } } });
 
   (window.PROJECTS_READY || Promise.resolve()).then(() => {
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();

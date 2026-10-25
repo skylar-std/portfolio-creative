@@ -43,6 +43,9 @@
       period: p.period_label || "",
       detail: p.detail || {},
       problem: p.problem || "", action: p.action || "", resultText: p.result || "", team: p.team || "",
+      // 팀 프로젝트 기여도(0~100). DB에 칸이 생기면 contribution, 아니면 detail.contribution 에서 읽어요
+      contribution: Number.isFinite(+p.contribution) && p.contribution !== null ? +p.contribution
+        : (p.detail && Number.isFinite(+p.detail.contribution) && p.detail.contribution !== null ? +p.detail.contribution : null),
     };
   }
   function toResume(rows) {
