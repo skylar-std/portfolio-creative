@@ -265,6 +265,36 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .peek-donut { display: grid; place-items: center; width: 96px; height: 96px; border-radius: 50%; }
 .peek-donut > span { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: var(--surface); font-size: 10px; font-weight: 600; letter-spacing: .04em; color: var(--ink-3); }
 .peek-donut b { font-size: 22px; line-height: 1; font-weight: 800; color: var(--navy); }
+/* 모든 프로젝트 아이콘: 카드에 마우스를 올리면 움직여요 */
+.ai { overflow: visible; }
+.ai * { transform-box: fill-box; transition: transform .45s cubic-bezier(.3, 1.4, .5, 1), stroke-dashoffset .9s ease; }
+/* 1 겹친 카드 */
+.ai--stack .ai-c3 { transform-origin: 50% 100%; transform: rotate(8deg); }
+.ai--stack .ai-c2 { transform-origin: 50% 100%; transform: rotate(-6deg); }
+.ai--stack .ai-c1 { transform-origin: 50% 100%; }
+.allwork__link:hover .ai--stack .ai-c3 { transform: translate(10px, -4px) rotate(18deg); }
+.allwork__link:hover .ai--stack .ai-c2 { transform: translate(-10px, -2px) rotate(-16deg); }
+.allwork__link:hover .ai--stack .ai-c1 { transform: translateY(-4px); }
+/* 2 4칸 갤러리: 시계 방향으로 한 칸씩 */
+.allwork__link:hover .ai--grid .ai-t1 { transform: translateX(42px); }
+.allwork__link:hover .ai--grid .ai-t2 { transform: translateY(42px); }
+.allwork__link:hover .ai--grid .ai-t3 { transform: translateX(-42px); }
+.allwork__link:hover .ai--grid .ai-t4 { transform: translateY(-42px); }
+/* 3 폴더: 종이가 올라오고 앞판이 살짝 젖혀져요 */
+.ai--folder .ai-s1 { transform-origin: 50% 50%; transform: rotate(-5deg); }
+.ai--folder .ai-s2 { transform-origin: 50% 50%; transform: rotate(4deg); }
+.ai--folder .ai-front { transform-origin: 50% 100%; }
+.allwork__link:hover .ai--folder .ai-s1 { transform: translate(-4px, -14px) rotate(-10deg); }
+.allwork__link:hover .ai--folder .ai-s2 { transform: translate(4px, -18px) rotate(8deg); }
+.allwork__link:hover .ai--folder .ai-front { transform: translateY(4px) scaleY(.9); }
+/* 4 펜 툴: 곡선이 그려지고 손잡이가 흔들려요 */
+.ai--pen .ai-curve { stroke-dasharray: 100; stroke-dashoffset: 0; }
+.ai--pen .ai-handle { transform-origin: 50% 50%; }
+.allwork__link:hover .ai--pen .ai-curve { animation: aiDraw .9s ease forwards; }
+.allwork__link:hover .ai--pen .ai-handle { transform: rotate(-14deg); }
+.allwork__link:hover .ai--pen .ai-nib { transform: translateY(-4px); }
+@keyframes aiDraw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .ai * { transition: none; animation: none !important; } }
 .allwork__peek--thumbs img { width: 84px; height: 84px; object-fit: cover; border-radius: 10px; border: 3px solid var(--surface); margin-left: -18px; background: var(--bg); }
 .allwork__peek--thumbs img:first-child { margin-left: 0; }
 .allwork__arrow { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--ink); color: #fff; font-size: 22px; transition: background .2s; }
