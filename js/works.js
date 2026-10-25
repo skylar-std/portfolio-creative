@@ -20,6 +20,9 @@
 
   /* 요약: 총 프로젝트 · 카테고리별 개수 · 많이 쓴 도구(전체 프로젝트 중 사용한 비율 %) */
   const TOOL_LIMIT = 5;
+  const CAT_LIMIT = 4;          // 카테고리는 많은 순 4개까지, 나머지는 '기타'
+  const CAT_STYLE = "bars";     // "bars" = 막대 · "strip" = 한 줄 비율 띠
+  const STRIP_COLORS = ["#FF2E63", "#08D9D6", "#252A34", "#FF8AA8", "#7FE9E7"];
   function summary() {
     const box = $("#summary");
     if (!ALL.length) { box.hidden = true; return; }
@@ -33,8 +36,8 @@
         <strong class="sum__v">${ALL.length}<small>개</small></strong>
       </div>
       <div class="sum">
-        <span class="sum__k">카테고리 <b>${cats.length}</b></span>
-        <ul class="sum__cats">${cats.map(([k, n]) => `<li>${esc(k)} <b>${n}</b></li>`).join("")}</ul>
+        <span class="sum__k">카테고리 <b>${cats.length}</b> <small>전체 프로젝트 중 비율</small></span>
+        ${CAT_STYLE === "strip" ? catStrip(cats) : catBars(cats)}
       </div>
       ${tools.length ? `<div class="sum">
         <span class="sum__k">많이 쓴 도구 <small>전체 프로젝트 중 사용 비율</small></span>
@@ -45,11 +48,34 @@
       </div>` : ""}`;
   }
 
+  // 카테고리: 많은 순 CAT_LIMIT 개 + 나머지는 '기타'
+  function topCats(cats) {
+    const top = cats.slice(0, CAT_LIMIT);
+    const rest = cats.slice(CAT_LIMIT).reduce((n, [, c]) => n + c, 0);
+    return rest ? [...top, ["기타", rest, true]] : top;
+  }
+  const pctOf = (n) => Math.round((n / ALL.length) * 100);
+  function catBars(cats) {
+    const list = topCats(cats), max = list[0][1];
+    return `<ul class="bars bars--cat">${list.map(([k, n, etc]) => `
+      <li><span class="bars__name">${esc(k)}</span>
+        <span class="bars__track" aria-hidden="true"><span class="bars__fill${n === max && !etc ? " is-top" : ""}${etc ? " is-etc" : ""}" style="width:${pctOf(n)}%"></span></span>
+        <span class="bars__pct">${pctOf(n)}%</span></li>`).join("")}</ul>`;
+  }
+  function catStrip(cats) {
+    const list = topCats(cats);
+    const color = (i, etc) => (etc ? "#D5D7DC" : STRIP_COLORS[i % STRIP_COLORS.length]);
+    return `<div class="strip" role="img" aria-label="${esc(list.map(([k, n]) => `${k} ${pctOf(n)}%`).join(", "))}">
+        ${list.map(([k, n, etc], i) => `<span style="flex:${n};background:${color(i, etc)}"></span>`).join("")}
+      </div>
+      <ul class="strip__legend">${list.map(([k, n, etc], i) => `<li><i style="background:${color(i, etc)}"></i>${esc(k)} <b>${pctOf(n)}%</b></li>`).join("")}</ul>`;
+  }
+
   function chips(box, key, items) {
     if (items.length < 2) { box.hidden = true; return; }
     box.innerHTML = `<span class="arc-filter__k">${box.getAttribute("aria-label")}</span>` +
-      [["all", "전체"], ...items.map((v) => [v, v])]
-        .map(([v, label]) => `<button type="button" class="chip chip--btn" data-v="${esc(v)}" aria-pressed="${F[key] === v}">${esc(label)}</button>`).join("");
+      [["all", "전체", ALL.length], ...items.map((v) => [v, v, ALL.filter((p) => (key === "year" ? yearOf(p) : p.categoryLabel) === v).length])]
+        .map(([v, label, n]) => `<button type="button" class="chip chip--btn" data-v="${esc(v)}" aria-pressed="${F[key] === v}">${esc(label)} <span>${n}</span></button>`).join("");
     box.addEventListener("click", (e) => {
       const b = e.target.closest("button[data-v]"); if (!b) return;
       F[key] = b.dataset.v;
@@ -102,7 +128,8 @@
     summary();
     if (!ALL.length) $("#arcTools").hidden = true;
     chips($("#fYear"), "year", [...new Set(ALL.map(yearOf))]);
-    chips($("#fCat"), "cat", [...new Set(ALL.map((p) => p.categoryLabel).filter(Boolean))]);
+    const catCount = (c) => ALL.filter((p) => p.categoryLabel === c).length;
+    chips($("#fCat"), "cat", [...new Set(ALL.map((p) => p.categoryLabel).filter(Boolean))].sort((a, b) => catCount(b) - catCount(a)));
     // 거를 게 없으면(연도 · 종류가 한 가지씩뿐) 필터 줄 전체를 숨겨요
     if ($("#fYear").hidden && $("#fCat").hidden) $("#arcTools").hidden = true;
     $("#arcReset").addEventListener("click", () => {

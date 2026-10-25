@@ -274,6 +274,15 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .bars__track { height: 8px; border-radius: 4px; background: var(--gray); overflow: hidden; }
 .bars__fill { display: block; height: 100%; border-radius: 4px; background: #FF8AA8; }
 .bars__fill.is-top { background: var(--pink); }
+.bars--cat .bars__fill { background: #7FE9E7; }
+.bars--cat .bars__fill.is-top { background: var(--cyan); }
+.bars--cat .bars__fill.is-etc { background: #C9CBD1; }
+.strip { display: flex; gap: 2px; height: 14px; margin-top: 14px; border-radius: 7px; overflow: hidden; }
+.strip span { min-width: 4px; }
+.strip__legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; margin: 12px 0 0; padding: 0; list-style: none; font-size: 13.5px; }
+.strip__legend li { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.strip__legend i { flex: none; width: 10px; height: 10px; border-radius: 3px; }
+.strip__legend b { margin-left: auto; font-variant-numeric: tabular-nums; }
 .bars__pct { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* ===== 아카이브 ===== */
