@@ -200,7 +200,40 @@
 
   /* '모든 프로젝트 보러가기' 오른쪽 미리보기
      ALL_STYLE: "stats"(숫자 3개) · "cats"(카테고리 칩) · "years"(연도별 막대) · "donut"(작은 도넛) · "thumbs"(이미지) */
-  const ALL_STYLE = "stats";
+  const ALL_STYLE = "icon1";
+  // 아이콘 시안 (브랜드 색 4개만 사용)
+  const P = "#FF2E63", CY = "#08D9D6", N = "#252A34", G = "#EAEAEA";
+  const ICONS = {
+    // 1. 겹쳐 쌓인 카드 (작업물이 쌓여 있는 느낌)
+    icon1: `<svg viewBox="0 0 120 96" width="120" height="96" aria-hidden="true">
+      <rect x="34" y="8" width="62" height="46" rx="8" fill="${G}" transform="rotate(8 65 31)"/>
+      <rect x="26" y="18" width="62" height="46" rx="8" fill="${CY}" transform="rotate(-6 57 41)"/>
+      <rect x="22" y="32" width="66" height="50" rx="8" fill="${N}"/>
+      <rect x="30" y="40" width="50" height="24" rx="4" fill="${P}"/>
+      <rect x="30" y="70" width="30" height="4" rx="2" fill="#fff" opacity=".7"/></svg>`,
+    // 2. 4칸 갤러리 (종류별로 정리된 느낌)
+    icon2: `<svg viewBox="0 0 96 96" width="96" height="96" aria-hidden="true">
+      <rect x="8" y="8" width="38" height="38" rx="10" fill="${P}"/>
+      <rect x="50" y="8" width="38" height="38" rx="19" fill="${CY}"/>
+      <rect x="8" y="50" width="38" height="38" rx="10" fill="${N}"/>
+      <rect x="50" y="50" width="38" height="38" rx="10" fill="${G}"/>
+      <path d="M60 74 l9-11 l9 11z" fill="${N}"/></svg>`,
+    // 3. 파일 폴더 (아카이브)
+    icon3: `<svg viewBox="0 0 120 96" width="120" height="96" aria-hidden="true">
+      <path d="M14 22 a8 8 0 0 1 8-8 h24 l8 9 h44 a8 8 0 0 1 8 8 v49 a8 8 0 0 1-8 8 H22 a8 8 0 0 1-8-8z" fill="${N}"/>
+      <rect x="28" y="20" width="56" height="40" rx="5" fill="${G}" transform="rotate(-5 56 40)"/>
+      <rect x="36" y="24" width="56" height="40" rx="5" fill="${CY}" transform="rotate(4 64 44)"/>
+      <path d="M10 44 a6 6 0 0 1 6-6 h88 a6 6 0 0 1 6 6 l-5 36 a8 8 0 0 1-8 7 H23 a8 8 0 0 1-8-7z" fill="${P}"/>
+      <rect x="48" y="56" width="24" height="5" rx="2.5" fill="#fff"/></svg>`,
+    // 4. 펜 툴 (디자이너 도구)
+    icon4: `<svg viewBox="0 0 120 96" width="120" height="96" aria-hidden="true">
+      <path d="M14 76 C 34 20, 70 20, 100 50" fill="none" stroke="${N}" stroke-width="4" stroke-linecap="round"/>
+      <line x1="34" y1="34" x2="72" y2="20" stroke="${CY}" stroke-width="2.5"/>
+      <circle cx="34" cy="34" r="5" fill="${CY}"/><circle cx="72" cy="20" r="5" fill="${CY}"/>
+      <rect x="8" y="70" width="12" height="12" rx="2" fill="#fff" stroke="${N}" stroke-width="3"/>
+      <rect x="94" y="44" width="12" height="12" rx="2" fill="#fff" stroke="${N}" stroke-width="3"/>
+      <circle cx="54" cy="25" r="11" fill="${P}"/><path d="M50 25 l4-7 l4 7 l-4 4z" fill="#fff"/></svg>`,
+  };
   function renderAllPeek(sorted) {
     const box = $("#allThumbs");
     const style = window.__ALL_STYLE || ALL_STYLE;
@@ -210,6 +243,7 @@
     const cats = count((p) => p.categoryLabel).sort((a, b) => b[1] - a[1]);
     const years = count((p) => p.date.slice(0, 4)).sort((a, b) => a[0].localeCompare(b[0]));
     const tools = new Set(sorted.flatMap((p) => p.tools || []));
+    if (style.startsWith("icon")) { box.innerHTML = ICONS[style] || ICONS.icon1; return; }
     if (style === "stats") {
       box.innerHTML = [[sorted.length, "Projects"], [cats.length, "Categories"], [tools.size, "Tools"]]
         .map(([n, l]) => `<span class="peek-stat"><b>${n}</b><span>${l}</span></span>`).join("");
