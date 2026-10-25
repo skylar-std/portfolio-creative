@@ -182,19 +182,36 @@
       sec.hidden = empty;
     });
     $$(".sec").filter((s) => !s.hidden).forEach((s, i) => { $(".sec__num", s).textContent = pad2(i + 1); });
-    $$(".nav a[href^='#']").forEach((a) => { const t = $(a.getAttribute("href")); a.hidden = !t || t.hidden; });
+    // 오른쪽 구역 이동 바에서도 숨긴 구역은 빼기
+    $$(".side__list li").forEach((li) => { const t = $($("a", li).getAttribute("href")); if (!t || t.hidden) li.remove(); });
   }
 
-  /* 지금 보고 있는 섹션을 메뉴에 표시 */
-  function activeNav() {
-    const links = $$(".nav a[href^='#']").filter((a) => !a.hidden);
-    const secs = links.map((a) => $(a.getAttribute("href")));
-    if (!("IntersectionObserver" in window)) return;
-    const io = new IntersectionObserver((es) => es.forEach((e) => {
-      if (!e.isIntersecting) return;
-      links.forEach((a) => { const on = a.getAttribute("href") === `#${e.target.id}`; a.classList.toggle("is-on", on); if (on) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
-    }), { rootMargin: "-40% 0px -55% 0px" });
-    secs.forEach((s) => s && io.observe(s));
+  /* 위 메뉴(Home · Profile)와 오른쪽 구역 이동 바에 지금 위치 표시 */
+  function trackPosition() {
+    const side = $("#side");
+    const items = $$(".side__list a", side).map((a) => ({ a, sec: $(a.getAttribute("href")) })).filter((x) => x.sec);
+    const home = $(".nav a[href='#top']"), prof = $(".nav a[href='#profile']");
+    const cover = $("#top"), profile = $("#profile");
+    const fill = $("#sideFill");
+    const set = (a, on) => { if (!a) return; a.classList.toggle("is-on", on); if (on) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); };
+    let ticking = false;
+    function update() {
+      ticking = false;
+      const probe = window.scrollY + window.innerHeight * 0.4;
+      // 위 메뉴: 표지에서는 Home, 그 아래는 Profile
+      const inHome = probe < profile.offsetTop;
+      set(home, inHome); set(prof, !inHome);
+      // 오른쪽 바: 표지가 지나면 보이기
+      side.classList.toggle("is-visible", window.scrollY > cover.offsetHeight * 0.6 && items.length > 0);
+      let active = -1;
+      items.forEach((x, i) => { if (x.sec.offsetTop <= probe) active = i; });
+      items.forEach((x, i) => { set(x.a, i === active); x.a.classList.toggle("is-passed", i < active); });
+      if (fill && items.length > 1) fill.style.height = `${Math.max(0, active) / (items.length - 1) * 100}%`;
+    }
+    const on = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    window.addEventListener("scroll", on, { passive: true });
+    window.addEventListener("resize", on);
+    update();
   }
 
   function headerShadow() {
@@ -211,6 +228,6 @@
     renderSlider(window.PROJECTS || []);
     renderFeatured(window.PROJECTS || []);
     hideEmpty();
-    activeNav();
+    trackPosition();
   });
 })();

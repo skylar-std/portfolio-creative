@@ -27,20 +27,29 @@
     <div class="wrap head__in">
       <a href="#top" class="logo">PARK Younghee</a>
       <nav class="nav" aria-label="주요 메뉴">
-        <a href="#profile" class="nav__sec">Profile</a>
-        <a href="#education" class="nav__sec">학력</a>
-        <a href="#career" class="nav__sec">경력</a>
-        <a href="#training" class="nav__sec">교육</a>
-        <a href="#awards" class="nav__sec">수상</a>
-        <a href="#certificates" class="nav__sec">자격증</a>
-        <a href="#skills" class="nav__sec">Skills</a>
-        <a href="#featured" class="nav__sec">대표작</a>
+        <a href="#top" aria-current="page" class="is-on">Home</a>
+        <a href="#profile">Profile</a>
         <a href="works.html" data-keep="works.html">Projects</a>
-        <a href="#contact" class="nav__sec">Contact</a>
       </nav>
       <a class="btn btn--sm btn--line" href="files/resume.pdf" target="_blank" rel="noopener">이력서 PDF</a>
     </div>
   </header>
+
+
+  <!-- ===== 오른쪽 구역 이동 바 (표지 아래부터 보여요 · 넓은 화면에서만) ===== -->
+  <nav class="side" id="side" aria-label="구역 이동">
+    <span class="side__track" aria-hidden="true"><span class="side__fill" id="sideFill"></span></span>
+    <ol class="side__list">
+      <li><a href="#education"><span class="side__label">학력</span></a></li>
+      <li><a href="#career"><span class="side__label">경력</span></a></li>
+      <li><a href="#training"><span class="side__label">교육</span></a></li>
+      <li><a href="#awards"><span class="side__label">수상</span></a></li>
+      <li><a href="#certificates"><span class="side__label">자격증</span></a></li>
+      <li><a href="#skills"><span class="side__label">Skills</span></a></li>
+      <li><a href="#featured"><span class="side__label">대표 프로젝트</span></a></li>
+      <li><a href="#contact"><span class="side__label">Contact</span></a></li>
+    </ol>
+  </nav>
 
   <main id="main">
 
