@@ -195,7 +195,40 @@
     $("#allMeta").textContent = list.length
       ? `${list.length}개 프로젝트 · ${years[years.length - 1] === years[0] ? years[0] : `${years[years.length - 1]}–${years[0]}`} · 연도 · 종류별로 정리`
       : "프로젝트가 정리되는 대로 이곳에 쌓여요";
-    $("#allThumbs").innerHTML = sorted.slice(0, 4).map((p) => `<img src="${esc(p.thumb)}" alt="" loading="lazy" />`).join("");
+    renderAllPeek(sorted);
+  }
+
+  /* '모든 프로젝트 보러가기' 오른쪽 미리보기
+     ALL_STYLE: "stats"(숫자 3개) · "cats"(카테고리 칩) · "years"(연도별 막대) · "donut"(작은 도넛) · "thumbs"(이미지) */
+  const ALL_STYLE = "stats";
+  function renderAllPeek(sorted) {
+    const box = $("#allThumbs");
+    const style = window.__ALL_STYLE || ALL_STYLE;
+    box.className = `allwork__peek allwork__peek--${style}`;
+    if (!sorted.length) { box.innerHTML = ""; return; }
+    const count = (key) => { const m = new Map(); sorted.forEach((p) => { const k = key(p); if (k) m.set(k, (m.get(k) || 0) + 1); }); return [...m]; };
+    const cats = count((p) => p.categoryLabel).sort((a, b) => b[1] - a[1]);
+    const years = count((p) => p.date.slice(0, 4)).sort((a, b) => a[0].localeCompare(b[0]));
+    const tools = new Set(sorted.flatMap((p) => p.tools || []));
+    if (style === "stats") {
+      box.innerHTML = [[sorted.length, "Projects"], [cats.length, "Categories"], [tools.size, "Tools"]]
+        .map(([n, l]) => `<span class="peek-stat"><b>${n}</b><span>${l}</span></span>`).join("");
+    } else if (style === "cats") {
+      box.innerHTML = cats.slice(0, 5).map(([c, n]) => `<span class="peek-chip">${esc(c)}<b>${n}</b></span>`).join("")
+        + (cats.length > 5 ? `<span class="peek-chip peek-chip--more">+${cats.length - 5}</span>` : "");
+    } else if (style === "years") {
+      const max = Math.max(...years.map((y) => y[1]));
+      box.innerHTML = years.slice(-4).map(([y, n]) => `<span class="peek-year"><span class="peek-year__bar" style="height:${Math.round((n / max) * 100)}%"><b>${n}</b></span><span class="peek-year__label">${y}</span></span>`).join("");
+    } else if (style === "donut") {
+      const C = ["#FF2E63", "#08D9D6", "#252A34", "#FF8AA8"];
+      let acc = 0; const total = sorted.length;
+      const top = cats.slice(0, 4), rest = total - top.reduce((a, c) => a + c[1], 0);
+      const stops = [...top.map((c, i) => [C[i], c[1]]), ...(rest ? [["#D5D7DC", rest]] : [])]
+        .map(([col, n]) => { const a = acc; acc += n; return `${col} ${(a / total) * 360}deg ${(acc / total) * 360}deg`; }).join(",");
+      box.innerHTML = `<span class="peek-donut" style="background:conic-gradient(${stops})"><span><b>${total}</b>Projects</span></span>`;
+    } else {
+      box.innerHTML = sorted.slice(0, 4).map((p) => `<img src="${esc(p.thumb)}" alt="" loading="lazy" />`).join("");
+    }
   }
 
   /* 내용이 없는 칸 숨기기 → 섹션 번호 · 메뉴 다시 매기기 */

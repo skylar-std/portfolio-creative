@@ -238,9 +238,35 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .allwork__text { display: flex; flex-direction: column; gap: 6px; }
 .allwork__title { font-size: clamp(24px, 3vw, 32px); font-weight: 800; letter-spacing: -0.03em; }
 .allwork__meta { font-size: 15px; color: var(--ink-2); }
-.allwork__thumbs { display: flex; }
-.allwork__thumbs img { width: 84px; height: 84px; object-fit: cover; border-radius: 10px; border: 3px solid var(--surface); margin-left: -18px; background: var(--bg); }
-.allwork__thumbs img:first-child { margin-left: 0; }
+.allwork__peek { display: flex; align-items: center; }
+/* stats: 숫자 3개 */
+.allwork__peek--stats { gap: 0; }
+.peek-stat { display: flex; flex-direction: column; align-items: center; min-width: 92px; padding: 0 18px; border-left: 1px solid var(--line); }
+.peek-stat:first-child { border-left: 0; }
+.peek-stat b { font-size: 34px; font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; color: var(--navy); font-variant-numeric: tabular-nums; }
+.peek-stat:first-child b { color: var(--pink); }
+.peek-stat span { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+/* cats: 카테고리 칩 */
+.allwork__peek--cats { flex-wrap: wrap; justify-content: flex-end; gap: 8px; max-width: 360px; }
+.peek-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: var(--gray); font-size: 14px; font-weight: 600; color: var(--navy); }
+.peek-chip b { font-size: 12px; color: var(--pink-text); }
+.peek-chip:first-child { background: var(--navy); color: #fff; }
+.peek-chip:first-child b { color: var(--cyan); }
+.peek-chip--more { background: transparent; border: 1px dashed var(--ink-3); color: var(--ink-3); }
+/* years: 연도별 막대 */
+.allwork__peek--years { align-items: flex-end; gap: 14px; height: 96px; }
+.peek-year { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%; width: 44px; }
+.peek-year__bar { display: flex; justify-content: center; width: 100%; min-height: 22px; border-radius: 6px 6px 2px 2px; background: var(--gray); }
+.peek-year__bar b { font-size: 12px; font-weight: 800; color: var(--navy); padding-top: 3px; }
+.peek-year:last-child .peek-year__bar { background: var(--pink); }
+.peek-year:last-child .peek-year__bar b { color: #fff; }
+.peek-year__label { font-size: 12px; font-weight: 600; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+/* donut: 작은 도넛 */
+.peek-donut { display: grid; place-items: center; width: 96px; height: 96px; border-radius: 50%; }
+.peek-donut > span { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: var(--surface); font-size: 10px; font-weight: 600; letter-spacing: .04em; color: var(--ink-3); }
+.peek-donut b { font-size: 22px; line-height: 1; font-weight: 800; color: var(--navy); }
+.allwork__peek--thumbs img { width: 84px; height: 84px; object-fit: cover; border-radius: 10px; border: 3px solid var(--surface); margin-left: -18px; background: var(--bg); }
+.allwork__peek--thumbs img:first-child { margin-left: 0; }
 .allwork__arrow { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--ink); color: #fff; font-size: 22px; transition: background .2s; }
 .allwork__link:hover .allwork__arrow { background: var(--accent); }
 
@@ -665,7 +691,7 @@ a.card:hover { border-color: var(--pink); }
 /* ===== 휴대폰 ===== */
 @media (max-width: 640px) {
   .allwork__link { grid-template-columns: minmax(0, 1fr) auto; }
-  .allwork__thumbs { display: none; }
+  .allwork__peek { display: none; }
   .summary, .summary.summary--donut, .summary.summary--pie { grid-template-columns: minmax(0, 1fr); }
   .sum--donut { gap: 20px; }
   .donut { width: 128px; height: 128px; }
