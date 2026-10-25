@@ -1,8 +1,8 @@
 /* =========================================
    프로젝트 페이지(works.html)
    1. 요약: 총 프로젝트 수 · 카테고리별 개수 · 많이 쓴 도구(사용 비율 %)
-   2. 필터: 연도 · 종류(category). 한 가지뿐인 필터 줄은 숨겨요
-   3. 목록: 연도별로 묶어 한 줄씩 (최신이 위)
+   2. 보기: [종류별 | 연도별] 탭. 탭을 누르거나 옆으로 밀어 바꿔요
+   3. 묶음마다 카드 한 줄, 옆으로 넘겨 봐요
    - 줄을 누르면 project.html?id=프로젝트id 로 이동
    - 예전 주소 works.html#프로젝트id 로 들어오면 그 상세 페이지로 보내요
    ========================================= */
@@ -15,7 +15,6 @@
   const KINDS = { personal: "개인", team: "팀", contest: "공모전", school: "학교 과제", client: "외주" };
   const kindOf = (p) => KINDS[p.type] || (p.client ? "외주" : "개인");
   const yearOf = (p) => p.date.slice(0, 4);
-  const F = { year: "all", cat: "all" };
   let ALL = [];
 
   /* 요약: 총 프로젝트 · 카테고리별 개수 · 많이 쓴 도구(전체 프로젝트 중 사용한 비율 %) */
@@ -118,47 +117,85 @@
       <ul class="strip__legend">${list.map(([k, n, etc], i) => `<li><i style="background:${color(i, etc)}"></i>${esc(k)} <b>${pctOf(n)}%</b></li>`).join("")}</ul>`;
   }
 
-  function chips(box, key, items) {
-    if (items.length < 2) { box.hidden = true; return; }
-    box.innerHTML = `<span class="arc-filter__k">${box.getAttribute("aria-label")}</span>` +
-      [["all", "전체", ALL.length], ...items.map((v) => [v, v, ALL.filter((p) => (key === "year" ? yearOf(p) : p.categoryLabel) === v).length])]
-        .map(([v, label, n]) => `<button type="button" class="chip chip--btn" data-v="${esc(v)}" aria-pressed="${F[key] === v}">${esc(label)} <span>${n}</span></button>`).join("");
-    box.addEventListener("click", (e) => {
-      const b = e.target.closest("button[data-v]"); if (!b) return;
-      F[key] = b.dataset.v;
-      $$("button", box).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-      draw();
-    });
-  }
-
-  const row = (p) => `
-    <li><a class="arc-row" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(p.id)}`))}">
-      <span class="arc-row__img"><img src="${esc(p.thumb)}" alt="" loading="lazy" /></span>
-      <span class="arc-row__date">${esc(p.date.slice(5, 7))}월</span>
-      <span class="arc-row__main">
-        <strong class="arc-row__title">${esc(p.title)}${p.featured ? ' <span class="badge">대표</span>' : ""}</strong>
-        ${p.summary ? `<span class="arc-row__sum">${esc(p.summary)}</span>` : ""}
-      </span>
-      <span class="arc-row__cat">${esc(p.categoryLabel)}</span>
-      <span class="arc-row__kind">${esc(kindOf(p))}</span>
-      <span class="arc-row__role">${esc(p.role)}</span>
+  /* ===== 보기: [종류별 | 연도별] 탭 + 옆으로 넘기는 줄 =====
+     - 위 탭을 누르거나, 휴대폰에서 화면을 옆으로 밀면 두 보기가 바뀌어요
+     - 각 묶음(종류 · 연도)은 카드 한 줄이고, 옆으로 밀거나 화살표로 넘겨요 */
+  const card = (p, meta) => `
+    <li class="sw-card"><a href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(p.id)}`))}">
+      <span class="sw-card__img"><img src="${esc(p.thumb)}" alt="" loading="lazy" />${p.featured ? '<span class="badge badge--img">대표</span>' : ""}</span>
+      <span class="sw-card__meta">${esc(meta)}</span>
+      <strong class="sw-card__title">${esc(p.title)}</strong>
+      ${p.role ? `<span class="sw-card__role">${esc(p.role)}</span>` : ""}
     </a></li>`;
 
-  function draw() {
-    const shown = ALL.filter((p) => (F.year === "all" || yearOf(p) === F.year) && (F.cat === "all" || p.categoryLabel === F.cat));
-    const filtered = F.year !== "all" || F.cat !== "all";
-    $("#arcReset").hidden = !filtered;
-    $("#arcResult").textContent = filtered ? `${shown.length}개` : "";
-    const years = [...new Set(shown.map(yearOf))];
-    $("#archive").innerHTML = years.length
-      ? years.map((y) => {
-        const items = shown.filter((p) => yearOf(p) === y);
-        return `<section class="arc-year" aria-labelledby="yh${y}">
-            <h2 class="arc-year__head" id="yh${y}">${y}<span>${items.length}개</span></h2>
-            <ul class="arc-list">${items.map(row).join("")}</ul>
-          </section>`;
-      }).join("")
-      : `<p class="arc-empty">${filtered ? "조건에 맞는 프로젝트가 없어요. 필터를 바꿔보세요." : "아직 등록된 프로젝트가 없어요. 정리되는 대로 이곳에 쌓일 거예요."}</p>`;
+  function groupsHTML(groups, metaOf, prefix) {
+    return groups.map(([name, items], i) => `
+      <section class="sw-group" aria-labelledby="${prefix}${i}">
+        <header class="sw-group__head">
+          <h2 id="${prefix}${i}">${esc(name)} <span>${items.length}</span></h2>
+          <span class="sw-group__arrows">
+            <button type="button" class="slider__btn sw-btn" data-dir="-1" aria-label="${esc(name)} 이전">←</button>
+            <button type="button" class="slider__btn sw-btn" data-dir="1" aria-label="${esc(name)} 다음">→</button>
+          </span>
+        </header>
+        <ul class="sw-track">${items.map((p) => card(p, metaOf(p))).join("")}</ul>
+      </section>`).join("");
+  }
+
+  function buildViews() {
+    const box = $("#views");
+    if (!ALL.length) {
+      box.innerHTML = `<p class="arc-empty">아직 등록된 프로젝트가 없어요. 정리되는 대로 이곳에 쌓일 거예요.</p>`;
+      $("#viewTabs").hidden = true;
+      return;
+    }
+    const by = (keyOf) => {
+      const m = new Map();
+      ALL.forEach((p) => { const k = keyOf(p) || "기타"; if (!m.has(k)) m.set(k, []); m.get(k).push(p); });
+      return [...m.entries()];
+    };
+    const byCat = by((p) => p.categoryLabel).sort((a, b) => b[1].length - a[1].length);   // 많은 순
+    const byYear = by(yearOf).sort((a, b) => b[0] - a[0]);                                // 최신 연도 순
+    $("#panelCat").innerHTML = groupsHTML(byCat, (p) => `${yearOf(p)} · ${kindOf(p)}`, "gc");
+    $("#panelYear").innerHTML = groupsHTML(byYear, (p) => `${p.categoryLabel} · ${p.date.slice(5, 7)}월`, "gy");
+
+    // 넘칠 때만 화살표
+    const arrows = () => $$(".sw-group").forEach((g) => {
+      const t = $(".sw-track", g); $(".sw-group__arrows", g).hidden = t.scrollWidth <= t.clientWidth + 4;
+    });
+    box.addEventListener("click", (e) => {
+      const b = e.target.closest(".sw-btn"); if (!b) return;
+      const t = $(".sw-track", b.closest(".sw-group"));
+      t.scrollBy({ left: Number(b.dataset.dir) * t.clientWidth * 0.8, behavior: "smooth" });
+    });
+
+    // 탭 ↔ 옆으로 밀기
+    const tabs = $$("#viewTabs [role=tab]");
+    const panels = [$("#panelCat"), $("#panelYear")];
+    let cur = 0;
+    const fit = () => { box.style.height = `${panels[cur].offsetHeight}px`; };
+    const select = (i, scroll = true) => {
+      cur = i;
+      tabs.forEach((t, k) => { t.setAttribute("aria-selected", String(k === i)); t.tabIndex = k === i ? 0 : -1; });
+      panels.forEach((p, k) => p.setAttribute("aria-hidden", String(k !== i)));
+      $("#viewTabs").style.setProperty("--i", i);
+      if (scroll) box.scrollTo({ left: i * box.clientWidth, behavior: "smooth" });
+      fit();
+    };
+    tabs.forEach((t, i) => t.addEventListener("click", () => select(i)));
+    $("#viewTabs").addEventListener("keydown", (e) => {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      const i = (cur + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+      select(i); tabs[i].focus();
+    });
+    let st = 0;
+    box.addEventListener("scroll", () => {
+      clearTimeout(st);
+      st = setTimeout(() => { const i = Math.round(box.scrollLeft / box.clientWidth); if (i !== cur) select(i, false); }, 80);
+    }, { passive: true });
+    window.addEventListener("resize", () => { box.scrollLeft = cur * box.clientWidth; fit(); arrows(); });
+    select(0, false);
+    arrows();
   }
 
   function init() {
@@ -173,18 +210,7 @@
 
     $("#wkCount").textContent = ALL.length;
     summary();
-    if (!ALL.length) $("#arcTools").hidden = true;
-    chips($("#fYear"), "year", [...new Set(ALL.map(yearOf))]);
-    const catCount = (c) => ALL.filter((p) => p.categoryLabel === c).length;
-    chips($("#fCat"), "cat", [...new Set(ALL.map((p) => p.categoryLabel).filter(Boolean))].sort((a, b) => catCount(b) - catCount(a)));
-    // 거를 게 없으면(연도 · 종류가 한 가지씩뿐) 필터 줄 전체를 숨겨요
-    if ($("#fYear").hidden && $("#fCat").hidden) $("#arcTools").hidden = true;
-    $("#arcReset").addEventListener("click", () => {
-      F.year = "all"; F.cat = "all";
-      $$(".arc-filter button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === "all")));
-      draw();
-    });
-    draw();
+    buildViews();
   }
 
   (window.PROJECTS_READY || Promise.resolve()).then(() => {

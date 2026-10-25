@@ -304,6 +304,42 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .strip__legend b { margin-left: auto; font-variant-numeric: tabular-nums; }
 .bars__pct { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
 
+/* ===== 프로젝트 페이지: 종류별 · 연도별 보기 ===== */
+.vtabs { --i: 0; position: relative; display: inline-grid; grid-template-columns: 1fr 1fr; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; }
+.vtabs button { position: relative; z-index: 1; min-width: 104px; min-height: 42px; padding: 0 20px; border: 0; background: none; font: inherit; font-size: 15px; font-weight: 700; color: var(--ink-3); cursor: pointer; border-radius: 999px; transition: color .25s; }
+.vtabs button[aria-selected="true"] { color: #fff; }
+.vtabs__pill { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 999px; background: var(--navy); transform: translateX(calc(var(--i) * 100%)); transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
+.vtabs__hint { display: none; margin: 8px 0 0; font-size: 12.5px; color: var(--ink-3); }
+.views { display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; margin-top: 8px; transition: height .3s; align-items: flex-start; }
+.views::-webkit-scrollbar { display: none; }
+.views__panel { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; }
+.views__panel[aria-hidden="true"] { visibility: hidden; transition: visibility 0s .3s; }
+.sw-group { padding-top: 32px; }
+.sw-group__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--navy); }
+.sw-group__head h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+.sw-group__head h2 span { margin-left: 4px; font-size: 15px; font-weight: 700; color: var(--pink-text); }
+.sw-group__arrows { display: flex; gap: 6px; }
+.sw-group .slider__btn { width: 38px; height: 38px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+.sw-group .slider__btn:hover { background: var(--pink); border-color: var(--pink); color: #fff; }
+.sw-track { display: flex; gap: 16px; margin: 0; padding: 16px 0 6px; list-style: none; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: thin; }
+.sw-card { flex: 0 0 280px; scroll-snap-align: start; }
+.sw-card a { display: flex; flex-direction: column; gap: 4px; height: 100%; padding: 10px 10px 14px; box-sizing: border-box; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; text-decoration: none; transition: border-color .2s, transform .2s, box-shadow .2s; }
+.sw-card a:hover { border-color: var(--pink); transform: translateY(-2px); box-shadow: 0 12px 24px -18px rgba(0, 0, 0, .35); }
+.sw-card__img { position: relative; display: block; aspect-ratio: 4 / 3; margin-bottom: 6px; border-radius: 8px; overflow: hidden; background: var(--bg); }
+.sw-card__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sw-card .badge--img { position: absolute; left: 8px; top: 8px; margin: 0; background: var(--pink); color: #fff; }
+.sw-card__meta, .sw-card__title, .sw-card__role { padding: 0 4px; }
+.sw-card__meta { font-size: 12.5px; font-weight: 600; color: var(--pink-text); }
+.sw-card__title { font-size: 16.5px; font-weight: 800; line-height: 1.35; }
+.sw-card__role { font-size: 13px; color: var(--ink-3); }
+@media (max-width: 760px) {
+  .vtabs { display: grid; width: 100%; }
+  .vtabs__hint { display: block; }
+  .sw-card { flex-basis: 72%; }
+  .sw-group__arrows { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .vtabs__pill, .views { transition: none; } }
+
 /* ===== 아카이브 ===== */
 .arc-tools { display: flex; flex-direction: column; gap: 12px; padding: 18px 0 20px; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); margin-bottom: 8px; }
 .search { display: flex; align-items: center; gap: 10px; max-width: 420px; min-height: 46px; padding: 0 14px; box-sizing: border-box; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }

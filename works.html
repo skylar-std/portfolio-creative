@@ -42,18 +42,19 @@
       <!-- 1. 요약: DB projects 로 자동 계산 -->
       <section class="summary" id="summary" aria-label="요약"></section>
 
-      <!-- 2. 필터: 연도 · 종류(category) -->
-      <div class="arc-tools" id="arcTools">
-        <div class="arc-filter" id="fYear" role="group" aria-label="연도"></div>
-        <div class="arc-filter" id="fCat" role="group" aria-label="종류"></div>
-        <div class="arc-status">
-          <p id="arcResult" aria-live="polite"></p>
-          <button type="button" class="link-btn" id="arcReset" hidden>필터 초기화</button>
-        </div>
+      <!-- 2. 보기: 종류별 · 연도별 (탭을 누르거나 옆으로 밀기) -->
+      <div class="vtabs" id="viewTabs" role="tablist" aria-label="보기 기준">
+        <button type="button" role="tab" id="tabCat" aria-controls="panelCat" aria-selected="true">종류별</button>
+        <button type="button" role="tab" id="tabYear" aria-controls="panelYear" aria-selected="false" tabindex="-1">연도별</button>
+        <span class="vtabs__pill" aria-hidden="true"></span>
       </div>
+      <p class="vtabs__hint">옆으로 밀어도 바뀌어요</p>
 
-      <!-- 3. 목록: 연도별 -->
-      <div id="archive"></div>
+      <!-- 3. 묶음마다 카드 한 줄 -->
+      <div class="views" id="views">
+        <div class="views__panel" id="panelCat" role="tabpanel" aria-labelledby="tabCat"></div>
+        <div class="views__panel" id="panelYear" role="tabpanel" aria-labelledby="tabYear"></div>
+      </div>
     </div>
   </main>
 
