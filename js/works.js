@@ -21,7 +21,7 @@
   const TOOL_LIMIT = 5;
   const CAT_LIMIT = 4;          // 카테고리는 많은 순 4개까지, 나머지는 '기타'
   const CAT_STYLE = "donut";
-  // 종류별 위 카테고리 고르기 모양: "text"(연도처럼 글자 탭) · "chips"(작은 칩)
+  // 종류별 · 연도별 위 고르기 모양: "text"(글자 탭, 연도와 같은 모양) · "chips"(둘 다 칩)
   const CAT_FILTER = window.__CAT_FILTER || "text";    // "pie" = 총 프로젝트 숫자 + 카테고리 원형 · "donut" = 도넛 가운데 총 개수 · "bars" = 막대 · "strip" = 한 줄 띠
   const STRIP_COLORS = ["#FF2E63", "#08D9D6", "#252A34", "#FF8AA8", "#7FE9E7"];
   const DONUT_COLORS = ["#FF2E63", "#08D9D6", "#252A34", "#FF8AA8"];   // 상위 4개 · 나머지는 회색 '기타'
@@ -221,9 +221,9 @@
     const cp = $("#panelCat");
     const catMeta = (p) => `${yearOf(p)}.${p.date.slice(5, 7)}`;
     cp.innerHTML = `
-      <div class="cbar cbar--${CAT_FILTER}" role="tablist" aria-label="카테고리 선택">
-        <button type="button" role="tab" class="cbar__btn" data-c="" aria-selected="true">전체<sup>${ALL.length}</sup></button>
-        ${byCat.map(([c, items]) => `<button type="button" role="tab" class="cbar__btn" data-c="${esc(c)}" aria-selected="false">${esc(c)}<sup>${items.length}</sup></button>`).join("")}
+      <div class="${CAT_FILTER === "chips" ? "cbar cbar--chips" : "ybar cbar"}" role="tablist" aria-label="카테고리 선택">
+        <button type="button" role="tab" class="cbar__btn${CAT_FILTER === "chips" ? "" : " ybar__btn"}" data-c="" aria-selected="true">전체<sup>${ALL.length}</sup></button>
+        ${byCat.map(([c, items]) => `<button type="button" role="tab" class="cbar__btn${CAT_FILTER === "chips" ? "" : " ybar__btn"}" data-c="${esc(c)}" aria-selected="false">${esc(c)}<sup>${items.length}</sup></button>`).join("")}
       </div>
       <div class="cview" id="cView" role="tabpanel" aria-live="polite"></div>`;
     const showCat = (c) => {
@@ -309,7 +309,7 @@
     /* 상세로 갈 때: 지금 보던 목록 순서와 자리를 기억해요
        → 상세 페이지의 이전 · 다음이 이 순서를 따르고, '목록'을 누르면 이 자리로 돌아와요 */
     const KEY = "pf.works";
-    const curYear = () => { const b = $(".ybar__btn[aria-selected=true]"); return b ? b.dataset.y : ""; };
+    const curYear = () => { const b = $("#panelYear .ybar__btn[aria-selected=true]"); return b ? b.dataset.y : ""; };
     box.addEventListener("click", (e) => {
       const a = e.target.closest(".sw-card a"); if (!a) return;
       const panel = panels[cur];
@@ -324,7 +324,7 @@
     try { back = sessionStorage.getItem("pf.back") === "1"; sessionStorage.removeItem("pf.back"); } catch (err) { back = false; }
     const nav = (performance.getEntriesByType && performance.getEntriesByType("navigation")[0]) || {};
     if (saved && (back || nav.type === "back_forward")) {
-      if (saved.year) { const b = $(`.ybar__btn[data-y="${saved.year}"]`); if (b) b.click(); }
+      if (saved.year) { const b = $(`#panelYear .ybar__btn[data-y="${saved.year}"]`); if (b) b.click(); }
       if (saved.tab) { box.style.scrollBehavior = "auto"; select(saved.tab, false); box.scrollLeft = saved.tab * box.clientWidth; box.style.scrollBehavior = ""; }
       requestAnimationFrame(() => window.scrollTo({ top: saved.y || 0, behavior: "instant" }));
     }
