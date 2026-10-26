@@ -127,8 +127,20 @@ html::-webkit-scrollbar { display: none; }
 .slide { flex: 0 0 100%; scroll-snap-align: start; }
 .slide__link { display: block; height: 100%; text-decoration: none; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
 .slide__img { display: block; aspect-ratio: 16 / 10; background: var(--bg); overflow: hidden; }
-.slide__img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
-.slide__link:hover .slide__img img { transform: scale(1.02); }
+.slide__img img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.06); transition: transform 1.4s cubic-bezier(.2, .7, .2, 1); }
+.slide.is-active .slide__img img { transform: scale(1); }
+/* 들어오는 장: 글이 아래에서 살짝 올라와요 */
+.slide__info > * { opacity: 0; transform: translateY(8px); transition: opacity .5s, transform .6s cubic-bezier(.2, .7, .2, 1); }
+.slide.is-active .slide__info > * { opacity: 1; transform: none; }
+.slide.is-active .slide__info > :nth-child(2) { transition-delay: .08s; }
+.slide.is-active .slide__info > :nth-child(3) { transition-delay: .16s; }
+.slide.is-active .slide__info > :nth-child(4) { transition-delay: .24s; }
+.slide--empty .slide__info > * { opacity: 1; transform: none; }
+/* 마지막 → 처음: 살짝 사라졌다 나타나기 */
+.slider__track { transition: opacity .28s; }
+.slider__track.is-fade { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .slide__img img, .slide__info > *, .slider__track { transition: none; transform: none; opacity: 1; } }
+.slide.is-active .slide__link:hover .slide__img img { transform: scale(1.03); }
 .slide__info { display: flex; flex-direction: column; gap: 4px; padding: 16px 20px 18px; }
 .slide__meta { font-size: 13px; font-weight: 600; color: var(--accent); }
 .slide__title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
