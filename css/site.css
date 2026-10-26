@@ -770,8 +770,15 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .slider__dot::after { background: rgba(255, 255, 255, .25); }
 .slider__dot[aria-current="true"]::after { background: var(--pink); }
 /* 자동 넘김: 지금 칸의 막대가 왼쪽부터 차올라요 */
-.slider.is-auto .slider__dot[aria-current="true"]::after { background: linear-gradient(var(--pink), var(--pink)) 0 0 / 0% 100% no-repeat, rgba(255, 255, 255, .25); }
+/* 지금 장: 막대가 길어지고 핑크로 빛나요. 자동 넘김 중에는 왼쪽부터 밝게 차올라요 */
+.slider__dot { width: 28px; transition: width .3s; }
+.slider__dot[aria-current="true"] { width: 48px; }
+.slider__dot[aria-current="true"]::after { height: 4px; top: 12px; background: var(--pink); box-shadow: 0 0 10px rgba(255, 46, 99, .75), 0 0 2px rgba(255, 46, 99, .9); }
+.slider.is-auto .slider__dot[aria-current="true"]::after { background: linear-gradient(#FF6E92, #FF6E92) 0 0 / 0% 100% no-repeat, var(--pink); }
 .slider.is-auto.is-run .slider__dot[aria-current="true"]::after { animation: slideFill var(--auto, 4500ms) linear forwards; }
+.slider__dot:hover::after { background: rgba(255, 255, 255, .55); }
+.slider__dot[aria-current="true"]:hover::after { background: var(--pink); }
+@media (prefers-reduced-motion: reduce) { .slider__dot { transition: none; } }
 @keyframes slideFill { to { background-size: 100% 100%; } }
 .slider__btn { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .35); }
 .slider__btn:hover { background: var(--pink); border-color: var(--pink); }
