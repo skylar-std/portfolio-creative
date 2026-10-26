@@ -442,6 +442,10 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .cbar--chips .cbar__btn[aria-selected="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
 .cbar--chips .cbar__btn[aria-selected="true"] sup { color: var(--cyan); }
 .cgrid { padding-top: 24px !important; }
+/* 칩 모양일 때 연도도 같은 칩으로 (글자 탭 스타일 덮어쓰기) */
+.ybar.ybar--chips { border-bottom: 0; gap: 8px; padding-bottom: 4px; }
+.ybar--chips .ybar__btn::after { display: none; }
+.ybar--chips + .ymonths .ym:first-child { border-top: 1px solid var(--line); margin-top: 20px; }
 /* 요약 도넛의 카테고리 이름 → 누르면 해당 카테고리로 */
 .donut__legend li[data-c] { cursor: pointer; margin: 0 -8px; padding: 2px 8px; border-radius: 6px; transition: background .15s; }
 .donut__legend li[data-c]:hover, .donut__legend li[data-c]:focus-visible { background: var(--pink-soft); outline: none; }

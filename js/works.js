@@ -246,8 +246,8 @@
     // 연도별: 위에서 연도를 고르고, 아래에 그 해를 월별로 정리
     const yp = $("#panelYear");
     yp.innerHTML = `
-      <div class="ybar" role="tablist" aria-label="연도 선택">
-        ${byYear.map(([y, items], i) => `<button type="button" role="tab" class="ybar__btn" data-y="${esc(y)}" aria-selected="${i === 0}">${esc(y)}<sup>${items.length}</sup></button>`).join("")}
+      <div class="ybar ${CAT_FILTER === "chips" ? "cbar cbar--chips ybar--chips" : ""}" role="tablist" aria-label="연도 선택">
+        ${byYear.map(([y, items], i) => `<button type="button" role="tab" class="ybar__btn${CAT_FILTER === "chips" ? " cbar__btn" : ""}" data-y="${esc(y)}" aria-selected="${i === 0}">${esc(y)}<sup>${items.length}</sup></button>`).join("")}
       </div>
       <div class="ymonths" id="yMonths" role="tabpanel" aria-live="polite"></div>`;
     const showYear = (y) => {
