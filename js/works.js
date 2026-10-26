@@ -20,7 +20,9 @@
   /* 요약: 총 프로젝트 · 카테고리별 개수 · 많이 쓴 도구(전체 프로젝트 중 사용한 비율 %) */
   const TOOL_LIMIT = 5;
   const CAT_LIMIT = 4;          // 카테고리는 많은 순 4개까지, 나머지는 '기타'
-  const CAT_STYLE = "donut";    // "pie" = 총 프로젝트 숫자 + 카테고리 원형 · "donut" = 도넛 가운데 총 개수 · "bars" = 막대 · "strip" = 한 줄 띠
+  const CAT_STYLE = "donut";
+  // 종류별 위 카테고리 고르기 모양: "text"(연도처럼 글자 탭) · "chips"(작은 칩)
+  const CAT_FILTER = window.__CAT_FILTER || "text";    // "pie" = 총 프로젝트 숫자 + 카테고리 원형 · "donut" = 도넛 가운데 총 개수 · "bars" = 막대 · "strip" = 한 줄 띠
   const STRIP_COLORS = ["#FF2E63", "#08D9D6", "#252A34", "#FF8AA8", "#7FE9E7"];
   const DONUT_COLORS = ["#FF2E63", "#08D9D6", "#252A34", "#FF8AA8"];   // 상위 4개 · 나머지는 회색 '기타'
   const OTHER_COLOR = "#D5D7DC";
@@ -118,7 +120,7 @@
       </div>
       <div class="donut__side">
         <span class="sum__k">카테고리${showCount ? ` <b>${cats.length}</b>` : ""}</span>
-        <ul class="donut__legend">${list.map(([k, n, col]) => `<li><i style="background:${col}"></i><span>${esc(k)}</span><b>${label(n)}</b></li>`).join("")}</ul>
+        <ul class="donut__legend">${list.map(([k, n, col]) => `<li${col === OTHER_COLOR ? "" : ` data-c="${esc(k)}" role="button" tabindex="0" title="${esc(k)} 프로젝트 보기"`}><i style="background:${col}"></i><span>${esc(k)}</span><b>${label(n)}</b></li>`).join("")}</ul>
       </div>`;
   }
 
@@ -214,7 +216,33 @@
     };
     const byCat = by((p) => p.categoryLabel).sort((a, b) => b[1].length - a[1].length);   // 많은 순
     const byYear = by(yearOf).sort((a, b) => b[0] - a[0]);                                // 최신 연도 순
-    $("#panelCat").innerHTML = groupsHTML(byCat, (p) => `${yearOf(p)}.${p.date.slice(5, 7)}`, "gc");
+    // 종류별: 위에서 카테고리를 고르고 아래에서 봐요
+    //  - 전체: 종류별 줄(옆으로 넘기기) / 하나 고르면: 그 종류 카드만 바둑판
+    const cp = $("#panelCat");
+    const catMeta = (p) => `${yearOf(p)}.${p.date.slice(5, 7)}`;
+    cp.innerHTML = `
+      <div class="cbar cbar--${CAT_FILTER}" role="tablist" aria-label="카테고리 선택">
+        <button type="button" role="tab" class="cbar__btn" data-c="" aria-selected="true">전체<sup>${ALL.length}</sup></button>
+        ${byCat.map(([c, items]) => `<button type="button" role="tab" class="cbar__btn" data-c="${esc(c)}" aria-selected="false">${esc(c)}<sup>${items.length}</sup></button>`).join("")}
+      </div>
+      <div class="cview" id="cView" role="tabpanel" aria-live="polite"></div>`;
+    const showCat = (c) => {
+      $$(".cbar__btn", cp).forEach((b) => b.setAttribute("aria-selected", String(b.dataset.c === c)));
+      const g = byCat.find((x) => x[0] === c);
+      $("#cView").innerHTML = g
+        ? `<ul class="ym__grid cgrid">${[...g[1]].sort((a, b) => b.date.localeCompare(a.date)).map((p) => card(p, catMeta(p))).join("")}</ul>`
+        : groupsHTML(byCat, catMeta, "gc");
+      if (typeof arrows === "function") arrows();
+      if (typeof fit === "function") fit();
+    };
+    cp.addEventListener("click", (e) => { const b = e.target.closest(".cbar__btn"); if (b) showCat(b.dataset.c); });
+    showCat("");
+    // 요약 도넛의 카테고리 이름을 누르면 → 종류별 탭 + 그 카테고리
+    $$("#summary .donut__legend li[data-c]").forEach((li) => {
+      const go = () => { select(0); showCat(li.dataset.c); $("#viewTabs").scrollIntoView({ behavior: "smooth", block: "start" }); };
+      li.addEventListener("click", go);
+      li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+    });
     // 연도별: 위에서 연도를 고르고, 아래에 그 해를 월별로 정리
     const yp = $("#panelYear");
     yp.innerHTML = `
@@ -241,7 +269,7 @@
     if (byYear.length) showYear(byYear[0][0]);
 
     // 넘칠 때만 화살표
-    const arrows = () => $$(".sw-group").forEach((g) => {
+    var arrows = () => $$(".sw-group").forEach((g) => {
       const t = $(".sw-track", g); $(".sw-group__arrows", g).hidden = t.scrollWidth <= t.clientWidth + 4;
     });
     box.addEventListener("click", (e) => {
@@ -255,7 +283,7 @@
     const panels = [$("#panelCat"), $("#panelYear")];
     let cur = 0;
     var fit = () => { box.style.height = `${panels[cur].offsetHeight}px`; };
-    const select = (i, scroll = true) => {
+    var select = (i, scroll = true) => {
       cur = i;
       tabs.forEach((t, k) => { t.setAttribute("aria-selected", String(k === i)); t.tabIndex = k === i ? 0 : -1; });
       panels.forEach((p, k) => p.setAttribute("aria-hidden", String(k !== i)));

@@ -421,6 +421,38 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .views__panel { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; }
 .views__panel[aria-hidden="true"] { visibility: hidden; transition: visibility 0s .3s; }
 /* 연도별 보기: 연도 버튼 + 월별 정리 */
+/* 종류별: 카테고리 고르기 */
+.cbar { display: flex; flex-wrap: wrap; align-items: flex-end; }
+.cbar__btn { position: relative; border: 0; background: none; font: inherit; cursor: pointer; white-space: nowrap; }
+.cbar__btn sup { margin-left: 3px; font-size: .6em; font-weight: 800; vertical-align: top; position: relative; top: -.15em; }
+.cbar__btn:focus-visible { outline: 2px solid var(--pink); outline-offset: 3px; }
+/* A. 글자 탭 (연도 탭과 같은 모양, 크기만 작게) */
+.cbar--text { gap: 4px 22px; padding: 28px 0 0; border-bottom: 1px solid var(--line); }
+.cbar--text .cbar__btn { padding: 0 0 12px; font-size: 19px; font-weight: 800; letter-spacing: -0.02em; color: #A6AAB4; transition: color .2s; }
+.cbar--text .cbar__btn::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: var(--navy); transform: scaleX(0); transform-origin: left; transition: transform .25s; }
+.cbar--text .cbar__btn:hover { color: var(--ink-3); }
+.cbar--text .cbar__btn[aria-selected="true"] { color: var(--navy); }
+.cbar--text .cbar__btn[aria-selected="true"] sup { color: var(--pink); }
+.cbar--text .cbar__btn[aria-selected="true"]::after { transform: scaleX(1); }
+/* B. 칩 */
+.cbar--chips { gap: 8px; padding: 28px 0 4px; }
+.cbar--chips .cbar__btn { display: inline-flex; align-items: baseline; min-height: 40px; padding: 0 16px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 15px; font-weight: 700; color: var(--ink-2); line-height: 38px; transition: background .2s, color .2s, border-color .2s; }
+.cbar--chips .cbar__btn sup { top: 0; vertical-align: baseline; margin-left: 5px; font-size: 12px; color: var(--pink-text); }
+.cbar--chips .cbar__btn:hover { border-color: var(--navy); color: var(--navy); }
+.cbar--chips .cbar__btn[aria-selected="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+.cbar--chips .cbar__btn[aria-selected="true"] sup { color: var(--cyan); }
+.cgrid { padding-top: 24px !important; }
+/* 요약 도넛의 카테고리 이름 → 누르면 해당 카테고리로 */
+.donut__legend li[data-c] { cursor: pointer; margin: 0 -8px; padding: 2px 8px; border-radius: 6px; transition: background .15s; }
+.donut__legend li[data-c]:hover, .donut__legend li[data-c]:focus-visible { background: var(--pink-soft); outline: none; }
+.donut__legend li[data-c]:hover span { color: var(--pink-text); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 640px) {
+  .cbar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .cbar::-webkit-scrollbar { display: none; }
+  .cbar__btn { flex: none; }
+  .cbar--text { gap: 18px; }
+  .cbar--text .cbar__btn { font-size: 17px; }
+}
 /* 연도: 글자 탭. 고른 연도만 진하게 + 밑줄, 나머지는 연한 회색 */
 .ybar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px 28px; padding: 28px 0 0; border-bottom: 1px solid var(--line); }
 .ybar__btn { position: relative; padding: 0 0 12px; border: 0; background: none; font: inherit; font-size: clamp(24px, 2.6vw, 30px); font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: #C4C7CE; cursor: pointer; font-variant-numeric: tabular-nums; transition: color .2s; }
