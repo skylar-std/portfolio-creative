@@ -137,7 +137,6 @@
     const n = Math.max(1, pick.length);
     const dots = $("#slideDots");
     dots.innerHTML = pick.length > 1 ? pick.map((p, i) => `<button type="button" class="slider__dot" data-i="${i}" aria-label="${i + 1}번째 슬라이드: ${esc(p.title)}"></button>`).join("") : "";
-    $(".slider__arrows").hidden = pick.length < 2;
     let cur = 0;
     const go = (i) => { cur = (i + n) % n; track.scrollTo({ left: cur * track.clientWidth, behavior: "smooth" }); };
     const mark = () => {
@@ -147,8 +146,28 @@
     };
     let t = 0;
     track.addEventListener("scroll", () => { clearTimeout(t); t = setTimeout(mark, 60); }, { passive: true });
-    $("#slidePrev").addEventListener("click", () => go(cur - 1));
-    $("#slideNext").addEventListener("click", () => go(cur + 1));
+    // 마우스로도 끌어서 넘기기 (손가락은 기본으로 밀려요)
+    let dragX = null, dragLeft = 0, moved = false;
+    track.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      dragX = e.clientX; dragLeft = track.scrollLeft; moved = false;
+      track.style.scrollSnapType = "none"; track.classList.add("is-drag");
+    });
+    window.addEventListener("pointermove", (e) => {
+      if (dragX === null) return;
+      const dx = e.clientX - dragX; if (Math.abs(dx) > 4) moved = true;
+      track.scrollLeft = dragLeft - dx;
+    });
+    window.addEventListener("pointerup", (e) => {
+      if (dragX === null) return;
+      const dx = e.clientX - dragX; dragX = null;
+      track.style.scrollSnapType = ""; track.classList.remove("is-drag");
+      const step = Math.abs(dx) > track.clientWidth * 0.15 ? (dx < 0 ? 1 : -1) : 0;
+      go(Math.max(0, Math.min(n - 1, Math.round(dragLeft / Math.max(1, track.clientWidth)) + step)));
+    });
+    // 끈 뒤에는 링크가 눌리지 않게
+    track.addEventListener("click", (e) => { if (moved) { e.preventDefault(); moved = false; } }, true);
+    track.addEventListener("dragstart", (e) => e.preventDefault());
     dots.addEventListener("click", (e) => { const d = e.target.closest("[data-i]"); if (d) go(+d.dataset.i); });
     $("#slider").addEventListener("keydown", (e) => {
       if (e.key === "ArrowLeft") { e.preventDefault(); go(cur - 1); }

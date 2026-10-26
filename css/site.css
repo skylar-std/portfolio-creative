@@ -122,7 +122,7 @@ html::-webkit-scrollbar { display: none; }
 .cover__desc strong { color: var(--ink); }
 .cover__btns { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px; }
 .slider { min-width: 0; }
-.slider__track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 14px; }
+.slider__track { cursor: grab; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 14px; }
 .slider__track::-webkit-scrollbar { display: none; }
 .slide { flex: 0 0 100%; scroll-snap-align: start; }
 .slide__link { display: block; height: 100%; text-decoration: none; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
@@ -141,6 +141,8 @@ html::-webkit-scrollbar { display: none; }
 .slider__bar { display: flex; align-items: center; gap: 16px; margin-top: 14px; }
 .slider__count { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-2); min-width: 56px; }
 .slider__dots { display: flex; gap: 2px; flex: 1; }
+.slider__track.is-drag { cursor: grabbing; user-select: none; }
+.slider__track.is-drag a { pointer-events: none; }
 .slider__dot { width: 28px; height: 28px; padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
 .slider__dot::after { content: ""; position: absolute; left: 4px; right: 4px; top: 13px; height: 3px; border-radius: 2px; background: var(--line); }
 .slider__dot[aria-current="true"]::after { background: var(--ink); }
