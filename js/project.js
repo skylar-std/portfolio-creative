@@ -151,10 +151,14 @@
         </div>
         <nav class="pnav" id="pnav" aria-label="다른 프로젝트">${link(prev, "← 이전 프로젝트", "pnav__a--prev")}${link(next, "다음 프로젝트 →", "pnav__a--next")}</nav>
       </div>
-      <div class="qtoc" id="qtoc" role="dialog" aria-label="이 프로젝트의 구성" hidden><p class="qtoc__title">Contents</p><ol>${tocItems}</ol></div>
+      <div class="ptop" id="ptop">
+        <button type="button" class="ptop__btn" id="qtocBtn" aria-expanded="false" aria-controls="qtoc">
+          <span class="ptop__num" id="ptopNum"></span><span class="ptop__name" id="ptopName">Contents</span>
+          <span class="ptop__caret" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+        </button>
+        <div class="qtoc" id="qtoc" role="dialog" aria-label="이 프로젝트의 구성" hidden><p class="qtoc__title">Contents</p><ol>${tocItems}</ol></div>
+      </div>
       <nav class="qbar" id="qbar" aria-label="빠른 이동">
-        <button type="button" class="qbar__toc" id="qtocBtn" aria-expanded="false" aria-controls="qtoc"><span class="qbar__tocicon" aria-hidden="true"><i></i><i></i><i></i></span><span class="qbar__tocnow">목차</span></button>
-        <span class="qbar__sep qbar__sep--toc" aria-hidden="true"></span>
         <a class="qbar__back js-back" href="${esc(window.keepLink("works.html"))}"><span aria-hidden="true">←</span> 목록</a>
         <span class="qbar__sep" aria-hidden="true"></span>
         ${prev ? `<a class="qbar__btn" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(prev.id)}`))}" aria-label="이전 프로젝트: ${esc(prev.title)}" title="이전 (←)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>` : `<span class="qbar__btn is-off" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></span>`}
@@ -172,16 +176,32 @@
   function quickNav(prev, next) {
     const bar = $("#qbar"), hero = $(".phero"), pnav = $("#pnav");
     let pastHero = false, atEnd = false;
-    const qtoc = $("#qtoc"), qBtn = $("#qtocBtn");
+    // 휴대폰 · 태블릿: 위쪽 '지금 섹션' 줄 → 누르면 목차가 아래로 펼쳐져요
+    const ptop = $("#ptop"), qtoc = $("#qtoc"), qBtn = $("#qtocBtn"), head = $(".head");
+    const place = () => { ptop.style.top = `${head ? Math.max(0, head.getBoundingClientRect().bottom) : 0}px`; };
     const openToc = (open) => {
-      qtoc.hidden = !open; qBtn.setAttribute("aria-expanded", String(open)); bar.classList.toggle("is-toc", open);
-      if (open) (qtoc.querySelector("a.is-on") || qtoc.querySelector("a"))?.focus();
+      qtoc.hidden = !open; qBtn.setAttribute("aria-expanded", String(open)); ptop.classList.toggle("is-open", open);
+      if (open) { ptop.classList.remove("is-hide"); (qtoc.querySelector("a.is-on") || qtoc.querySelector("a"))?.focus(); }
     };
+    // 아래로 읽을 때는 숨고, 위로 올리면 다시 나타나요
+    let lastY = window.scrollY;
+    window.addEventListener("scroll", () => {
+      const y = window.scrollY;
+      if (qtoc.hidden) { if (y > lastY + 6) ptop.classList.add("is-hide"); else if (y < lastY - 6) ptop.classList.remove("is-hide"); }
+      if (Math.abs(y - lastY) > 6) lastY = y;
+      place();
+    }, { passive: true });
+    window.addEventListener("resize", place);
+    place();
     qBtn.addEventListener("click", () => openToc(qtoc.hidden));
     qtoc.addEventListener("click", (e) => { if (e.target.closest("a")) openToc(false); });
     document.addEventListener("click", (e) => { if (!qtoc.hidden && !qtoc.contains(e.target) && !qBtn.contains(e.target)) openToc(false); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !qtoc.hidden) { e.stopImmediatePropagation(); openToc(false); qBtn.focus(); } }, true);
-    const show = () => { const on = pastHero && !atEnd; bar.classList.toggle("is-on", on); if (!on && !qtoc.hidden) openToc(false); };
+    const show = () => {
+      bar.classList.toggle("is-on", pastHero && !atEnd);
+      ptop.classList.toggle("is-on", pastHero);
+      if (!pastHero && !qtoc.hidden) openToc(false);
+    };
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(([e]) => { pastHero = !e.isIntersecting; show(); }).observe(hero);
       new IntersectionObserver(([e]) => { atEnd = e.isIntersecting; show(); }).observe(pnav);
@@ -209,7 +229,8 @@
        (페이지 끝 근처라 그 섹션이 위까지 못 올라와도 누른 걸로 유지, 직접 스크롤하면 다시 자동) */
   function tocSpy() {
     const links = [...document.querySelectorAll(".ptoc a")];
-    const panel = [...document.querySelectorAll(".qtoc a")];      // 휴대폰 · 태블릿용 목차 (아래 막대의 '목차')
+    const panel = [...document.querySelectorAll(".qtoc a")];      // 휴대폰 · 태블릿용 목차 (위쪽 '지금 섹션' 줄)
+    const tNum = document.getElementById("ptopNum"), tName = document.getElementById("ptopName");
     const secs = links.map((a) => document.querySelector(a.getAttribute("href")));
     if (!secs.length || secs.some((x) => !x)) return;
     const head = document.querySelector(".head");
@@ -219,6 +240,8 @@
         a.classList.toggle("is-on", i === k);
         if (i === k) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current");
       }));
+      const a = links[Math.max(0, k)];
+      if (tNum && a) { tNum.textContent = a.querySelector("span")?.textContent || ""; tName.textContent = a.textContent.replace(/^\s*\d+/, "").trim(); }
     };
     function update() {
       ticking = false;
