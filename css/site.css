@@ -777,10 +777,14 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .qbar__pos { min-width: 56px; text-align: center; font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, .55); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .qbar__pos b { color: #fff; font-weight: 700; }
 .qbar a:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+/* 휴대폰: 이전 · 다음을 한 줄 두 칸으로 작게 (썸네일·분류는 빼고 제목만) */
 @media (max-width: 640px) {
-  .pnav { grid-template-columns: minmax(0, 1fr); }
-  .pnav__a--none { display: none; }
-  .pnav__img { width: 72px; }
+  .pnav { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 36px; }
+  .pnav__a { gap: 0; padding: 12px 14px; border-radius: 12px; }
+  .pnav__a--none { visibility: hidden; padding: 0; }
+  .pnav__img, .pnav__txt em { display: none; }
+  .pnav__txt span { font-size: 12px; }
+  .pnav__txt strong { font-size: 14.5px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 }
 @media (prefers-reduced-motion: reduce) { .qbar, .pnav__a, .pnav__img img { transition: none; } }
 
@@ -990,8 +994,6 @@ a.card:hover { border-color: var(--pink); }
   .steps li span:last-child { grid-column: 2; }
   .fonts li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .dtable td:first-child { width: 42%; }
-  .pnav { grid-template-columns: minmax(0, 1fr); }
-  .pnav__a:last-child { text-align: left; }
 }
 @media (max-width: 1099px) { html:has(#ptop) { scroll-padding-top: calc(var(--head-h) + 62px); } }
 
