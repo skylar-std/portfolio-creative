@@ -455,10 +455,10 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .cbar__btn:focus-visible { outline: 2px solid var(--pink); outline-offset: 3px; }
 /* A. 글자 탭 (연도 탭과 같은 모양, 크기만 작게) */
 .cbar--text { gap: 4px 22px; padding: 28px 0 0; border-bottom: 1px solid var(--line); }
-.cbar--text .cbar__btn { padding: 0 0 12px; font-size: 19px; font-weight: 800; letter-spacing: -0.02em; color: #A6AAB4; transition: color .2s; }
+.cbar--text .cbar__btn { padding: 0 0 12px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em; color: var(--ink-3); transition: color .2s; }
 .cbar--text .cbar__btn::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: var(--navy); transform: scaleX(0); transform-origin: left; transition: transform .25s; }
-.cbar--text .cbar__btn:hover { color: var(--ink-3); }
-.cbar--text .cbar__btn[aria-selected="true"] { color: var(--navy); }
+.cbar--text .cbar__btn:hover { color: var(--navy); }
+.cbar--text .cbar__btn[aria-selected="true"] { color: var(--navy); font-weight: 800; }
 .cbar--text .cbar__btn[aria-selected="true"] sup { color: var(--pink); }
 .cbar--text .cbar__btn[aria-selected="true"]::after { transform: scaleX(1); }
 /* B. 칩 */
@@ -486,11 +486,11 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 }
 /* 연도: 글자 탭. 고른 연도만 진하게 + 밑줄, 나머지는 연한 회색 */
 .ybar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px 28px; padding: 28px 0 0; border-bottom: 1px solid var(--line); }
-.ybar__btn { position: relative; padding: 0 0 12px; border: 0; background: none; font: inherit; font-size: clamp(24px, 2.6vw, 30px); font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: #C4C7CE; cursor: pointer; font-variant-numeric: tabular-nums; transition: color .2s; }
+.ybar__btn { position: relative; padding: 0 0 12px; border: 0; background: none; font: inherit; font-size: clamp(24px, 2.6vw, 30px); font-weight: 600; line-height: 1; letter-spacing: -0.03em; color: var(--ink-3); cursor: pointer; font-variant-numeric: tabular-nums; transition: color .2s; }
 .ybar__btn sup { margin-left: 2px; font-size: .38em; font-weight: 800; letter-spacing: 0; color: inherit; vertical-align: top; position: relative; top: -.1em; }
 .ybar__btn::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: var(--navy); transform: scaleX(0); transform-origin: left; transition: transform .25s; }
-.ybar__btn:hover { color: var(--ink-3); }
-.ybar__btn[aria-selected="true"] { color: var(--navy); }
+.ybar__btn:hover { color: var(--navy); }
+.ybar__btn[aria-selected="true"] { color: var(--navy); font-weight: 800; }
 .ybar__btn[aria-selected="true"] sup { color: var(--pink); }
 .ybar__btn[aria-selected="true"]::after { transform: scaleX(1); }
 .ybar__btn:focus-visible { outline: 2px solid var(--pink); outline-offset: 4px; }
