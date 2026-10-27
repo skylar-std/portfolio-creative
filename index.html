@@ -278,41 +278,47 @@
         </div>
 
         <!-- ✏️ SNS는 여기서 직접 고쳐요. 한 줄 = <li> 하나 (복사해서 늘리면 돼요)
-             sns__mark 글자: 유튜브 YT · 인스타 IG · 네이버 블로그 N · 비핸스 Be · 링크드인 in -->
+             sns__mark 글자: 네이버 블로그 N · 인스타그램 IG · 페이스북 f · 유튜브 YT · 티스토리 T
+             아직 없는 계정은 'sns__item--soon'(링크 없음, "곧 열려요")으로 두고, 만들면 위쪽 <a> 모양으로 바꿔요.
+             작업 기록 묶음을 통째로 숨기려면 그 <div class="contact__group"> 에 hidden 을 붙여요. -->
         <div class="contact__groups">
           <div class="contact__group">
-            <h3 class="contact__label">내 채널</h3>
+            <h3 class="contact__label">대외활동 운영 계정</h3>
             <ul class="sns">
+              <li><a class="sns__item" href="https://blog.naver.com/" target="_blank" rel="noopener">
+                <span class="sns__mark sns__mark--nb" aria-hidden="true">N</span>
+                <span class="sns__text"><span class="sns__platform">네이버 블로그</span><strong class="sns__name">OO 서포터즈 블로그</strong><span class="sns__meta">대외활동 이름 · 연도 · 취재 글 · 사진</span></span>
+                <span class="sns__go" aria-hidden="true">↗</span></a></li>
               <li><a class="sns__item" href="https://www.instagram.com/" target="_blank" rel="noopener">
                 <span class="sns__mark sns__mark--ig" aria-hidden="true">IG</span>
-                <span class="sns__text"><span class="sns__platform">Instagram</span><strong class="sns__name">@younghee.design</strong><span class="sns__meta">작업 기록 · 일러스트</span></span>
+                <span class="sns__text"><span class="sns__platform">Instagram</span><strong class="sns__name">@activity_account</strong><span class="sns__meta">대외활동 이름 · 연도 · 카드뉴스 디자인</span></span>
                 <span class="sns__go" aria-hidden="true">↗</span></a></li>
-              <li><a class="sns__item" href="https://www.behance.net/" target="_blank" rel="noopener">
-                <span class="sns__mark sns__mark--be" aria-hidden="true">Be</span>
-                <span class="sns__text"><span class="sns__platform">Behance</span><strong class="sns__name">PARK Younghee</strong><span class="sns__meta">프로젝트 전체 과정</span></span>
+              <li><a class="sns__item" href="https://www.facebook.com/" target="_blank" rel="noopener">
+                <span class="sns__mark sns__mark--fb" aria-hidden="true">f</span>
+                <span class="sns__text"><span class="sns__platform">Facebook</span><strong class="sns__name">대외활동 페이지 이름</strong><span class="sns__meta">대외활동 이름 · 연도 · 홍보 콘텐츠</span></span>
                 <span class="sns__go" aria-hidden="true">↗</span></a></li>
-              <li><a class="sns__item" href="https://www.linkedin.com/" target="_blank" rel="noopener">
-                <span class="sns__mark sns__mark--in" aria-hidden="true">in</span>
-                <span class="sns__text"><span class="sns__platform">LinkedIn</span><strong class="sns__name">박영희</strong><span class="sns__meta">경력 · 이력</span></span>
+              <li><a class="sns__item" href="https://www.youtube.com/" target="_blank" rel="noopener">
+                <span class="sns__mark sns__mark--yt" aria-hidden="true">YT</span>
+                <span class="sns__text"><span class="sns__platform">YouTube</span><strong class="sns__name">대외활동 채널 이름</strong><span class="sns__meta">대외활동 이름 · 연도 · 썸네일 · 영상 편집</span></span>
                 <span class="sns__go" aria-hidden="true">↗</span></a></li>
             </ul>
           </div>
 
           <div class="contact__group">
-            <h3 class="contact__label">활동하며 운영한 채널</h3>
+            <h3 class="contact__label">작업 기록 · 학습</h3>
             <ul class="sns">
-              <li><a class="sns__item" href="https://www.youtube.com/" target="_blank" rel="noopener">
-                <span class="sns__mark sns__mark--yt" aria-hidden="true">YT</span>
-                <span class="sns__text"><span class="sns__platform">YouTube</span><strong class="sns__name">청년기획단 공식 채널</strong><span class="sns__meta">청년기획단 · 2026 · 썸네일 · 영상 편집</span></span>
-                <span class="sns__go" aria-hidden="true">↗</span></a></li>
-              <li><a class="sns__item" href="https://www.instagram.com/" target="_blank" rel="noopener">
+              <li><span class="sns__item sns__item--soon">
                 <span class="sns__mark sns__mark--ig" aria-hidden="true">IG</span>
-                <span class="sns__text"><span class="sns__platform">Instagram</span><strong class="sns__name">@culture_supporters</strong><span class="sns__meta">문화 서포터즈 · 2026 · 카드뉴스 디자인</span></span>
-                <span class="sns__go" aria-hidden="true">↗</span></a></li>
-              <li><a class="sns__item" href="https://blog.naver.com/" target="_blank" rel="noopener">
-                <span class="sns__mark sns__mark--nb" aria-hidden="true">N</span>
-                <span class="sns__text"><span class="sns__platform">네이버 블로그</span><strong class="sns__name">OO 기자단 블로그</strong><span class="sns__meta">기자단 · 2025 · 취재 글 · 사진</span></span>
-                <span class="sns__go" aria-hidden="true">↗</span></a></li>
+                <span class="sns__text"><span class="sns__platform">Instagram</span><strong class="sns__name">준비 중</strong><span class="sns__meta">작업 기록 · 일러스트</span></span>
+                <span class="sns__soon">곧 열려요</span></span></li>
+              <li><span class="sns__item sns__item--soon">
+                <span class="sns__mark sns__mark--yt" aria-hidden="true">YT</span>
+                <span class="sns__text"><span class="sns__platform">YouTube</span><strong class="sns__name">준비 중</strong><span class="sns__meta">작업 과정 · 튜토리얼</span></span>
+                <span class="sns__soon">곧 열려요</span></span></li>
+              <li><span class="sns__item sns__item--soon">
+                <span class="sns__mark sns__mark--ts" aria-hidden="true">T</span>
+                <span class="sns__text"><span class="sns__platform">Tistory</span><strong class="sns__name">준비 중</strong><span class="sns__meta">공부 기록 · 회고</span></span>
+                <span class="sns__soon">곧 열려요</span></span></li>
             </ul>
           </div>
         </div>

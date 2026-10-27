@@ -21,7 +21,7 @@
       const facts = [...doc.querySelectorAll(".facts--profile > div")].map((d) => [d.querySelector("dt")?.textContent.trim(), d.querySelector("dd")?.textContent.trim()]);
       const groups = [...doc.querySelectorAll(".contact__group")].map((g) => ({
         title: g.querySelector(".contact__label")?.textContent.trim() || "",
-        items: [...g.querySelectorAll(".sns__item")].map((a) => ({
+        items: [...g.querySelectorAll("a.sns__item")].map((a) => ({
           href: a.getAttribute("href"), platform: a.querySelector(".sns__platform")?.textContent.trim(), name: a.querySelector(".sns__name")?.textContent.trim(),
         })),
       }));

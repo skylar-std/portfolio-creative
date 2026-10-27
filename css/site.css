@@ -339,7 +339,14 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .sns__mark--yt { background: var(--pink); }
 .sns__mark--ig { background: #fff; color: var(--navy); }
 .sns__mark--nb { background: var(--cyan); color: var(--navy); }
-.sns__mark--be, .sns__mark--in { background: rgba(255, 255, 255, .12); }
+.sns__mark--be, .sns__mark--in, .sns__mark--fb, .sns__mark--ts { background: rgba(255, 255, 255, .12); }
+.sns__mark--fb { font-size: 20px; font-family: Georgia, serif; font-weight: 700; }
+/* 아직 만들기 전 계정: 흐리게 + '곧 열려요' */
+.sns__item--soon { cursor: default; }
+.sns__item--soon:hover { background: none; }
+.sns__item--soon .sns__mark { opacity: .45; }
+.sns__item--soon .sns__name { color: rgba(255, 255, 255, .55); font-weight: 600; }
+.sns__soon { padding: 3px 9px; border: 1px dashed rgba(255, 255, 255, .3); border-radius: 999px; font-size: 11.5px; font-weight: 600; color: rgba(255, 255, 255, .6); white-space: nowrap; }
 .sns__text { display: flex; flex-direction: column; min-width: 0; }
 .sns__platform { font-size: 12.5px; color: rgba(255, 255, 255, .6); }
 .sns__name { font-size: 16.5px; font-weight: 700; overflow-wrap: anywhere; }
