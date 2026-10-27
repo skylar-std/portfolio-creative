@@ -137,18 +137,71 @@
     const n = Math.max(1, pick.length);
     const dots = $("#slideDots");
     dots.innerHTML = pick.length > 1 ? pick.map((p, i) => `<button type="button" class="slider__dot" data-i="${i}" aria-label="${i + 1}번째 슬라이드: ${esc(p.title)}"></button>`).join("") : "";
-    $(".slider__arrows").hidden = pick.length < 2;
     let cur = 0;
-    const go = (i) => { cur = (i + n) % n; track.scrollTo({ left: cur * track.clientWidth, behavior: "smooth" }); };
+    // 넘김: 천천히 시작해서 천천히 멈추는 0.8초 움직임. 마지막 → 처음은 거꾸로 훑지 않고 살짝 사라졌다 나타나요
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const ease = (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+    let anim = 0;
+    const setActive = (k) => {
+      $$(".slide", track).forEach((sl, i) => sl.classList.toggle("is-active", i === k));
+      $("#slideCount").textContent = pick.length ? `${String(k + 1).padStart(2, "0")} / ${String(n).padStart(2, "0")}` : "";
+      $$(".slider__dot", dots).forEach((d, i) => d.setAttribute("aria-current", String(i === k)));
+    };
+    const slideTo = (to, dur) => {
+      cancelAnimationFrame(anim);
+      const from = track.scrollLeft, t0 = performance.now();
+      track.style.scrollSnapType = "none";
+      const step = (t) => {
+        const k = Math.min(1, (t - t0) / dur);
+        track.scrollLeft = from + (to - from) * ease(k);
+        if (k < 1) anim = requestAnimationFrame(step);
+        else { anim = 0; track.style.scrollSnapType = ""; }
+      };
+      anim = requestAnimationFrame(step);
+    };
+    const go = (i) => {
+      const prev = cur;
+      cur = (i + n) % n;
+      setActive(cur);
+      const to = cur * track.clientWidth;
+      if (still) { track.scrollLeft = to; return; }
+      const wrap = Math.abs(cur - prev) > 1 && (prev === n - 1 || prev === 0) && Math.abs(i - prev) === 1;
+      if (wrap) {
+        track.classList.add("is-fade");
+        setTimeout(() => { cancelAnimationFrame(anim); track.scrollLeft = to; track.classList.remove("is-fade"); }, 280);
+      } else slideTo(to, 800);
+    };
     const mark = () => {
+      if (anim) return;   // 움직이는 중에는 표시를 바꾸지 않아요
       cur = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
+      $$(".slide", track).forEach((sl, i) => sl.classList.toggle("is-active", i === cur));
       $("#slideCount").textContent = pick.length ? `${String(cur + 1).padStart(2, "0")} / ${String(n).padStart(2, "0")}` : "";
       $$(".slider__dot", dots).forEach((d, i) => d.setAttribute("aria-current", String(i === cur)));
     };
     let t = 0;
     track.addEventListener("scroll", () => { clearTimeout(t); t = setTimeout(mark, 60); }, { passive: true });
-    $("#slidePrev").addEventListener("click", () => go(cur - 1));
-    $("#slideNext").addEventListener("click", () => go(cur + 1));
+    // 마우스로도 끌어서 넘기기 (손가락은 기본으로 밀려요)
+    let dragX = null, dragLeft = 0, moved = false;
+    track.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      dragX = e.clientX; dragLeft = track.scrollLeft; moved = false;
+      track.style.scrollSnapType = "none"; track.classList.add("is-drag");
+    });
+    window.addEventListener("pointermove", (e) => {
+      if (dragX === null) return;
+      const dx = e.clientX - dragX; if (Math.abs(dx) > 4) moved = true;
+      track.scrollLeft = dragLeft - dx;
+    });
+    window.addEventListener("pointerup", (e) => {
+      if (dragX === null) return;
+      const dx = e.clientX - dragX; dragX = null;
+      track.style.scrollSnapType = ""; track.classList.remove("is-drag");
+      const step = Math.abs(dx) > track.clientWidth * 0.15 ? (dx < 0 ? 1 : -1) : 0;
+      go(Math.max(0, Math.min(n - 1, Math.round(dragLeft / Math.max(1, track.clientWidth)) + step)));
+    });
+    // 끈 뒤에는 링크가 눌리지 않게
+    track.addEventListener("click", (e) => { if (moved) { e.preventDefault(); moved = false; } }, true);
+    track.addEventListener("dragstart", (e) => e.preventDefault());
     dots.addEventListener("click", (e) => { const d = e.target.closest("[data-i]"); if (d) go(+d.dataset.i); });
     $("#slider").addEventListener("keydown", (e) => {
       if (e.key === "ArrowLeft") { e.preventDefault(); go(cur - 1); }
@@ -158,7 +211,6 @@
 
     // 자동 넘김: 점(막대)이 차오르는 동안 기다렸다가 다음 장으로
     const slider = $("#slider");
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (pick.length < 2 || still || !LIMITS.autoplay) return;
     slider.style.setProperty("--auto", `${LIMITS.autoplay}ms`);
     slider.classList.add("is-auto");
