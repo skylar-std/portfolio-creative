@@ -141,7 +141,7 @@ html::-webkit-scrollbar { display: none; }
 .slider__track.is-fade { opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .slide__img img, .slide__info > *, .slider__track { transition: none; transform: none; opacity: 1; } }
 .slide.is-active .slide__link:hover .slide__img img { transform: scale(1.03); }
-.slide__info { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 16px 124px 18px 20px; }
+.slide__info { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 16px 20px 18px; }
 .slide__meta { font-size: 13px; font-weight: 600; color: var(--accent); }
 .slide__award { display: inline-block; margin-right: 8px; padding: 2px 9px; border-radius: 999px; background: var(--pink); color: #fff; font-size: 12px; font-weight: 800; vertical-align: 1px; }
 .slide__title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }

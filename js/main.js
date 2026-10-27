@@ -136,7 +136,6 @@
             <span class="slide__meta">${p.result && p.result.value ? `<b class="slide__award">${esc(p.result.value)}</b>` : ""}${esc(p.categoryLabel)}${p.date ? ` · ${esc(p.date.slice(0, 4))}` : ""}${p.type ? ` · ${esc(window.kindLabel(p))}` : ""}</span>
             <strong class="slide__title">${esc(p.title)}</strong>
             ${p.role ? `<span class="slide__role"><b>역할</b>${esc(p.role)}</span>` : ""}
-            <span class="slide__go">자세히 보기 <span aria-hidden="true">→</span></span>
           </span>
         </a>
       </article>`).join("")
