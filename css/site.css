@@ -141,16 +141,16 @@ html::-webkit-scrollbar { display: none; }
 .slider__track.is-fade { opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .slide__img img, .slide__info > *, .slider__track { transition: none; transform: none; opacity: 1; } }
 .slide.is-active .slide__link:hover .slide__img img { transform: scale(1.03); }
-.slide__info { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 16px 84px 18px 20px; }
+.slide__info { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 16px 124px 18px 20px; }
 .slide__meta { font-size: 13px; font-weight: 600; color: var(--accent); }
 .slide__award { display: inline-block; margin-right: 8px; padding: 2px 9px; border-radius: 999px; background: var(--pink); color: #fff; font-size: 12px; font-weight: 800; vertical-align: 1px; }
 .slide__title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
 .slide__role { font-size: 14px; color: var(--ink-2); }
 .slide__role b { margin-right: 8px; font-weight: 600; }
-/* 카드 오른쪽 가운데 화살표 (카드 전체가 링크라 '누를 수 있다'는 표시) */
-.slide__go { position: absolute; right: 20px; top: 50%; display: grid; place-items: center; width: 48px; height: 48px; margin-top: -24px; border-radius: 50%; background: var(--pink); color: #fff; transition: background .2s, transform .25s; }
-.slide.is-active .slide__info > .slide__go { transform: none; }
-.slide__link:hover .slide__go { background: var(--navy); transform: translateX(3px); }
+/* 카드 오른쪽 가운데 '자세히 보기' (카드 전체가 링크라 '누를 수 있다'는 표시만, 눈에 덜 띄게) */
+.slide__go { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 14px; font-weight: 600; color: var(--ink-2); white-space: nowrap; transition: color .2s; }
+.slide.is-active .slide__info > .slide__go { transform: translateY(-50%); }
+.slide__link:hover .slide__go { color: var(--accent); }
 .slide--empty { border: 1px dashed var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); }
 .slide--empty .slide__img { background: repeating-linear-gradient(45deg, var(--bg) 0 10px, var(--surface) 10px 20px); }
 .slider__bar { position: relative; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; margin-top: 14px; }
