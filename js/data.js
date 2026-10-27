@@ -35,7 +35,7 @@
     return {
       id: p.id, title: p.title, summary: p.summary, desc: p.description || "",
       category: (p.category || "").toLowerCase(), categoryLabel: p.category || "",
-      date: ym(p.date, "-"), featured: p.featured, type: p.kind, client: p.client || "", role: p.my_role || "",
+      date: ym(p.date, "-"), featured: p.featured, slide: !!p.on_slide, type: p.kind, client: p.client || "", role: p.my_role || "",
       did: p.did || [], tools: p.tools || [], tags: p.tags || [],
       result: p.result_value ? { value: p.result_value, label: p.result_label || "" } : null,
       thumb: p.thumb, image: p.image || p.thumb,

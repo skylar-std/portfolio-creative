@@ -143,6 +143,7 @@ html::-webkit-scrollbar { display: none; }
 .slide.is-active .slide__link:hover .slide__img img { transform: scale(1.03); }
 .slide__info { display: flex; flex-direction: column; gap: 4px; padding: 16px 20px 18px; }
 .slide__meta { font-size: 13px; font-weight: 600; color: var(--accent); }
+.slide__award { display: inline-block; margin-right: 8px; padding: 2px 9px; border-radius: 999px; background: var(--pink); color: #fff; font-size: 12px; font-weight: 800; vertical-align: 1px; }
 .slide__title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
 .slide__role { font-size: 14px; color: var(--ink-2); }
 .slide__role b { margin-right: 8px; font-weight: 600; }
