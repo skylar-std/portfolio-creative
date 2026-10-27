@@ -82,11 +82,11 @@
     fill("#awardList", "#awardCount", [...(R.awards || [])].sort(latestFirst("date")).map((a) =>
       row({ date: a.date, title: a.title, sub: a.org, desc: a.desc })));
 
-    const langs = [...(R.languages || [])].sort(latestFirst("date"));
+    // 어학: 유효기간이 지난 성적은 보여주지 않아요 (DB에는 그대로 남아 있어요)
+    const langs = [...(R.languages || [])].filter((l) => !(l.expires && l.expires < NOW)).sort(latestFirst("date"));
     fill("#langList", "#langCount", langs.map((l) => {
-      const expired = l.expires && l.expires < NOW;
-      const state = !l.expires ? "평생 유효" : expired ? `만료 · ${l.expires}` : `유효 ~${l.expires}`;
-      return `<li class="lang${expired ? " is-expired" : ""}">
+      const state = !l.expires ? "평생 유효" : `유효 ~${l.expires}`;
+      return `<li class="lang">
         <span class="lang__test">${esc(l.test)}</span>
         <strong class="lang__score">${esc(l.score)}</strong>
         <span class="lang__meta">${esc(l.date)} 취득${l.org ? ` · ${esc(l.org)}` : ""}<br />${esc(state)}</span>

@@ -12,6 +12,7 @@
   const pad2 = (n) => String(n).padStart(2, "0");
   const KINDS = { personal: "개인 프로젝트", team: "팀 프로젝트", contest: "공모전", school: "학교 과제", client: "외주" };
   const HEX = /^#[0-9a-f]{3,8}$/i;
+  const NOW_YM = (() => { const d = new Date(); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}`; })();
 
   // index.html 에서 About Me · 기본 정보 · 연락처 읽기
   async function readIndex() {
@@ -89,7 +90,7 @@
       ["교육", (RS.training || []).map((x) => [range(x.start, x.end), x.title, x.org])],
       ["활동", (RS.activities || []).map((x) => [range(x.start, x.end), x.title, [x.org, x.role].filter(Boolean).join(" · ")])],
       ["수상", (RS.awards || []).map((x) => [x.date, x.title, x.org])],
-      ["어학", (RS.languages || []).map((x) => [x.date, `${x.test}${x.score ? ` ${x.score}` : ""}`, x.org])],
+      ["어학", (RS.languages || []).filter((x) => !(x.expires && x.expires < NOW_YM)).map((x) => [x.date, `${x.test}${x.score ? ` ${x.score}` : ""}`, x.org])],
       ["자격증", (RS.certificates || []).map((x) => [x.date, x.name, x.org])],
     ].filter(([, rows]) => rows.length);
     if (!blocks.length) return "";
