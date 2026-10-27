@@ -153,13 +153,13 @@
       </div>
       <div class="qtoc" id="qtoc" role="dialog" aria-label="이 프로젝트의 구성" hidden><p class="qtoc__title">Contents</p><ol>${tocItems}</ol></div>
       <nav class="qbar" id="qbar" aria-label="빠른 이동">
-        <button type="button" class="qbar__toc" id="qtocBtn" aria-expanded="false" aria-controls="qtoc"><span class="qbar__tocicon" aria-hidden="true"><i></i><i></i><i></i></span><span class="qbar__tocnow" id="qtocNow">목차</span></button>
+        <button type="button" class="qbar__toc" id="qtocBtn" aria-expanded="false" aria-controls="qtoc"><span class="qbar__tocicon" aria-hidden="true"><i></i><i></i><i></i></span><span class="qbar__tocnow">목차</span></button>
         <span class="qbar__sep qbar__sep--toc" aria-hidden="true"></span>
         <a class="qbar__back js-back" href="${esc(window.keepLink("works.html"))}"><span aria-hidden="true">←</span> 목록</a>
         <span class="qbar__sep" aria-hidden="true"></span>
-        ${prev ? `<a class="qbar__btn" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(prev.id)}`))}" aria-label="이전 프로젝트: ${esc(prev.title)}" title="이전 (←)">‹</a>` : `<span class="qbar__btn is-off" aria-hidden="true">‹</span>`}
-        <span class="qbar__pos"><span><b>${pad2(seq.i + 1)}</b> / ${pad2(seq.n)}</span><small>${esc(seq.label)}</small></span>
-        ${next ? `<a class="qbar__btn" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(next.id)}`))}" aria-label="다음 프로젝트: ${esc(next.title)}" title="다음 (→)">›</a>` : `<span class="qbar__btn is-off" aria-hidden="true">›</span>`}
+        ${prev ? `<a class="qbar__btn" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(prev.id)}`))}" aria-label="이전 프로젝트: ${esc(prev.title)}" title="이전 (←)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>` : `<span class="qbar__btn is-off" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></span>`}
+        <span class="qbar__pos" title="${esc(seq.label)} 프로젝트 중 ${seq.i + 1}번째" aria-label="${esc(seq.label)} ${seq.n}개 중 ${seq.i + 1}번째"><b>${pad2(seq.i + 1)}</b> / ${pad2(seq.n)}</span>
+        ${next ? `<a class="qbar__btn" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(next.id)}`))}" aria-label="다음 프로젝트: ${esc(next.title)}" title="다음 (→)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></a>` : `<span class="qbar__btn is-off" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>`}
       </nav>`;
     tocSpy();
     quickNav(prev, next);
@@ -210,7 +210,6 @@
   function tocSpy() {
     const links = [...document.querySelectorAll(".ptoc a")];
     const panel = [...document.querySelectorAll(".qtoc a")];      // 휴대폰 · 태블릿용 목차 (아래 막대의 '목차')
-    const now = document.getElementById("qtocNow");
     const secs = links.map((a) => document.querySelector(a.getAttribute("href")));
     if (!secs.length || secs.some((x) => !x)) return;
     const head = document.querySelector(".head");
@@ -220,7 +219,6 @@
         a.classList.toggle("is-on", i === k);
         if (i === k) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current");
       }));
-      if (now) now.textContent = k >= 0 && links[k] ? links[k].textContent.replace(/^\d+/, "").trim() : "목차";
     };
     function update() {
       ticking = false;
