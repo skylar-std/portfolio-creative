@@ -14,8 +14,7 @@
   const pad2 = (n) => String(n).padStart(2, "0");
   const fmtDate = (d) => (d || "").replace("-", ".");
   const HEX = /^#[0-9a-f]{3,8}$/i;
-  const KINDS = { personal: "개인 프로젝트", team: "팀 프로젝트", contest: "공모전", school: "학교 과제", client: "외주" };
-  const kindLabel = (p) => KINDS[p.type] || (p.client ? "외주" : "개인 프로젝트");
+  const kindLabel = (p) => window.kindLabel(p);
 
   const paras = (b) => (Array.isArray(b) ? b : b ? [b] : []).filter(Boolean).map((t) => `<p>${esc(t)}</p>`).join("");
   const img = (src, alt) => (src ? `<img src="${esc(src)}" alt="${esc(alt || "")}" loading="lazy" />` : "");
@@ -88,13 +87,7 @@
   }
 
   // 참여: "팀 3인 · 기여도 50%" (기여도는 막대와 함께)
-  function team(p) {
-    const m = /(\d+)\s*인/.exec(p.team || "");
-    const isTeam = p.type === "team" || (m && +m[1] > 1) || (p.contribution != null && p.contribution < 100);
-    const label = isTeam ? `팀${m ? ` ${m[1]}인` : ""}` : (p.team || "");
-    const pct = isTeam && p.contribution != null ? Math.max(0, Math.min(100, Math.round(p.contribution))) : null;
-    return { label, pct };
-  }
+  const team = (p) => window.teamInfo(p);
 
   function render(p, prev, next, seq) {
     document.title = `${p.title} | 박영희 Portfolio`;

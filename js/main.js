@@ -127,13 +127,12 @@
     let pick = sorted.filter((p) => p.featured);
     if (!pick.length) pick = sorted;
     pick = pick.slice(0, LIMITS.slides);
-    const KINDS = { personal: "개인 프로젝트", team: "팀 프로젝트", contest: "공모전", school: "학교 과제", client: "외주" };
     track.innerHTML = pick.length ? pick.map((p, i) => `
       <article class="slide" aria-roledescription="slide" aria-label="${i + 1} / ${pick.length}">
         <a class="slide__link" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(p.id)}`))}">
           <span class="slide__img"><img src="${esc(p.image || p.thumb)}" alt="" ${i ? 'loading="lazy"' : ""} /></span>
           <span class="slide__info">
-            <span class="slide__meta">${esc(p.categoryLabel)}${p.date ? ` · ${esc(p.date.slice(0, 4))}` : ""}${KINDS[p.type] ? ` · ${KINDS[p.type]}` : ""}</span>
+            <span class="slide__meta">${esc(p.categoryLabel)}${p.date ? ` · ${esc(p.date.slice(0, 4))}` : ""}${p.type ? ` · ${esc(window.kindLabel(p))}` : ""}</span>
             <strong class="slide__title">${esc(p.title)}</strong>
             ${p.role ? `<span class="slide__role"><b>역할</b>${esc(p.role)}</span>` : ""}
             <span class="slide__go">자세히 보기 <span aria-hidden="true">→</span></span>
