@@ -1038,3 +1038,10 @@ body.is-viewing { overflow: hidden; }
   .logo { font-size: 14px; }
   .nav a { padding: 8px 4px; font-size: 13px; }
 }
+
+/* 포트폴리오 PDF: 풋터(모든 페이지) · Contact — 휴대폰은 위 메뉴의 PDF 버튼이 숨겨져서 여기서 받아요 */
+.foot__links { display: flex; align-items: center; gap: 20px; }
+.foot__pdf { font-weight: 600; color: var(--ink-2); }
+.contact__pdf { margin-top: 8px; color: #fff; border-color: rgba(255, 255, 255, .35); }
+.contact__pdf:hover { border-color: var(--cyan); color: var(--cyan); }
+@media (max-width: 400px) { .foot__in { flex-wrap: wrap; } .foot__links { gap: 14px; } }
