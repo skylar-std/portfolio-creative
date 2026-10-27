@@ -904,7 +904,7 @@ a.card:hover { border-color: var(--pink); }
 .jump { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 45; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; opacity: 0; transform: translateY(16px); pointer-events: none; transition: opacity .25s, transform .3s cubic-bezier(.2, .8, .2, 1); }
 .jump.is-visible { opacity: 1; transform: none; pointer-events: auto; }
 @media (min-width: 1200px) { .jump { display: none; } }
-.jump__btn { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 8px 0 18px; border: 0; border-radius: 999px; background: var(--navy); color: #fff; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 12px 28px -10px rgba(37, 42, 52, .6); }
+.jump__btn { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 8px 0 18px; border: 0; border-radius: 999px; background: var(--navy); color: #fff; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 0 0 1px rgba(255, 255, 255, .16), 0 12px 28px -10px rgba(37, 42, 52, .6); }
 .jump__now { max-width: 9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .jump__icon { display: grid; place-content: center; gap: 3px; width: 34px; height: 34px; border-radius: 50%; background: var(--pink); }
 .jump__icon i { display: block; width: 14px; height: 2px; border-radius: 1px; background: #fff; transition: transform .25s, opacity .2s; }

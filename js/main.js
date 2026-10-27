@@ -372,6 +372,10 @@
       jLinks.forEach((a, i) => { a.classList.toggle("is-on", i === jLast); if (i === jLast) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
       jNow.textContent = jItems[jLast] ? jItems[jLast].label : "";
       jump.classList.toggle("is-visible", window.scrollY > cover.offsetHeight * 0.6);
+      // 풋터가 화면에 올라오면 버튼도 그만큼 위로 (풋터의 '맨 위로'를 가리지 않게)
+      const foot = document.querySelector(".foot");
+      const overlap = foot ? Math.max(0, window.innerHeight - foot.getBoundingClientRect().top) : 0;
+      jump.style.bottom = overlap ? `calc(16px + env(safe-area-inset-bottom, 0px) + ${Math.round(overlap)}px)` : "";
       // 오른쪽 바: 표지가 지나면 보이기
       side.classList.toggle("is-visible", window.scrollY > cover.offsetHeight * 0.6 && items.length > 0);
       let active = -1;
