@@ -136,7 +136,7 @@
             <span class="slide__meta">${p.result && p.result.value ? `<b class="slide__award">${esc(p.result.value)}</b>` : ""}${esc(p.categoryLabel)}${p.date ? ` · ${esc(p.date.slice(0, 4))}` : ""}${p.type ? ` · ${esc(window.kindLabel(p))}` : ""}</span>
             <strong class="slide__title">${esc(p.title)}</strong>
             ${p.role ? `<span class="slide__role"><b>역할</b>${esc(p.role)}</span>` : ""}
-            <span class="slide__go">자세히 보기 <span aria-hidden="true">→</span></span>
+            <span class="slide__go"><span class="sr-only">자세히 보기</span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
           </span>
         </a>
       </article>`).join("")
