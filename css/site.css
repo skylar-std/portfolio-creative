@@ -1039,8 +1039,7 @@ body.is-viewing { overflow: hidden; }
   .nav a { padding: 8px 4px; font-size: 13px; }
 }
 
-/* 포트폴리오 PDF: PC는 위 메뉴 버튼, 휴대폰은 위 메뉴 버튼이 숨겨져서 풋터(모든 페이지)에서 받아요 */
-.foot__links { display: flex; align-items: center; gap: 20px; }
-.foot__pdf { display: none; font-weight: 600; color: var(--ink-2); }
-@media (max-width: 640px) { .foot__pdf { display: inline-flex; } }
-@media (max-width: 400px) { .foot__in { flex-wrap: wrap; } .foot__links { gap: 14px; } }
+/* 포트폴리오 PDF: PC는 위 메뉴 버튼, 휴대폰은 위 메뉴 버튼이 숨겨져서 Contact(메인 맨 아래)의 버튼으로 받아요 */
+.contact__pdf { display: none; margin-top: 8px; color: #fff; border-color: rgba(255, 255, 255, .35); }
+.contact__pdf:hover { border-color: var(--cyan); color: var(--cyan); }
+@media (max-width: 640px) { .contact__pdf { display: inline-flex; } }
