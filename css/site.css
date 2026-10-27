@@ -150,8 +150,9 @@ html::-webkit-scrollbar { display: none; }
 .slide__link:hover .slide__go { color: var(--accent); }
 .slide--empty { border: 1px dashed var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); }
 .slide--empty .slide__img { background: repeating-linear-gradient(45deg, var(--bg) 0 10px, var(--surface) 10px 20px); }
-.slider__bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; margin-top: 14px; }
-.slider__bar .slider__count { grid-column: 3; grid-row: 1; justify-self: end; text-align: right; }
+.slider__bar { position: relative; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; margin-top: 14px; }
+/* 숫자(01 / 04)는 화면에서 숨기고 화면 읽기 프로그램에만 알려줘요 */
+.slider__bar .slider__count { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .slider__bar .slider__dots { grid-column: 2; grid-row: 1; flex: none; justify-content: center; }
 .slider__count { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-2); min-width: 56px; }
 .slider__dots { display: flex; gap: 2px; flex: 1; }
@@ -168,12 +169,6 @@ html::-webkit-scrollbar { display: none; }
 .profile { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 32px; align-items: start; }
 .profile__photo { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
 .profile__text .block__title { margin-bottom: 10px; }
-/* 시안 A: 사진을 왼쪽 'Profile' 제목 아래로 */
-.sec__head .profile__photo { display: block; width: 180px; margin-top: 24px; }
-.profile--a { grid-template-columns: minmax(0, 1fr); }
-/* 시안 B: 사진을 글 오른쪽에, 글·정보 높이에 맞춰 */
-.profile--b { grid-template-columns: minmax(0, 1fr) 220px; gap: 40px; }
-.profile--b .profile__photo { order: 2; }
 .facts.facts--profile { margin: 24px 0 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
 /* ===== 섹션 공통: 왼쪽 제목 | 오른쪽 내용 ===== */
@@ -927,9 +922,6 @@ a.card:hover { border-color: var(--pink); }
   .sum__v { font-size: 36px; }
   .profile { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .profile__photo { width: 140px; }
-  .sec__head .profile__photo { width: 120px; margin-top: 12px; flex-basis: 100%; }
-  .profile--b { grid-template-columns: minmax(0, 1fr); }
-  .profile--b .profile__photo { order: 0; }
   .facts.facts--profile { grid-template-columns: minmax(0, 1fr); }
   .arc-row { grid-template-columns: 72px minmax(0, 1fr); grid-template-areas: "img main" "img meta"; }
   .arc-row__img { width: 72px; }
