@@ -404,5 +404,28 @@
     renderFeatured(window.PROJECTS || []);
     hideEmpty();
     trackPosition();
+    // 처음 들어오거나 새로고침하면 항상 맨 위(표지)에서 시작해요.
+    // (주소에 #profile 같은 위치가 있으면 그곳으로, 뒤로 가기로 돌아온 경우는 보던 자리 그대로)
+    const nav = (performance.getEntriesByType && performance.getEntriesByType("navigation")[0]) || {};
+    let savedY = null;
+    try { savedY = sessionStorage.getItem("pf.mainY"); } catch (e) { savedY = null; }
+    if (nav.type === "back_forward" && savedY !== null) {
+      window.scrollTo({ top: Number(savedY) || 0, behavior: "instant" });
+    } else {
+      const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (target) target.scrollIntoView({ behavior: "instant", block: "start" });
+      else window.scrollTo({ top: 0, behavior: "instant" });
+    }
   });
+  // 다른 페이지로 갈 때 위치를 기억해 두었다가, 뒤로 가기로 돌아오면 그 자리로
+  window.addEventListener("pagehide", () => { try { sessionStorage.setItem("pf.mainY", String(window.scrollY)); } catch (e) { /* 무시 */ } });
+
+  // 로고: 맨 위로 부드럽게 (주소의 #위치도 지워요)
+  const logo = document.querySelector(".logo");
+  if (logo) logo.addEventListener("click", (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+    history.replaceState(null, "", location.pathname + location.search);
+  });
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 })();
