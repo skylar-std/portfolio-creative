@@ -56,7 +56,7 @@
       experience: k("experience").map((r) => ({ company: r.title, role: r.detail || "", desc: r.description || "", start: d(r.start_date), end: d(r.end_date) })),
       training: k("training").map((r) => ({ title: r.title, org: r.org || "", desc: r.description || "", start: d(r.start_date), end: d(r.end_date) })),
       activities: k("activity").map((r) => ({ type: r.activity_type, title: r.title, org: r.org || "", role: r.my_role || "", desc: r.description || "", start: d(r.start_date), end: d(r.end_date) })),
-      awards: k("award").map((r) => ({ title: r.title, org: r.org || "", desc: r.description || "", date: d(r.start_date) })),
+      awards: k("award").map((r) => ({ title: r.title, org: r.org || "", desc: r.description || "", date: d(r.start_date), project: r.project_id || "" })),
       languages: k("language").map((r) => ({ test: r.title, score: r.score, org: r.org || "", date: d(r.start_date), expires: d(r.expires_date) })),
       certificates: k("certificate").map((r) => ({ name: r.title, org: r.org || "", date: d(r.start_date) })),
     };

@@ -26,7 +26,7 @@
   }
 
   /* 한 줄: 날짜 | 이름 · 부제 · 설명 | 오른쪽 꼬리표 */
-  const row = ({ date, title, sub, desc, tag, now }) => `
+  const row = ({ date, title, sub, desc, tag, now, link }) => `
     <li class="row${now ? " is-now" : ""}">
       <span class="row__date">${esc(date)}</span>
       <div class="row__main">
@@ -35,6 +35,7 @@
         ${desc ? `<p class="row__desc">${esc(desc)}</p>` : ""}
       </div>
       ${tag ? `<span class="row__tag">${esc(tag)}</span>` : ""}
+      ${link ? `<a class="row__go" href="${esc(link.href)}">${esc(link.label)} <span aria-hidden="true">→</span></a>` : ""}
     </li>`;
 
   function fill(listId, countId, items, limit, label) {
@@ -61,6 +62,13 @@
     }
   }
 
+  // 수상 → 관련 프로젝트 바로 가기 (DB resume_items.project_id 에 프로젝트 id 를 적으면 나와요)
+  const awardLink = (a) => {
+    if (!a.project) return null;
+    const p = (window.PROJECTS || []).find((x) => x.id === a.project);
+    return p ? { href: window.keepLink(`project.html?id=${encodeURIComponent(p.id)}`), label: "프로젝트 보기" } : null;
+  };
+
   function renderResume(R) {
     if (!R) return;
     fill("#eduList", null, [...(R.education || [])].sort(latestFirst("start")).map((e) =>
@@ -80,7 +88,7 @@
     fill("#campList", "#campCount", acts.filter((a) => a.type === "campus").map(act), LIMITS.activities, "교내활동");
 
     fill("#awardList", "#awardCount", [...(R.awards || [])].sort(latestFirst("date")).map((a) =>
-      row({ date: a.date, title: a.title, sub: a.org, desc: a.desc })));
+      row({ date: a.date, title: a.title, sub: a.org, desc: a.desc, link: awardLink(a) })));
 
     // 어학: 유효기간이 지난 성적은 보여주지 않아요 (DB에는 그대로 남아 있어요)
     const langs = [...(R.languages || [])].filter((l) => !(l.expires && l.expires < NOW)).sort(latestFirst("date"));

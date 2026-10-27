@@ -87,6 +87,15 @@
     return secs;
   }
 
+  // 참여: "팀 3인 · 기여도 50%" (기여도는 막대와 함께)
+  function team(p) {
+    const m = /(\d+)\s*인/.exec(p.team || "");
+    const isTeam = p.type === "team" || (m && +m[1] > 1) || (p.contribution != null && p.contribution < 100);
+    const label = isTeam ? `팀${m ? ` ${m[1]}인` : ""}` : (p.team || "");
+    const pct = isTeam && p.contribution != null ? Math.max(0, Math.min(100, Math.round(p.contribution))) : null;
+    return { label, pct };
+  }
+
   function render(p, prev, next, seq) {
     document.title = `${p.title} | 박영희 Portfolio`;
     const facts = [
@@ -94,9 +103,9 @@
       ["기간", p.period || fmtDate(p.date)],
       ["구분", kindLabel(p)],
       ["주최 · 발주", p.client],
-      ["참여", p.team],
+      ["참여", team(p)],
       ["도구", (p.tools || []).join(", ")],
-    ].filter(([, v]) => v);
+    ].filter(([, v]) => (typeof v === "object" ? v.label || v.pct != null : v));
     let n = 0;
     const secs = sectionsOf(p).map((s) => {
       n += 1;
@@ -131,7 +140,9 @@
           <p class="phero__meta">${esc(p.categoryLabel)}${p.date ? ` · ${esc(fmtDate(p.date))}` : ""}</p>
           <h1 class="phero__title">${esc(p.title)}</h1>
           ${p.summary ? `<p class="phero__lead">${esc(p.summary)}</p>` : ""}
-          <dl class="phero__facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
+          <dl class="phero__facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${typeof v === "object"
+            ? `${esc(v.label)}${v.pct != null ? `<span class="phero__pct" aria-label="기여도 ${v.pct}%"><i><b style="width:${v.pct}%"></b></i>기여도 ${v.pct}%</span>` : ""}`
+            : esc(v)}</dd></div>`).join("")}</dl>
           ${p.link ? `<a class="btn" href="${esc(p.link)}" target="_blank" rel="noopener">작품 보러 가기 ↗</a>` : ""}
         </div>
       </section>
