@@ -167,6 +167,7 @@
       </nav>`;
     tocSpy();
     quickNav(prev, next);
+    viewer();
   }
 
   /* 빠른 이동
@@ -216,11 +217,71 @@
     const go = (q) => { if (q) location.href = window.keepLink(`project.html?id=${encodeURIComponent(q.id)}`); };
     document.addEventListener("keydown", (e) => {
       if (e.altKey || e.ctrlKey || e.metaKey || /input|textarea|select/i.test(e.target.tagName)) return;
+      if (document.body.classList.contains("is-viewing")) return;   // 크게 보기 중에는 사진 넘기기로 써요
       if (e.key === "ArrowLeft") go(prev);
       else if (e.key === "ArrowRight") go(next);
       else if (e.key === "Escape") { const a = $(".qbar__back"); toList(null); location.href = a.href; }
     });
     if (next && next.thumb) { const im = new Image(); im.src = next.thumb; }   // 다음 이미지를 미리 받아 둬요
+  }
+
+  /* 이미지 크게 보기 (대표 이미지 · 목업 · 펼침면 · 장면)
+     - 이미지를 누르면 화면 가득 보여요. 여러 장이면 ‹ › (또는 키보드 ← →, 휴대폰은 옆으로 밀기)로 넘겨요
+     - 닫기: ✕, 바깥 누르기, Esc */
+  function viewer() {
+    const imgs = [...document.querySelectorAll(".pcover img, .psec .fig img, .psec .scenes img")];
+    if (!imgs.length) return;
+    const box = document.createElement("div");
+    box.className = "lbox"; box.hidden = true;
+    box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-label", "이미지 크게 보기");
+    box.innerHTML = `
+      <button type="button" class="lbox__close" aria-label="닫기"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <button type="button" class="lbox__nav lbox__nav--prev" aria-label="이전 이미지"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <figure class="lbox__fig"><img class="lbox__img" alt="" /><figcaption class="lbox__cap"></figcaption></figure>
+      <button type="button" class="lbox__nav lbox__nav--next" aria-label="다음 이미지"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>`;
+    document.body.appendChild(box);
+    const im = box.querySelector(".lbox__img"), cap = box.querySelector(".lbox__cap");
+    let cur = 0, opener = null;
+    const capOf = (img) => {
+      const fig = img.closest("figure");
+      const t = fig && fig.querySelector("figcaption") ? fig.querySelector("figcaption").textContent.trim() : "";
+      const sec = img.closest(".psec");
+      const head = sec ? (sec.querySelector(".psec__title") || {}).textContent || "" : document.querySelector(".phero__title")?.textContent || "";
+      return [head.trim(), t].filter(Boolean).join(" · ");
+    };
+    const showAt = (i) => {
+      cur = (i + imgs.length) % imgs.length;
+      im.src = imgs[cur].currentSrc || imgs[cur].src; im.alt = imgs[cur].alt || "";
+      cap.textContent = `${capOf(imgs[cur])}${imgs.length > 1 ? `  ${cur + 1} / ${imgs.length}` : ""}`;
+    };
+    const open = (i) => {
+      opener = document.activeElement; showAt(i); box.hidden = false;
+      document.body.classList.add("is-viewing"); box.classList.toggle("is-single", imgs.length < 2);
+      box.querySelector(".lbox__close").focus();
+    };
+    const close = () => { box.hidden = true; document.body.classList.remove("is-viewing"); if (opener && opener.focus) opener.focus(); };
+    imgs.forEach((img, i) => {
+      img.classList.add("is-zoomable"); img.tabIndex = 0; img.setAttribute("role", "button");
+      img.setAttribute("aria-label", `${img.alt || "이미지"} 크게 보기`);
+      img.addEventListener("click", () => open(i));
+      img.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(i); } });
+    });
+    box.querySelector(".lbox__close").addEventListener("click", close);
+    box.querySelector(".lbox__nav--prev").addEventListener("click", () => showAt(cur - 1));
+    box.querySelector(".lbox__nav--next").addEventListener("click", () => showAt(cur + 1));
+    box.addEventListener("click", (e) => { if (e.target === box || e.target.classList.contains("lbox__fig")) close(); });
+    document.addEventListener("keydown", (e) => {
+      if (box.hidden) return;
+      if (e.key === "Escape") { e.preventDefault(); e.stopImmediatePropagation(); close(); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); showAt(cur - 1); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); showAt(cur + 1); }
+    }, true);
+    let sx = null;
+    box.addEventListener("touchstart", (e) => { sx = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
+    box.addEventListener("touchend", (e) => {
+      if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; sx = null;
+      if (Math.abs(dx) > 50 && imgs.length > 1) showAt(cur + (dx < 0 ? 1 : -1));
+    }, { passive: true });
   }
 
   /* 왼쪽 목차: 지금 읽는 섹션 표시
