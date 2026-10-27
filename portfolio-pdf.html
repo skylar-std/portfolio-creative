@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1123" />
+  <title>박영희 Portfolio (PDF)</title>
+  <meta name="robots" content="noindex" />
+  <!--
+    포트폴리오 PDF 만드는 페이지 (A4 가로 297×210mm, 한 장 = 한 쪽)
+    - 사이트와 같은 DB · 같은 index.html 내용(About Me, 연락처)으로 채워져요.
+    - files/portfolio.pdf 는 이 페이지를 PDF로 저장한 거예요.
+      다시 만들기: tools/make-pdf.py (README 참고)  또는 이 페이지를 크롬에서 열고 인쇄 → PDF로 저장(여백 없음, 배경 그래픽 켜기)
+  -->
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="css/pdf.css" />
+</head>
+<body data-keep-title="1">
+  <main id="book" aria-live="polite"><p class="pdf-loading">포트폴리오를 만드는 중이에요…</p></main>
+
+  <script src="js/db.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/pdf.js"></script>
+</body>
+</html>

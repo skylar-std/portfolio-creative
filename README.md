@@ -42,7 +42,8 @@ portfolio/
 │   ├── icons/          # Skills 아이콘 (같은 파일명으로 교체 가능)
 │   └── projects/       # 작업물 이미지
 ├── files/
-│   └── resume.pdf      # 이력서
+│   ├── portfolio.pdf   # 포트폴리오 PDF (위 메뉴 버튼) — tools/make-pdf.py 로 만들어요
+│   └── resume.pdf      # (예전 이력서, 지금은 연결 안 됨)
 └── .nojekyll           # GitHub Pages 설정용 (지우지 마세요)
 ```
 
@@ -72,10 +73,24 @@ portfolio/
    - `featured` 켜기 → 메인 '대표 프로젝트'에 보여요 (최신 3개까지, 하나도 없으면 최신순 3개). 아카이브에는 '대표' 표시가 붙어요. `published` 끄기 → 숨기기
    - `category` · `kind` → 아카이브의 분야 · 구분 필터가 이 값으로 자동 생성돼요 (한 가지뿐이면 그 필터는 숨겨요)
 3. **프로필 사진** → `img/profile.jpg`로 넣고 `index.html`의 `img/profile.svg`를 `img/profile.jpg`로 변경
-4. **이력서** → `files/resume.pdf`를 내 파일로 교체
+4. **포트폴리오 PDF** → 아래 "포트폴리오 PDF 다시 만들기"
 5. **색상** → `css/site.css` 맨 위 `--accent` 값 변경
 
 > 💡 이미지는 가로 1200px 정도, 장당 500KB 이하로 줄여서 올리면 사이트가 빨리 열립니다.
+
+## 📄 포트폴리오 PDF 다시 만들기
+
+위 메뉴의 "포트폴리오 PDF"는 `files/portfolio.pdf` 파일이에요. 사이트처럼 저절로 바뀌지 않으니,
+DB 내용이나 index.html(About Me · 연락처)을 바꾼 뒤에는 다시 만들어 올려야 해요.
+
+- 내용: 표지 → 프로필·스킬 → 이력 → 목차 → 대표 프로젝트(최대 4개, 하나당 2쪽) → 연락처 (A4 가로)
+- 모양 · 구성: `portfolio-pdf.html`, `css/pdf.css`, `js/pdf.js`
+- 만드는 법 (컴퓨터에서 한 번만 준비):
+  ```bash
+  pip install playwright && python -m playwright install chromium
+  python tools/make-pdf.py        # → files/portfolio.pdf
+  ```
+- 프로그램 없이: 크롬에서 `portfolio-pdf.html`을 열고 인쇄 → "PDF로 저장", 여백 "없음", "배경 그래픽" 켜기
 
 ## 🚀 GitHub Pages로 배포하기
 
