@@ -744,6 +744,25 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 /* 아래 떠 있는 빠른 이동 막대 */
 .qbar { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 40; display: flex; align-items: center; gap: 4px; padding: 6px; background: var(--navy); color: #fff; border-radius: 999px; box-shadow: 0 14px 34px -12px rgba(37, 42, 52, .55); transform: translate(-50%, 140%); opacity: 0; pointer-events: none; transition: transform .35s cubic-bezier(.2, .8, .2, 1), opacity .25s; }
 .qbar.is-on { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+/* 휴대폰 · 태블릿: 아래 막대의 '목차' → 위로 펼쳐지는 목차 (넓은 화면은 왼쪽 목차가 있어서 숨겨요) */
+.qbar__toc { display: none; align-items: center; gap: 8px; min-height: 40px; max-width: 9.5em; padding: 0 14px 0 10px; border: 0; border-radius: 999px; background: none; color: #fff; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.qbar__toc:hover, .qbar.is-toc .qbar__toc { background: rgba(255, 255, 255, .1); color: var(--cyan); }
+.qbar__tocnow { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qbar__tocicon { display: grid; gap: 3px; flex: none; }
+.qbar__tocicon i { display: block; width: 14px; height: 2px; border-radius: 1px; background: currentColor; }
+.qbar__tocicon i:nth-child(2) { width: 10px; }
+.qbar__sep--toc { display: none; }
+.qtoc { position: fixed; left: 50%; bottom: calc(82px + env(safe-area-inset-bottom, 0px)); z-index: 41; width: min(320px, calc(100vw - 32px)); max-height: min(60vh, 460px); overflow-y: auto; padding: 14px 10px 10px; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 20px 44px -18px rgba(37, 42, 52, .45); }
+.qtoc__title { margin: 0 8px 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; color: var(--ink-3); text-transform: uppercase; }
+.qtoc ol { margin: 0; padding: 0; list-style: none; }
+.qtoc a { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 0 10px; border-radius: 10px; font-size: 15px; font-weight: 600; color: var(--ink-2); text-decoration: none; }
+.qtoc a span { font-size: 11.5px; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.qtoc a:hover { background: var(--bg); }
+.qtoc a.is-on { background: var(--pink-soft); color: var(--pink-text); }
+.qtoc a.is-on span { color: var(--pink-text); }
+.qtoc a:focus-visible, .qbar__toc:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+@media (max-width: 1099px) { .qbar__toc { display: inline-flex; } .qbar__sep--toc { display: block; } }
+@media (max-width: 400px) { .qbar__back { padding: 0 10px; } .qbar__toc { max-width: 7em; } }
 .qbar__back { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 16px; border-radius: 999px; color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; }
 .qbar__back:hover { background: rgba(255, 255, 255, .1); color: var(--cyan); }
 .qbar__sep { width: 1px; height: 20px; margin: 0 4px; background: rgba(255, 255, 255, .2); }

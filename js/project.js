@@ -151,7 +151,10 @@
         </div>
         <nav class="pnav" id="pnav" aria-label="다른 프로젝트">${link(prev, "← 이전 프로젝트", "pnav__a--prev")}${link(next, "다음 프로젝트 →", "pnav__a--next")}</nav>
       </div>
+      <div class="qtoc" id="qtoc" role="dialog" aria-label="이 프로젝트의 구성" hidden><p class="qtoc__title">Contents</p><ol>${tocItems}</ol></div>
       <nav class="qbar" id="qbar" aria-label="빠른 이동">
+        <button type="button" class="qbar__toc" id="qtocBtn" aria-expanded="false" aria-controls="qtoc"><span class="qbar__tocicon" aria-hidden="true"><i></i><i></i><i></i></span><span class="qbar__tocnow" id="qtocNow">목차</span></button>
+        <span class="qbar__sep qbar__sep--toc" aria-hidden="true"></span>
         <a class="qbar__back js-back" href="${esc(window.keepLink("works.html"))}"><span aria-hidden="true">←</span> 목록</a>
         <span class="qbar__sep" aria-hidden="true"></span>
         ${prev ? `<a class="qbar__btn" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(prev.id)}`))}" aria-label="이전 프로젝트: ${esc(prev.title)}" title="이전 (←)">‹</a>` : `<span class="qbar__btn is-off" aria-hidden="true">‹</span>`}
@@ -169,7 +172,16 @@
   function quickNav(prev, next) {
     const bar = $("#qbar"), hero = $(".phero"), pnav = $("#pnav");
     let pastHero = false, atEnd = false;
-    const show = () => bar.classList.toggle("is-on", pastHero && !atEnd);
+    const qtoc = $("#qtoc"), qBtn = $("#qtocBtn");
+    const openToc = (open) => {
+      qtoc.hidden = !open; qBtn.setAttribute("aria-expanded", String(open)); bar.classList.toggle("is-toc", open);
+      if (open) (qtoc.querySelector("a.is-on") || qtoc.querySelector("a"))?.focus();
+    };
+    qBtn.addEventListener("click", () => openToc(qtoc.hidden));
+    qtoc.addEventListener("click", (e) => { if (e.target.closest("a")) openToc(false); });
+    document.addEventListener("click", (e) => { if (!qtoc.hidden && !qtoc.contains(e.target) && !qBtn.contains(e.target)) openToc(false); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !qtoc.hidden) { e.stopImmediatePropagation(); openToc(false); qBtn.focus(); } }, true);
+    const show = () => { const on = pastHero && !atEnd; bar.classList.toggle("is-on", on); if (!on && !qtoc.hidden) openToc(false); };
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(([e]) => { pastHero = !e.isIntersecting; show(); }).observe(hero);
       new IntersectionObserver(([e]) => { atEnd = e.isIntersecting; show(); }).observe(pnav);
@@ -197,14 +209,19 @@
        (페이지 끝 근처라 그 섹션이 위까지 못 올라와도 누른 걸로 유지, 직접 스크롤하면 다시 자동) */
   function tocSpy() {
     const links = [...document.querySelectorAll(".ptoc a")];
+    const panel = [...document.querySelectorAll(".qtoc a")];      // 휴대폰 · 태블릿용 목차 (아래 막대의 '목차')
+    const now = document.getElementById("qtocNow");
     const secs = links.map((a) => document.querySelector(a.getAttribute("href")));
     if (!secs.length || secs.some((x) => !x)) return;
     const head = document.querySelector(".head");
     let pinned = -1, ticking = false;
-    const mark = (k) => links.forEach((a, i) => {
-      a.classList.toggle("is-on", i === k);
-      if (i === k) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current");
-    });
+    const mark = (k) => {
+      [links, panel].forEach((list) => list.forEach((a, i) => {
+        a.classList.toggle("is-on", i === k);
+        if (i === k) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current");
+      }));
+      if (now) now.textContent = k >= 0 && links[k] ? links[k].textContent.replace(/^\d+/, "").trim() : "목차";
+    };
     function update() {
       ticking = false;
       if (pinned >= 0) { mark(pinned); return; }
@@ -216,7 +233,7 @@
       mark(k);
     }
     const on = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
-    links.forEach((a, i) => a.addEventListener("click", () => { pinned = i; mark(i); }));
+    [links, panel].forEach((list) => list.forEach((a, i) => a.addEventListener("click", () => { pinned = i; mark(i); })));
     // 사용자가 직접 스크롤하기 시작하면 다시 자동 표시
     const unpin = () => { if (pinned >= 0) { pinned = -1; on(); } };
     ["wheel", "touchstart", "keydown"].forEach((ev) => window.addEventListener(ev, unpin, { passive: true }));
