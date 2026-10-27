@@ -12,6 +12,7 @@
   const pad2 = (n) => String(n).padStart(2, "0");
   const KINDS = { personal: "개인 프로젝트", team: "팀 프로젝트", contest: "공모전", school: "학교 과제", client: "외주" };
   const HEX = /^#[0-9a-f]{3,8}$/i;
+  const NOW_YM = (() => { const d = new Date(); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}`; })();
 
   // index.html 에서 About Me · 기본 정보 · 연락처 읽기
   async function readIndex() {
@@ -89,7 +90,7 @@
       ["교육", (RS.training || []).map((x) => [range(x.start, x.end), x.title, x.org])],
       ["활동", (RS.activities || []).map((x) => [range(x.start, x.end), x.title, [x.org, x.role].filter(Boolean).join(" · ")])],
       ["수상", (RS.awards || []).map((x) => [x.date, x.title, x.org])],
-      ["어학", (RS.languages || []).map((x) => [x.date, `${x.test}${x.score ? ` ${x.score}` : ""}`, x.org])],
+      ["어학", (RS.languages || []).filter((x) => !(x.expires && x.expires < NOW_YM)).map((x) => [x.date, `${x.test}${x.score ? ` ${x.score}` : ""}`, x.org])],
       ["자격증", (RS.certificates || []).map((x) => [x.date, x.name, x.org])],
     ].filter(([, rows]) => rows.length);
     if (!blocks.length) return "";
@@ -128,11 +129,11 @@
     const teamM = /(\d+)\s*인/.exec(p.team || "");
     const pct = p.contribution != null ? Math.max(0, Math.min(100, Math.round(p.contribution))) : null;
     const facts = [
-      ["역할", p.role && esc(p.role)],
       ["기간", esc(p.period || p.date.replace("-", "."))],
-      ["구분", esc([kind, teamM ? `팀 ${teamM[1]}인` : p.team && p.team !== "개인" ? p.team : ""].filter(Boolean).join(" · "))],
+      ["구분", esc(kind)],
       ["주최 · 발주", p.client && esc(p.client)],
-      ["기여도", pct != null ? `<span class="pct"><i><b style="width:${pct}%"></b></i>${pct}%</span>` : ""],
+      ["참여", esc(teamM ? `팀 ${teamM[1]}인` : p.team || "") + (pct != null ? ` <span class="pct"><i><b style="width:${pct}%"></b></i>기여도 ${pct}%</span>` : "")],
+      ["역할", p.role && esc(p.role)],
     ].filter(([, v]) => v);
     return `<section class="page" id="pj-${i + 1}">
       <div class="pj">
@@ -142,7 +143,7 @@
           <p class="pj__meta">${esc(p.categoryLabel)}${p.date ? ` · ${esc(p.date.slice(0, 4))}` : ""}</p>
           <h2 class="pj__title">${esc(p.title)}</h2>
           ${p.summary ? `<p class="pj__sum">${esc(p.summary)}</p>` : ""}
-          <dl class="pj__facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>
+          <dl class="pj__facts">${facts.map(([k, v], i) => `<div${k === "참여" ? ' class="pj__gap"' : ""}><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>
           ${(p.tools || []).length ? `<div><p class="k" style="margin-bottom:2mm">Tools</p><div class="chips">${p.tools.map((t) => `<span class="chip">${esc(t)}</span>`).join("")}</div></div>` : ""}
           <p class="pj__link">자세한 과정 → <a href="${SITE}project.html?id=${encodeURIComponent(p.id)}">웹에서 보기</a></p>
         </div>

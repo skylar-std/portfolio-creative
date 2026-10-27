@@ -14,8 +14,7 @@
   const pad2 = (n) => String(n).padStart(2, "0");
   const fmtDate = (d) => (d || "").replace("-", ".");
   const HEX = /^#[0-9a-f]{3,8}$/i;
-  const KINDS = { personal: "개인 프로젝트", team: "팀 프로젝트", contest: "공모전", school: "학교 과제", client: "외주" };
-  const kindLabel = (p) => KINDS[p.type] || (p.client ? "외주" : "개인 프로젝트");
+  const kindLabel = (p) => window.kindLabel(p);
 
   const paras = (b) => (Array.isArray(b) ? b : b ? [b] : []).filter(Boolean).map((t) => `<p>${esc(t)}</p>`).join("");
   const img = (src, alt) => (src ? `<img src="${esc(src)}" alt="${esc(alt || "")}" loading="lazy" />` : "");
@@ -87,16 +86,17 @@
     return secs;
   }
 
+  // 참여: "팀 3인 · 기여도 50%" (기여도는 막대와 함께)
+  const team = (p) => window.teamInfo(p);
+
   function render(p, prev, next, seq) {
     document.title = `${p.title} | 박영희 Portfolio`;
-    const facts = [
-      ["역할", p.role],
-      ["기간", p.period || fmtDate(p.date)],
-      ["구분", kindLabel(p)],
-      ["주최 · 발주", p.client],
-      ["참여", p.team],
-      ["도구", (p.tools || []).join(", ")],
-    ].filter(([, v]) => v);
+    // 위쪽 정보: 비슷한 것끼리 두 줄로 — 프로젝트 정보 / 나의 참여
+    const has = ([, v]) => (typeof v === "object" ? v.label || v.pct != null : v);
+    const factGroups = [
+      ["프로젝트", [["기간", p.period || fmtDate(p.date)], ["구분", kindLabel(p)], ["주최 · 발주", p.client]].filter(has)],
+      ["나의 참여", [["참여", team(p)], ["역할", p.role], ["도구", (p.tools || []).join(", ")]].filter(has)],
+    ].filter(([, list]) => list.length);
     let n = 0;
     const secs = sectionsOf(p).map((s) => {
       n += 1;
@@ -131,7 +131,11 @@
           <p class="phero__meta">${esc(p.categoryLabel)}${p.date ? ` · ${esc(fmtDate(p.date))}` : ""}</p>
           <h1 class="phero__title">${esc(p.title)}</h1>
           ${p.summary ? `<p class="phero__lead">${esc(p.summary)}</p>` : ""}
-          <dl class="phero__facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
+          <div class="phero__facts">${factGroups.map(([g, list]) => `
+            <div class="phero__group"><p class="phero__gk">${g}</p>
+              <dl>${list.map(([k, v]) => `<div><dt>${k}</dt><dd>${typeof v === "object"
+                ? `${esc(v.label)}${v.pct != null ? `<span class="phero__pct" aria-label="기여도 ${v.pct}%"><i><b style="width:${v.pct}%"></b></i>기여도 ${v.pct}%</span>` : ""}`
+                : esc(v)}</dd></div>`).join("")}</dl></div>`).join("")}</div>
           ${p.link ? `<a class="btn" href="${esc(p.link)}" target="_blank" rel="noopener">작품 보러 가기 ↗</a>` : ""}
         </div>
       </section>
@@ -147,15 +151,23 @@
         </div>
         <nav class="pnav" id="pnav" aria-label="다른 프로젝트">${link(prev, "← 이전 프로젝트", "pnav__a--prev")}${link(next, "다음 프로젝트 →", "pnav__a--next")}</nav>
       </div>
+      <div class="ptop" id="ptop">
+        <button type="button" class="ptop__btn" id="qtocBtn" aria-expanded="false" aria-controls="qtoc">
+          <span class="ptop__num" id="ptopNum"></span><span class="ptop__name" id="ptopName">Contents</span>
+          <span class="ptop__caret" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+        </button>
+        <div class="qtoc" id="qtoc" role="dialog" aria-label="이 프로젝트의 구성" hidden><p class="qtoc__title">Contents</p><ol>${tocItems}</ol></div>
+      </div>
       <nav class="qbar" id="qbar" aria-label="빠른 이동">
         <a class="qbar__back js-back" href="${esc(window.keepLink("works.html"))}"><span aria-hidden="true">←</span> 목록</a>
         <span class="qbar__sep" aria-hidden="true"></span>
-        ${prev ? `<a class="qbar__btn" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(prev.id)}`))}" aria-label="이전 프로젝트: ${esc(prev.title)}" title="이전 (←)">‹</a>` : `<span class="qbar__btn is-off" aria-hidden="true">‹</span>`}
-        <span class="qbar__pos"><span><b>${pad2(seq.i + 1)}</b> / ${pad2(seq.n)}</span><small>${esc(seq.label)}</small></span>
-        ${next ? `<a class="qbar__btn" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(next.id)}`))}" aria-label="다음 프로젝트: ${esc(next.title)}" title="다음 (→)">›</a>` : `<span class="qbar__btn is-off" aria-hidden="true">›</span>`}
+        ${prev ? `<a class="qbar__btn" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(prev.id)}`))}" aria-label="이전 프로젝트: ${esc(prev.title)}" title="이전 (←)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>` : `<span class="qbar__btn is-off" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></span>`}
+        <span class="qbar__pos" title="${esc(seq.label)} 프로젝트 중 ${seq.i + 1}번째" aria-label="${esc(seq.label)} ${seq.n}개 중 ${seq.i + 1}번째"><b>${pad2(seq.i + 1)}</b> / ${pad2(seq.n)}</span>
+        ${next ? `<a class="qbar__btn" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(next.id)}`))}" aria-label="다음 프로젝트: ${esc(next.title)}" title="다음 (→)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></a>` : `<span class="qbar__btn is-off" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>`}
       </nav>`;
     tocSpy();
     quickNav(prev, next);
+    viewer();
   }
 
   /* 빠른 이동
@@ -165,7 +177,32 @@
   function quickNav(prev, next) {
     const bar = $("#qbar"), hero = $(".phero"), pnav = $("#pnav");
     let pastHero = false, atEnd = false;
-    const show = () => bar.classList.toggle("is-on", pastHero && !atEnd);
+    // 휴대폰 · 태블릿: 위쪽 '지금 섹션' 줄 → 누르면 목차가 아래로 펼쳐져요
+    const ptop = $("#ptop"), qtoc = $("#qtoc"), qBtn = $("#qtocBtn"), head = $(".head");
+    const place = () => { ptop.style.top = `${head ? Math.max(0, head.getBoundingClientRect().bottom) : 0}px`; };
+    const openToc = (open) => {
+      qtoc.hidden = !open; qBtn.setAttribute("aria-expanded", String(open)); ptop.classList.toggle("is-open", open);
+      if (open) { ptop.classList.remove("is-hide"); (qtoc.querySelector("a.is-on") || qtoc.querySelector("a"))?.focus(); }
+    };
+    // 아래로 읽을 때는 숨고, 위로 올리면 다시 나타나요
+    let lastY = window.scrollY;
+    window.addEventListener("scroll", () => {
+      const y = window.scrollY;
+      if (qtoc.hidden) { if (y > lastY + 6) ptop.classList.add("is-hide"); else if (y < lastY - 6) ptop.classList.remove("is-hide"); }
+      if (Math.abs(y - lastY) > 6) lastY = y;
+      place();
+    }, { passive: true });
+    window.addEventListener("resize", place);
+    place();
+    qBtn.addEventListener("click", () => openToc(qtoc.hidden));
+    qtoc.addEventListener("click", (e) => { if (e.target.closest("a")) openToc(false); });
+    document.addEventListener("click", (e) => { if (!qtoc.hidden && !qtoc.contains(e.target) && !qBtn.contains(e.target)) openToc(false); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !qtoc.hidden) { e.stopImmediatePropagation(); openToc(false); qBtn.focus(); } }, true);
+    const show = () => {
+      bar.classList.toggle("is-on", pastHero && !atEnd);
+      ptop.classList.toggle("is-on", pastHero);
+      if (!pastHero && !qtoc.hidden) openToc(false);
+    };
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(([e]) => { pastHero = !e.isIntersecting; show(); }).observe(hero);
       new IntersectionObserver(([e]) => { atEnd = e.isIntersecting; show(); }).observe(pnav);
@@ -180,11 +217,71 @@
     const go = (q) => { if (q) location.href = window.keepLink(`project.html?id=${encodeURIComponent(q.id)}`); };
     document.addEventListener("keydown", (e) => {
       if (e.altKey || e.ctrlKey || e.metaKey || /input|textarea|select/i.test(e.target.tagName)) return;
+      if (document.body.classList.contains("is-viewing")) return;   // 크게 보기 중에는 사진 넘기기로 써요
       if (e.key === "ArrowLeft") go(prev);
       else if (e.key === "ArrowRight") go(next);
       else if (e.key === "Escape") { const a = $(".qbar__back"); toList(null); location.href = a.href; }
     });
     if (next && next.thumb) { const im = new Image(); im.src = next.thumb; }   // 다음 이미지를 미리 받아 둬요
+  }
+
+  /* 이미지 크게 보기 (대표 이미지 · 목업 · 펼침면 · 장면)
+     - 이미지를 누르면 화면 가득 보여요. 여러 장이면 ‹ › (또는 키보드 ← →, 휴대폰은 옆으로 밀기)로 넘겨요
+     - 닫기: ✕, 바깥 누르기, Esc */
+  function viewer() {
+    const imgs = [...document.querySelectorAll(".pcover img, .psec .fig img, .psec .scenes img")];
+    if (!imgs.length) return;
+    const box = document.createElement("div");
+    box.className = "lbox"; box.hidden = true;
+    box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-label", "이미지 크게 보기");
+    box.innerHTML = `
+      <button type="button" class="lbox__close" aria-label="닫기"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <button type="button" class="lbox__nav lbox__nav--prev" aria-label="이전 이미지"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <figure class="lbox__fig"><img class="lbox__img" alt="" /><figcaption class="lbox__cap"></figcaption></figure>
+      <button type="button" class="lbox__nav lbox__nav--next" aria-label="다음 이미지"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>`;
+    document.body.appendChild(box);
+    const im = box.querySelector(".lbox__img"), cap = box.querySelector(".lbox__cap");
+    let cur = 0, opener = null;
+    const capOf = (img) => {
+      const fig = img.closest("figure");
+      const t = fig && fig.querySelector("figcaption") ? fig.querySelector("figcaption").textContent.trim() : "";
+      const sec = img.closest(".psec");
+      const head = sec ? (sec.querySelector(".psec__title") || {}).textContent || "" : document.querySelector(".phero__title")?.textContent || "";
+      return [head.trim(), t].filter(Boolean).join(" · ");
+    };
+    const showAt = (i) => {
+      cur = (i + imgs.length) % imgs.length;
+      im.src = imgs[cur].currentSrc || imgs[cur].src; im.alt = imgs[cur].alt || "";
+      cap.textContent = `${capOf(imgs[cur])}${imgs.length > 1 ? `  ${cur + 1} / ${imgs.length}` : ""}`;
+    };
+    const open = (i) => {
+      opener = document.activeElement; showAt(i); box.hidden = false;
+      document.body.classList.add("is-viewing"); box.classList.toggle("is-single", imgs.length < 2);
+      box.querySelector(".lbox__close").focus();
+    };
+    const close = () => { box.hidden = true; document.body.classList.remove("is-viewing"); if (opener && opener.focus) opener.focus(); };
+    imgs.forEach((img, i) => {
+      img.classList.add("is-zoomable"); img.tabIndex = 0; img.setAttribute("role", "button");
+      img.setAttribute("aria-label", `${img.alt || "이미지"} 크게 보기`);
+      img.addEventListener("click", () => open(i));
+      img.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(i); } });
+    });
+    box.querySelector(".lbox__close").addEventListener("click", close);
+    box.querySelector(".lbox__nav--prev").addEventListener("click", () => showAt(cur - 1));
+    box.querySelector(".lbox__nav--next").addEventListener("click", () => showAt(cur + 1));
+    box.addEventListener("click", (e) => { if (e.target === box || e.target.classList.contains("lbox__fig")) close(); });
+    document.addEventListener("keydown", (e) => {
+      if (box.hidden) return;
+      if (e.key === "Escape") { e.preventDefault(); e.stopImmediatePropagation(); close(); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); showAt(cur - 1); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); showAt(cur + 1); }
+    }, true);
+    let sx = null;
+    box.addEventListener("touchstart", (e) => { sx = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
+    box.addEventListener("touchend", (e) => {
+      if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; sx = null;
+      if (Math.abs(dx) > 50 && imgs.length > 1) showAt(cur + (dx < 0 ? 1 : -1));
+    }, { passive: true });
   }
 
   /* 왼쪽 목차: 지금 읽는 섹션 표시
@@ -193,14 +290,20 @@
        (페이지 끝 근처라 그 섹션이 위까지 못 올라와도 누른 걸로 유지, 직접 스크롤하면 다시 자동) */
   function tocSpy() {
     const links = [...document.querySelectorAll(".ptoc a")];
+    const panel = [...document.querySelectorAll(".qtoc a")];      // 휴대폰 · 태블릿용 목차 (위쪽 '지금 섹션' 줄)
+    const tNum = document.getElementById("ptopNum"), tName = document.getElementById("ptopName");
     const secs = links.map((a) => document.querySelector(a.getAttribute("href")));
     if (!secs.length || secs.some((x) => !x)) return;
     const head = document.querySelector(".head");
     let pinned = -1, ticking = false;
-    const mark = (k) => links.forEach((a, i) => {
-      a.classList.toggle("is-on", i === k);
-      if (i === k) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current");
-    });
+    const mark = (k) => {
+      [links, panel].forEach((list) => list.forEach((a, i) => {
+        a.classList.toggle("is-on", i === k);
+        if (i === k) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current");
+      }));
+      const a = links[Math.max(0, k)];
+      if (tNum && a) { tNum.textContent = a.querySelector("span")?.textContent || ""; tName.textContent = a.textContent.replace(/^\s*\d+/, "").trim(); }
+    };
     function update() {
       ticking = false;
       if (pinned >= 0) { mark(pinned); return; }
@@ -212,7 +315,7 @@
       mark(k);
     }
     const on = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
-    links.forEach((a, i) => a.addEventListener("click", () => { pinned = i; mark(i); }));
+    [links, panel].forEach((list) => list.forEach((a, i) => a.addEventListener("click", () => { pinned = i; mark(i); })));
     // 사용자가 직접 스크롤하기 시작하면 다시 자동 표시
     const unpin = () => { if (pinned >= 0) { pinned = -1; on(); } };
     ["wheel", "touchstart", "keydown"].forEach((ev) => window.addEventListener(ev, unpin, { passive: true }));

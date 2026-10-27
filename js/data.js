@@ -56,7 +56,7 @@
       experience: k("experience").map((r) => ({ company: r.title, role: r.detail || "", desc: r.description || "", start: d(r.start_date), end: d(r.end_date) })),
       training: k("training").map((r) => ({ title: r.title, org: r.org || "", desc: r.description || "", start: d(r.start_date), end: d(r.end_date) })),
       activities: k("activity").map((r) => ({ type: r.activity_type, title: r.title, org: r.org || "", role: r.my_role || "", desc: r.description || "", start: d(r.start_date), end: d(r.end_date) })),
-      awards: k("award").map((r) => ({ title: r.title, org: r.org || "", desc: r.description || "", date: d(r.start_date) })),
+      awards: k("award").map((r) => ({ title: r.title, org: r.org || "", desc: r.description || "", date: d(r.start_date), project: r.project_id || "" })),
       languages: k("language").map((r) => ({ test: r.title, score: r.score, org: r.org || "", date: d(r.start_date), expires: d(r.expires_date) })),
       certificates: k("certificate").map((r) => ({ name: r.title, org: r.org || "", date: d(r.start_date) })),
     };
@@ -67,6 +67,19 @@
     const [p, hash] = path.split("#");
     const sep = p.includes("?") ? "&" : "?";
     return `${p}${code ? `${sep}v=${encodeURIComponent(code)}` : ""}${hash ? `#${hash}` : ""}`;
+  };
+  /* 프로젝트 구분 = 작업 성격 (DB projects.kind 값 → 화면 이름)
+     혼자/팀은 구분이 아니라 '참여'(team · contribution)에서 보여줘요.
+     예전 값 personal · team 은 '토이 프로젝트'로 보여요. */
+  const KIND_LABELS = { contest: "공모전", activity: "대외활동", school: "학교 과제", academy: "교육 과제", client: "외주", toy: "토이 프로젝트", personal: "토이 프로젝트", team: "토이 프로젝트" };
+  window.kindLabel = (p) => KIND_LABELS[p.type] || "토이 프로젝트";
+  /* 참여: 팀인지, 몇 명인지, 기여도 */
+  window.teamInfo = (p) => {
+    const m = /(\d+)\s*인/.exec(p.team || "");
+    const size = m ? Number(m[1]) : 0;
+    const team = p.type === "team" || size > 1 || (p.contribution != null && p.contribution < 100);
+    const pct = team && p.contribution != null ? Math.max(0, Math.min(100, Math.round(p.contribution))) : null;
+    return { team, size, pct, label: team ? `팀${size ? ` ${size}인` : ""}` : "개인" };
   };
   window.esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   /* 프로젝트 카드: 메인 미리보기 · 프로젝트 목록에서 같이 써요 */

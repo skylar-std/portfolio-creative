@@ -12,8 +12,7 @@
   const $ = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
   const esc = window.esc;
-  const KINDS = { personal: "개인", team: "팀", contest: "공모전", school: "학교 과제", client: "외주" };
-  const kindOf = (p) => KINDS[p.type] || (p.client ? "외주" : "개인");
+  const kindOf = (p) => window.kindLabel(p);
   const yearOf = (p) => p.date.slice(0, 4);
   let ALL = [];
 
@@ -153,19 +152,13 @@
   // 도구 이름 → img/icons 파일 이름 (없으면 글자만)
   const TOOL_ICON = { photoshop: "photoshop", illustrator: "illustrator", indesign: "indesign", figma: "figma", "after effects": "after-effects", blender: "blender", notion: "notion", "html / css": "html-css", html: "html-css" };
   const toolIcon = (t) => TOOL_ICON[String(t).toLowerCase().replace(/^adobe\s+/, "")];
-  const teamSize = (p) => { const m = /(\d+)\s*인/.exec(p.team || ""); return m ? Number(m[1]) : 0; };
-  const isTeam = (p) => p.type === "team" || teamSize(p) > 1 || (p.contribution != null && p.contribution < 100);
-
-  // 카드 아래 '유형 · 기여도' 줄
+  // 카드 아래 '구분 · 참여 · 기여도' 줄 (예: 공모전 · 팀 3인 ━━ 50%)
   function typeRow(p) {
-    const kind = KINDS[p.type] || (p.client ? "외주" : "개인");
-    const size = teamSize(p);
-    const team = isTeam(p);
-    const label = team && p.type !== "team" ? `${kind} · 팀${size ? ` ${size}인` : ""}` : team ? `팀 프로젝트${size ? ` · ${size}인` : ""}` : kind === "개인" ? "개인 프로젝트" : `${kind} · 개인`;
-    const pct = team && p.contribution != null ? Math.max(0, Math.min(100, Math.round(p.contribution))) : null;
-    return `<span class="sw-type ${team ? "sw-type--team" : ""}">
+    const t = window.teamInfo(p);
+    const label = `${window.kindLabel(p)} · ${t.label}`;
+    return `<span class="sw-type ${t.team ? "sw-type--team" : ""}">
         <span class="sw-type__label">${esc(label)}</span>
-        ${pct != null ? `<span class="sw-type__pct" aria-label="기여도 ${pct}%"><span class="sw-type__k" aria-hidden="true">기여도</span><span class="sw-type__bar"><i style="width:${pct}%"></i></span><b>${pct}%</b></span>` : ""}
+        ${t.pct != null ? `<span class="sw-type__pct" aria-label="기여도 ${t.pct}%"><span class="sw-type__k" aria-hidden="true">기여도</span><span class="sw-type__bar"><i style="width:${t.pct}%"></i></span><b>${t.pct}%</b></span>` : ""}
       </span>`;
   }
   // 카드 맨 아래 사용 도구 (3개까지 + 나머지 개수)

@@ -26,7 +26,7 @@
   }
 
   /* 한 줄: 날짜 | 이름 · 부제 · 설명 | 오른쪽 꼬리표 */
-  const row = ({ date, title, sub, desc, tag, now }) => `
+  const row = ({ date, title, sub, desc, tag, now, link }) => `
     <li class="row${now ? " is-now" : ""}">
       <span class="row__date">${esc(date)}</span>
       <div class="row__main">
@@ -35,6 +35,7 @@
         ${desc ? `<p class="row__desc">${esc(desc)}</p>` : ""}
       </div>
       ${tag ? `<span class="row__tag">${esc(tag)}</span>` : ""}
+      ${link ? `<a class="row__go" href="${esc(link.href)}">${esc(link.label)} <span aria-hidden="true">→</span></a>` : ""}
     </li>`;
 
   function fill(listId, countId, items, limit, label) {
@@ -61,6 +62,13 @@
     }
   }
 
+  // 수상 → 관련 프로젝트 바로 가기 (DB resume_items.project_id 에 프로젝트 id 를 적으면 나와요)
+  const awardLink = (a) => {
+    if (!a.project) return null;
+    const p = (window.PROJECTS || []).find((x) => x.id === a.project);
+    return p ? { href: window.keepLink(`project.html?id=${encodeURIComponent(p.id)}`), label: "프로젝트 보기" } : null;
+  };
+
   function renderResume(R) {
     if (!R) return;
     fill("#eduList", null, [...(R.education || [])].sort(latestFirst("start")).map((e) =>
@@ -80,13 +88,13 @@
     fill("#campList", "#campCount", acts.filter((a) => a.type === "campus").map(act), LIMITS.activities, "교내활동");
 
     fill("#awardList", "#awardCount", [...(R.awards || [])].sort(latestFirst("date")).map((a) =>
-      row({ date: a.date, title: a.title, sub: a.org, desc: a.desc })));
+      row({ date: a.date, title: a.title, sub: a.org, desc: a.desc, link: awardLink(a) })));
 
-    const langs = [...(R.languages || [])].sort(latestFirst("date"));
+    // 어학: 유효기간이 지난 성적은 보여주지 않아요 (DB에는 그대로 남아 있어요)
+    const langs = [...(R.languages || [])].filter((l) => !(l.expires && l.expires < NOW)).sort(latestFirst("date"));
     fill("#langList", "#langCount", langs.map((l) => {
-      const expired = l.expires && l.expires < NOW;
-      const state = !l.expires ? "평생 유효" : expired ? `만료 · ${l.expires}` : `유효 ~${l.expires}`;
-      return `<li class="lang${expired ? " is-expired" : ""}">
+      const state = !l.expires ? "평생 유효" : `유효 ~${l.expires}`;
+      return `<li class="lang">
         <span class="lang__test">${esc(l.test)}</span>
         <strong class="lang__score">${esc(l.score)}</strong>
         <span class="lang__meta">${esc(l.date)} 취득${l.org ? ` · ${esc(l.org)}` : ""}<br />${esc(state)}</span>
@@ -119,13 +127,12 @@
     let pick = sorted.filter((p) => p.featured);
     if (!pick.length) pick = sorted;
     pick = pick.slice(0, LIMITS.slides);
-    const KINDS = { personal: "개인 프로젝트", team: "팀 프로젝트", contest: "공모전", school: "학교 과제", client: "외주" };
     track.innerHTML = pick.length ? pick.map((p, i) => `
       <article class="slide" aria-roledescription="slide" aria-label="${i + 1} / ${pick.length}">
         <a class="slide__link" href="${esc(window.keepLink(`project.html?id=${encodeURIComponent(p.id)}`))}">
           <span class="slide__img"><img src="${esc(p.image || p.thumb)}" alt="" ${i ? 'loading="lazy"' : ""} /></span>
           <span class="slide__info">
-            <span class="slide__meta">${esc(p.categoryLabel)}${p.date ? ` · ${esc(p.date.slice(0, 4))}` : ""}${KINDS[p.type] ? ` · ${KINDS[p.type]}` : ""}</span>
+            <span class="slide__meta">${esc(p.categoryLabel)}${p.date ? ` · ${esc(p.date.slice(0, 4))}` : ""}${p.type ? ` · ${esc(window.kindLabel(p))}` : ""}</span>
             <strong class="slide__title">${esc(p.title)}</strong>
             ${p.role ? `<span class="slide__role"><b>역할</b>${esc(p.role)}</span>` : ""}
             <span class="slide__go">자세히 보기 <span aria-hidden="true">→</span></span>
@@ -365,6 +372,10 @@
       jLinks.forEach((a, i) => { a.classList.toggle("is-on", i === jLast); if (i === jLast) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
       jNow.textContent = jItems[jLast] ? jItems[jLast].label : "";
       jump.classList.toggle("is-visible", window.scrollY > cover.offsetHeight * 0.6);
+      // 풋터가 화면에 올라오면 버튼도 그만큼 위로 (풋터의 '맨 위로'를 가리지 않게)
+      const foot = document.querySelector(".foot");
+      const overlap = foot ? Math.max(0, window.innerHeight - foot.getBoundingClientRect().top) : 0;
+      jump.style.bottom = overlap ? `calc(16px + env(safe-area-inset-bottom, 0px) + ${Math.round(overlap)}px)` : "";
       // 오른쪽 바: 표지가 지나면 보이기
       side.classList.toggle("is-visible", window.scrollY > cover.offsetHeight * 0.6 && items.length > 0);
       let active = -1;
