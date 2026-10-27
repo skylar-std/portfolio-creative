@@ -35,7 +35,7 @@
     return {
       id: p.id, title: p.title, summary: p.summary, desc: p.description || "",
       category: (p.category || "").toLowerCase(), categoryLabel: p.category || "",
-      date: ym(p.date, "-"), featured: p.featured, type: p.kind, client: p.client || "", role: p.my_role || "",
+      date: ym(p.date, "-"), featured: p.featured, slide: !!p.on_slide, type: p.kind, client: p.client || "", role: p.my_role || "",
       did: p.did || [], tools: p.tools || [], tags: p.tags || [],
       result: p.result_value ? { value: p.result_value, label: p.result_label || "" } : null,
       thumb: p.thumb, image: p.image || p.thumb,
@@ -90,7 +90,16 @@
       <strong class="card__title">${window.esc(p.title)}</strong>
       ${p.summary ? `<span class="card__sum">${window.esc(p.summary)}</span>` : ""}
       ${p.role ? `<span class="card__role"><b>역할</b>${window.esc(p.role)}</span>` : ""}
+      ${cardType(p)}
     </a>`;
+  /* 카드 아래 '구분 · 참여 (· 기여도)' 줄 — 프로젝트 페이지 카드와 같은 모양 */
+  function cardType(p) {
+    const t = window.teamInfo(p);
+    return `<span class="card__foot"><span class="sw-type ${t.team ? "sw-type--team" : ""}">
+        <span class="sw-type__label">${window.esc(`${window.kindLabel(p)} · ${t.label}`)}</span>
+        ${t.pct != null ? `<span class="sw-type__pct" aria-label="기여도 ${t.pct}%"><span class="sw-type__k" aria-hidden="true">기여도</span><span class="sw-type__bar"><i style="width:${t.pct}%"></i></span><b>${t.pct}%</b></span>` : ""}
+      </span></span>`;
+  }
   window.emptyCard = () => `
     <div class="card card--empty" role="note">
       <span class="card__img" aria-hidden="true"></span>

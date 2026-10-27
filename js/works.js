@@ -307,10 +307,12 @@
       const a = e.target.closest(".sw-card a"); if (!a) return;
       const panel = panels[cur];
       const ids = [...new Set($$(".sw-card a", panel).map((x) => new URL(x.href, location.href).searchParams.get("id")))];
-      const label = cur === 0 ? "종류별" : `${curYear()}년`;
-      try { sessionStorage.setItem(KEY, JSON.stringify({ ids, label, tab: cur, year: curYear(), y: window.scrollY })); } catch (err) { /* 저장이 안 돼도 이동은 돼요 */ }
+      const cb = $("#panelCat .cbar__btn[aria-selected=true]");
+      const cat = cb ? cb.dataset.c : "";
+      const label = cur === 0 ? (cat || "전체") : `${curYear()}년`;
+      try { sessionStorage.setItem(KEY, JSON.stringify({ ids, label, tab: cur, year: curYear(), cat, y: window.scrollY })); } catch (err) { /* 저장이 안 돼도 이동은 돼요 */ }
     });
-    // '목록'으로 돌아왔을 때 보던 탭 · 연도 · 위치 그대로
+    // '목록'으로 돌아왔을 때 보던 탭 · 카테고리 · 연도 · 위치 그대로
     let saved = null;
     try { saved = JSON.parse(sessionStorage.getItem(KEY) || "null"); } catch (err) { saved = null; }
     let back = false;
@@ -318,6 +320,7 @@
     const nav = (performance.getEntriesByType && performance.getEntriesByType("navigation")[0]) || {};
     if (saved && (back || nav.type === "back_forward")) {
       if (saved.year) { const b = $(`#panelYear .ybar__btn[data-y="${saved.year}"]`); if (b) b.click(); }
+      if (saved.cat) { const b = [...$$("#panelCat .cbar__btn")].find((x) => x.dataset.c === saved.cat); if (b) b.click(); }
       if (saved.tab) { box.style.scrollBehavior = "auto"; select(saved.tab, false); box.scrollLeft = saved.tab * box.clientWidth; box.style.scrollBehavior = ""; }
       requestAnimationFrame(() => window.scrollTo({ top: saved.y || 0, behavior: "instant" }));
     }

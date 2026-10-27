@@ -15,8 +15,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 
   <!-- 스타일 (?v= 숫자는 수정 후 올릴 때마다 바꾸면 캐시 문제 없음) -->
-  <link rel="stylesheet" href="css/reset.css?v=20261027c" />
-  <link rel="stylesheet" href="css/site.css?v=20261027c" />
+  <link rel="stylesheet" href="css/reset.css?v=20261027d" />
+  <link rel="stylesheet" href="css/site.css?v=20261027d" />
 </head>
 <body>
 
@@ -58,7 +58,6 @@
     <div class="jump__panel" id="jumpPanel" role="dialog" aria-label="구역 이동" hidden>
       <p class="jump__title">바로 가기</p>
       <ol class="jump__list" id="jumpList"></ol>
-      <a class="jump__pdf" href="files/portfolio.pdf" target="_blank" rel="noopener" download="박영희_포트폴리오.pdf">포트폴리오 PDF ↓</a>
     </div>
     <button type="button" class="jump__btn" id="jumpBtn" aria-expanded="false" aria-controls="jumpPanel">
       <span class="jump__now" id="jumpNow">Profile</span>
@@ -276,29 +275,30 @@
           <h2 class="contact__title" id="t-contact">끝까지 봐 주셔서 감사합니다.</h2>
           <p class="contact__lead">작업 과정이나 궁금한 점은 메일로 편하게 물어봐 주세요.</p>
           <a class="contact__mail" href="mailto:hello@example.com">hello@example.com</a>
+          <a class="btn btn--line contact__pdf" href="files/portfolio.pdf" target="_blank" rel="noopener" download="박영희_포트폴리오.pdf">포트폴리오 PDF 내려받기 <span aria-hidden="true">↓</span></a>
         </div>
 
         <!-- ✏️ SNS는 여기서 직접 고쳐요. 한 줄 = <li> 하나 (복사해서 늘리면 돼요)
              sns__mark 글자: 네이버 블로그 N · 인스타그램 IG · 페이스북 f · 유튜브 YT · 티스토리 T
              sns__name 에 계정 이름(아이디)을 적어요
-             아직 없는 계정은 'sns__item--soon'(링크 없음, "곧 열려요")으로 두고, 만들면 위쪽 <a> 모양으로 바꿔요.
+             (아직 링크가 없는 계정은 sns__item--soon 모양으로 '곧 열려요' 표시도 할 수 있어요)
              작업 기록 묶음을 통째로 숨기려면 그 <div class="contact__group"> 에 hidden 을 붙여요. -->
         <div class="contact__groups">
           <div class="contact__group">
             <h3 class="contact__label">작업 기록 · 학습</h3>
             <ul class="sns">
-              <li><span class="sns__item sns__item--soon">
+              <li><a class="sns__item" href="https://www.instagram.com/" target="_blank" rel="noopener">
                 <span class="sns__mark sns__mark--ig" aria-hidden="true">IG</span>
-                <span class="sns__text"><span class="sns__platform">인스타그램</span><strong class="sns__name">준비 중</strong></span>
-                <span class="sns__soon">곧 열려요</span></span></li>
-              <li><span class="sns__item sns__item--soon">
+                <span class="sns__text"><span class="sns__platform">인스타그램</span><strong class="sns__name">@아이디</strong></span>
+                <span class="sns__go" aria-hidden="true">↗</span></a></li>
+              <li><a class="sns__item" href="https://www.youtube.com/" target="_blank" rel="noopener">
                 <span class="sns__mark sns__mark--yt" aria-hidden="true">YT</span>
-                <span class="sns__text"><span class="sns__platform">유튜브</span><strong class="sns__name">준비 중</strong></span>
-                <span class="sns__soon">곧 열려요</span></span></li>
-              <li><span class="sns__item sns__item--soon">
+                <span class="sns__text"><span class="sns__platform">유튜브</span><strong class="sns__name">채널 이름</strong></span>
+                <span class="sns__go" aria-hidden="true">↗</span></a></li>
+              <li><a class="sns__item" href="https://www.tistory.com/" target="_blank" rel="noopener">
                 <span class="sns__mark sns__mark--ts" aria-hidden="true">T</span>
-                <span class="sns__text"><span class="sns__platform">티스토리</span><strong class="sns__name">준비 중</strong></span>
-                <span class="sns__soon">곧 열려요</span></span></li>
+                <span class="sns__text"><span class="sns__platform">티스토리</span><strong class="sns__name">블로그 이름</strong></span>
+                <span class="sns__go" aria-hidden="true">↗</span></a></li>
             </ul>
           </div>
 
@@ -335,9 +335,9 @@
     </div>
   </footer>
 
-  <script src="js/scrollbar.js?v=20261027c"></script>
-  <script src="js/db.js?v=20261027c"></script>
-  <script src="js/data.js?v=20261027c"></script>
-  <script src="js/main.js?v=20261027c"></script>
+  <script src="js/scrollbar.js?v=20261027d"></script>
+  <script src="js/db.js?v=20261027d"></script>
+  <script src="js/data.js?v=20261027d"></script>
+  <script src="js/main.js?v=20261027d"></script>
 </body>
 </html>
