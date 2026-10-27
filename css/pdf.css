@@ -119,6 +119,7 @@ ul, ol { padding: 0; list-style: none; }
 .pj__facts div { display: grid; grid-template-columns: 20mm minmax(0, 1fr); gap: 3mm; padding: 2mm 0; border-bottom: 0.5pt solid var(--line); font-size: 9pt; }
 .pj__facts dt { color: var(--ink-3); }
 .pj__facts dd { font-weight: 600; }
+.pj__facts .pj__gap { border-top: 1pt solid var(--navy); margin-top: 3mm; }
 .pct { display: inline-flex; align-items: center; gap: 2mm; }
 .pct i { display: inline-block; width: 22mm; height: 1.6mm; border-radius: 1mm; background: var(--gray); overflow: hidden; }
 .pct i b { display: block; height: 100%; background: var(--pink); }

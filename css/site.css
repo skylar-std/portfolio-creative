@@ -614,8 +614,12 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .phero__meta { margin: 8px 0 0; font-size: 14.5px; font-weight: 600; color: var(--cyan); }
 .phero__title { margin: 8px 0 0; max-width: 860px; font-size: clamp(32px, 4.6vw, 52px); font-weight: 800; line-height: 1.18; letter-spacing: -0.04em; }
 .phero__lead { margin: 14px 0 0; max-width: 760px; font-size: 18px; color: #C9CDD6; }
-.phero__facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0 24px; margin: 28px 0 0; border-top: 1px solid rgba(255, 255, 255, .25); }
-.phero__facts div { padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, .12); }
+/* 위쪽 정보: [프로젝트] 기간 · 구분 · 주최 / [나의 참여] 참여 · 역할 · 도구 */
+.phero__facts { display: flex; flex-direction: column; margin: 28px 0 0; border-top: 1px solid rgba(255, 255, 255, .25); }
+.phero__group { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 0 24px; align-items: start; border-bottom: 1px solid rgba(255, 255, 255, .12); }
+.phero__gk { margin: 0; padding-top: 14px; font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--cyan); }
+.phero__group dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 24px; margin: 0; }
+.phero__group dl div { padding: 12px 0; }
 .phero__facts dt { font-size: 13px; color: #A9AFBC; }
 .phero__pct { display: inline-flex; align-items: center; gap: 8px; margin-left: 10px; font-size: 13px; font-weight: 700; color: #fff; }
 .phero__pct i { display: inline-block; width: 64px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .2); overflow: hidden; }
@@ -647,7 +651,7 @@ a.card:hover { border-color: var(--ink-3); box-shadow: 0 12px 28px -18px rgba(0,
 .pbody .psec__head { flex-direction: row; gap: 10px; }
 .psec { scroll-margin-top: calc(var(--head-h) + 16px); }
 @media (max-width: 1099px) { .pbody { grid-template-columns: minmax(0, 1fr); gap: 0; } .ptoc { display: none; } }
-@media (max-width: 760px) { .glance__list { grid-template-columns: minmax(0, 1fr); gap: 18px; } .phero { padding-bottom: 96px; } .pcover { margin-top: -64px; } .phero__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; } .phero__lead { font-size: 16px; } }
+@media (max-width: 760px) { .glance__list { grid-template-columns: minmax(0, 1fr); gap: 18px; } .phero { padding-bottom: 96px; } .pcover { margin-top: -64px; } .phero__group { grid-template-columns: minmax(0, 1fr); } .phero__gk { padding-top: 12px; } .phero__group dl { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; } .phero__group dl div { padding: 8px 0 10px; } .phero__pct { display: flex; margin: 6px 0 0; } .phero__lead { font-size: 16px; } }
 
 /* 상세 섹션: 왼쪽 번호 | 오른쪽 내용 */
 .psec { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 12px clamp(24px, 4vw, 48px); padding: 44px 0; border-bottom: 1px solid var(--line); }

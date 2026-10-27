@@ -98,14 +98,12 @@
 
   function render(p, prev, next, seq) {
     document.title = `${p.title} | 박영희 Portfolio`;
-    const facts = [
-      ["역할", p.role],
-      ["기간", p.period || fmtDate(p.date)],
-      ["구분", kindLabel(p)],
-      ["주최 · 발주", p.client],
-      ["참여", team(p)],
-      ["도구", (p.tools || []).join(", ")],
-    ].filter(([, v]) => (typeof v === "object" ? v.label || v.pct != null : v));
+    // 위쪽 정보: 비슷한 것끼리 두 줄로 — 프로젝트 정보 / 나의 참여
+    const has = ([, v]) => (typeof v === "object" ? v.label || v.pct != null : v);
+    const factGroups = [
+      ["프로젝트", [["기간", p.period || fmtDate(p.date)], ["구분", kindLabel(p)], ["주최 · 발주", p.client]].filter(has)],
+      ["나의 참여", [["참여", team(p)], ["역할", p.role], ["도구", (p.tools || []).join(", ")]].filter(has)],
+    ].filter(([, list]) => list.length);
     let n = 0;
     const secs = sectionsOf(p).map((s) => {
       n += 1;
@@ -140,9 +138,11 @@
           <p class="phero__meta">${esc(p.categoryLabel)}${p.date ? ` · ${esc(fmtDate(p.date))}` : ""}</p>
           <h1 class="phero__title">${esc(p.title)}</h1>
           ${p.summary ? `<p class="phero__lead">${esc(p.summary)}</p>` : ""}
-          <dl class="phero__facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${typeof v === "object"
-            ? `${esc(v.label)}${v.pct != null ? `<span class="phero__pct" aria-label="기여도 ${v.pct}%"><i><b style="width:${v.pct}%"></b></i>기여도 ${v.pct}%</span>` : ""}`
-            : esc(v)}</dd></div>`).join("")}</dl>
+          <div class="phero__facts">${factGroups.map(([g, list]) => `
+            <div class="phero__group"><p class="phero__gk">${g}</p>
+              <dl>${list.map(([k, v]) => `<div><dt>${k}</dt><dd>${typeof v === "object"
+                ? `${esc(v.label)}${v.pct != null ? `<span class="phero__pct" aria-label="기여도 ${v.pct}%"><i><b style="width:${v.pct}%"></b></i>기여도 ${v.pct}%</span>` : ""}`
+                : esc(v)}</dd></div>`).join("")}</dl></div>`).join("")}</div>
           ${p.link ? `<a class="btn" href="${esc(p.link)}" target="_blank" rel="noopener">작품 보러 가기 ↗</a>` : ""}
         </div>
       </section>

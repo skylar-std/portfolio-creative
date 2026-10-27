@@ -129,11 +129,11 @@
     const teamM = /(\d+)\s*인/.exec(p.team || "");
     const pct = p.contribution != null ? Math.max(0, Math.min(100, Math.round(p.contribution))) : null;
     const facts = [
-      ["역할", p.role && esc(p.role)],
       ["기간", esc(p.period || p.date.replace("-", "."))],
-      ["구분", esc([kind, teamM ? `팀 ${teamM[1]}인` : p.team && p.team !== "개인" ? p.team : ""].filter(Boolean).join(" · "))],
+      ["구분", esc(kind)],
       ["주최 · 발주", p.client && esc(p.client)],
-      ["기여도", pct != null ? `<span class="pct"><i><b style="width:${pct}%"></b></i>${pct}%</span>` : ""],
+      ["참여", esc(teamM ? `팀 ${teamM[1]}인` : p.team || "") + (pct != null ? ` <span class="pct"><i><b style="width:${pct}%"></b></i>기여도 ${pct}%</span>` : "")],
+      ["역할", p.role && esc(p.role)],
     ].filter(([, v]) => v);
     return `<section class="page" id="pj-${i + 1}">
       <div class="pj">
@@ -143,7 +143,7 @@
           <p class="pj__meta">${esc(p.categoryLabel)}${p.date ? ` · ${esc(p.date.slice(0, 4))}` : ""}</p>
           <h2 class="pj__title">${esc(p.title)}</h2>
           ${p.summary ? `<p class="pj__sum">${esc(p.summary)}</p>` : ""}
-          <dl class="pj__facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>
+          <dl class="pj__facts">${facts.map(([k, v], i) => `<div${k === "참여" ? ' class="pj__gap"' : ""}><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>
           ${(p.tools || []).length ? `<div><p class="k" style="margin-bottom:2mm">Tools</p><div class="chips">${p.tools.map((t) => `<span class="chip">${esc(t)}</span>`).join("")}</div></div>` : ""}
           <p class="pj__link">자세한 과정 → <a href="${SITE}project.html?id=${encodeURIComponent(p.id)}">웹에서 보기</a></p>
         </div>
